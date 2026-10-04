@@ -61,6 +61,26 @@ export default defineConfig({
               cacheableResponse: { statuses: [200] },
             },
           },
+          {
+            // Wikipedia summaries and photo lists: shown from the cache at once, refreshed in the background.
+            urlPattern: /^https:\/\/(pt\.wikipedia\.org\/(api\/rest_v1\/page\/summary|w\/api\.php)|www\.wikidata\.org\/w\/api\.php)/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'wiki',
+              expiration: { maxEntries: 120, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
+            // Photos are loaded by <img>, so their responses are opaque (status 0).
+            urlPattern: /^https:\/\/(upload|thumb)\.wikimedia\.org\/.+/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'wiki-photos',
+              expiration: { maxEntries: 80, maxAgeSeconds: 30 * DAY, purgeOnQuotaError: true },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           // Everything else (the Worker, Transitous, Photon) always goes to the network.
         ],
       },

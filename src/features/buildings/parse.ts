@@ -23,6 +23,12 @@ export type BuildingProperties = {
   elev?: boolean;
   /** Reserved parking spaces. */
   park?: number;
+  /** One-line street address. */
+  addr?: string;
+  /** Portuguese Wikipedia article title, or a Wikidata id (`Q123`) to resolve. */
+  wiki?: string;
+  /** Website URL. */
+  web?: string;
   note?: string;
   /** ISO date of the last on-site check. */
   chk?: string;
@@ -52,6 +58,9 @@ export function parseBuilding(feature: {
     height: Number.isFinite(height) ? height : 0,
     minHeight: Number.isFinite(minHeight) ? minHeight : 0,
     center,
+    address: optionalString(properties.addr),
+    wiki: optionalString(properties.wiki),
+    website: optionalString(properties.web),
     access: {
       status: decodeAccess(properties.acc),
       source: properties.src === 'curated' ? 'curated' : 'osm',

@@ -34,6 +34,21 @@ export const strings = {
       yes: 'Edifício',
     } as Record<string, string>,
   },
+  wiki: {
+    about: (name: string) => `${name} na Wikipédia`,
+    readMore: 'Ler na Wikipédia',
+    license: 'Wikipédia, CC BY-SA',
+    photos: (title: string) => `Fotos: ${title}`,
+    photoAlt: (title: string, position: number) => `${title}, foto ${position}`,
+    photoBy: (author: string | undefined) => (author ? `Foto: ${author}` : 'Foto'),
+    commons: 'Wikimedia Commons',
+    website: 'Site',
+  },
+  carousel: {
+    previous: 'Foto anterior',
+    next: 'Próxima foto',
+    position: (current: number, total: number) => `${current}/${total}`,
+  },
   institute: {
     buildings: 'Prédios',
     noNamedBuildings: 'Nenhum prédio com nome cadastrado.',

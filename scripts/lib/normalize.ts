@@ -5,6 +5,7 @@ import type { AccessFeatureProperties } from '../../src/features/accessibility/p
 import type { BuildingProperties } from '../../src/features/buildings/parse';
 import type { PoiProperties } from '../../src/features/pois/parse';
 import { reservedParking } from './accessibility';
+import { website, wikiRef } from './address';
 
 export type OsmTags = Record<string, string>;
 
@@ -61,13 +62,20 @@ function curatedDetails(tags: OsmTags) {
   return { ...(note && { note }), ...(checked && { chk: checked }) };
 }
 
-type BuildingContext = { institute?: string; source?: DataSource };
+type BuildingContext = { institute?: string; source?: DataSource; address?: string };
+
+/** Where to read more about the object: its Wikipedia article and its website. */
+function links(tags: OsmTags) {
+  const wiki = wikiRef(tags);
+  const web = website(tags);
+  return { ...(wiki && { wiki }), ...(web && { web }) };
+}
 
 /** `id` is the OSM-style id, e.g. `way/123`; `institute` is the id of the institute the building belongs to. */
 export function buildingProperties(
   id: string,
   tags: OsmTags,
-  { institute, source = 'osm' }: BuildingContext = {},
+  { institute, source = 'osm', address }: BuildingContext = {},
 ): BuildingProperties {
   const name = clean(tags.name);
   const shortName = clean(tags.short_name);
@@ -84,6 +92,8 @@ export function buildingProperties(
     ...(toilet !== 'unknown' && { wc: encodeAccess(toilet) }),
     ...((tags.elevator === 'yes' || tags.elevator === 'no') && { elev: tags.elevator === 'yes' }),
     ...(parking !== undefined && { park: parking }),
+    ...(address && { addr: address }),
+    ...links(tags),
     ...curatedDetails(tags),
     src: source,
   };
@@ -124,6 +134,7 @@ export function poiProperties(
     acc: encodeAccess(deriveAccessStatus(tags.wheelchair)),
     ...(building && { bld: building }),
     ...(openingHours && { oh: openingHours }),
+    ...links(tags),
     src: source,
   };
 }

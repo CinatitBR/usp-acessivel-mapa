@@ -14,6 +14,10 @@ export type PoiProperties = {
   bld?: string;
   /** OSM opening_hours value. */
   oh?: string;
+  /** Portuguese Wikipedia article title, or a Wikidata id (`Q123`) to resolve. */
+  wiki?: string;
+  /** Website URL. */
+  web?: string;
   src: DataSource;
 };
 
@@ -37,5 +41,7 @@ export function parsePoi(feature: {
     },
     buildingId: optionalString(properties.bld),
     openingHours: optionalString(properties.oh),
+    wiki: optionalString(properties.wiki),
+    website: optionalString(properties.web),
   };
 }

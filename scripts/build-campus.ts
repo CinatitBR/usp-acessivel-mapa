@@ -4,7 +4,7 @@
  *
  * Usage: npm run data:build
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import osmtogeojson from 'osmtogeojson';
 import { type Bbox, bboxContains, geometryBbox, geometryCenter, pointInGeometry } from '../src/domain/geo';
@@ -12,6 +12,7 @@ import { encodeTrees, type Tree } from '../src/domain/trees';
 import type { Institute, LngLat } from '../src/domain/types';
 import { poiCategory } from '../src/features/pois/categories';
 import { classifyAccessFeature } from './lib/accessibility';
+import { formatAddress, type NamedRoad, nearestRoad, type NominatimAddress, website, wikiRef } from './lib/address';
 import { type CampusRecord, mergeOverlay, type OverlayFeature } from './lib/mergeOverlay';
 import { alongLine, scatterInPolygon, selectTrees, treeAt } from './lib/trees';
 import {
@@ -25,6 +26,8 @@ import {
 const RAW = 'data/raw/overpass.json';
 const OVERLAY = 'data/overlay/campus-overlay.geojson';
 const INSTITUTE_OVERLAY = 'data/overlay/institutes.json';
+/** Written by `npm run data:addresses`. Without it the buildings only get the addresses tagged in OSM. */
+const ADDRESSES = 'data/raw/addresses.json';
 const OUT_DIR = 'public/data';
 
 /** The university itself: an area, but not an institute within the campus. */
@@ -109,11 +112,15 @@ const institutes = instituteRecords
   .map(({ id, tags, geometry }): Institute => {
     const center = geometryCenter(geometry)!;
     const sigla = siglas[id]?.sigla ?? tags.short_name?.trim();
+    const wiki = wikiRef(tags);
+    const web = website(tags);
     return {
       id,
       name: siglas[id]?.name ?? tags.name!.trim(),
       ...(sigla && { sigla }),
       center: [round6(center[0]), round6(center[1])],
+      ...(wiki && { wiki }),
+      ...(web && { website: web }),
     };
   })
   .sort((a, b) => a.id.localeCompare(b.id));
@@ -136,6 +143,22 @@ function resolveInstitute(record: CampusRecord): string | undefined {
 
 // --- Buildings -------------------------------------------------------------
 
+const addresses: Record<string, NominatimAddress | null> = existsSync(ADDRESSES)
+  ? (JSON.parse(readFileSync(ADDRESSES, 'utf8')) as Record<string, NominatimAddress | null>)
+  : {};
+if (!existsSync(ADDRESSES)) console.warn(`  warning: ${ADDRESSES} not found; run npm run data:addresses to add street addresses`);
+
+/** A building further than this from every named street gets no street. */
+const ROAD_MAX_METERS = 150;
+/** Streets a building can have as its address: not footways, steps or cycle paths. */
+const ADDRESS_HIGHWAYS = /^(primary|secondary|tertiary|residential|unclassified|service|living_street)(_link)?$/;
+const roads = records.flatMap(({ tags, geometry }): NamedRoad[] =>
+  tags.name && ADDRESS_HIGHWAYS.test(tags.highway ?? '') && geometry.type === 'LineString'
+    ? [{ name: tags.name.trim(), line: geometry.coordinates as LngLat[] }]
+    : [],
+);
+if (roads.length === 0) console.warn('  warning: no named streets in the OSM data; run npm run data:osm');
+
 const buildingRecords = records.filter(({ tags, geometry }) => tags.building && isArea(geometry));
 const buildingAreas = buildingRecords.map(toArea).filter((area) => area !== undefined);
 const buildings = buildingRecords.map((record): Feature => ({
@@ -143,6 +166,11 @@ const buildings = buildingRecords.map((record): Feature => ({
   properties: buildingProperties(record.id, record.tags, {
     institute: resolveInstitute(record) ?? containingArea(geometryCenter(record.geometry)!, instituteAreas),
     source: sourceOf(record),
+    address: formatAddress(
+      record.tags,
+      addresses[record.id] ?? undefined,
+      nearestRoad(geometryCenter(record.geometry)!, roads, ROAD_MAX_METERS),
+    ),
   }),
   geometry: roundGeometry(record.geometry),
 }));
@@ -239,6 +267,8 @@ for (const feature of accessFeatures) {
 
 console.log('\nCoverage');
 console.log(`  buildings with a name:            ${percent(count(buildings, (p) => p.name), buildings.length)}`);
+console.log(`  buildings with an address:        ${percent(count(buildings, (p) => p.addr), buildings.length)}`);
+console.log(`  with a Wikipedia article:         ${count(buildings, (p) => p.wiki)} buildings, ${institutes.filter((institute) => institute.wiki).length} institutes, ${count(pois, (p) => p.wiki)} places`);
 console.log(`  buildings with an institute:      ${percent(count(buildings, (p) => p.inst), buildings.length)}`);
 console.log(`  buildings with known access:      ${percent(count(buildings, (p) => p.acc !== 'u'), buildings.length)}`);
 console.log(`  objects changed by the overlay:   ${records.filter((record) => record.curated).length}`);

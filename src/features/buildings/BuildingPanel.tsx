@@ -4,6 +4,8 @@ import { useAppStore } from '../../state/store';
 import { buildingKindLabel, strings } from '../../strings/pt-BR';
 import { AccessSummary, StatusBadge } from '../../ui/AccessSummary';
 import { BottomSheet } from '../../ui/BottomSheet';
+import { WebsiteLink } from '../../ui/WebsiteLink';
+import { WikiSection } from '../wiki/WikiSection';
 
 export function BuildingPanel({ id }: { id: string }) {
   const building = use(loadBuildings()).find((candidate) => candidate.id === id);
@@ -21,6 +23,7 @@ export function BuildingPanel({ id }: { id: string }) {
       onClose={clearSelection}
       routeTo={{ label: building.name ?? strings.building.unnamed, position: building.center }}
     >
+      {building.address && <p className="muted">{building.address}</p>}
       {institute && (
         <button
           type="button"
@@ -30,6 +33,13 @@ export function BuildingPanel({ id }: { id: string }) {
           {institute.sigla ? `${institute.sigla} · ${institute.name}` : institute.name}
         </button>
       )}
+      {/* A building without an article of its own shows its institute's. */}
+      {building.wiki ? (
+        <WikiSection wiki={building.wiki} />
+      ) : (
+        institute?.wiki && <WikiSection wiki={institute.wiki} about={institute.sigla ?? institute.name} />
+      )}
+      <WebsiteLink url={building.website ?? institute?.website} />
       <AccessSummary access={building.access} />
       {features.length > 0 && (
         <div>

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit && npm run worker:types --silent && tsc --noEmit -p worker",
     "test": "vitest run",
     "data:osm": "tsx scripts/fetch-osm.ts",
+    "data:addresses": "tsx scripts/fetch-addresses.ts",
     "data:build": "tsx scripts/build-campus.ts",
     "data:transit": "tsx scripts/build-transit.ts",
     "check:data": "tsx scripts/check-data.ts",

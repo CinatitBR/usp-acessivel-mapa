@@ -33,6 +33,7 @@ const QUERY = `
   nwr(area.campus)["kerb"];
   node(area.campus)["highway"~"^(elevator|bus_stop|crossing)$"];
   way(area.campus)["highway"="steps"];
+  way(area.campus)["highway"]["name"];
   node(area.campus)["natural"="tree"];
   way(area.campus)["natural"~"^(wood|tree_row)$"];
   way(area.campus)["landuse"="forest"];

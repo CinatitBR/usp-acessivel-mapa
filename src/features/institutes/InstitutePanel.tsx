@@ -3,6 +3,8 @@ import { loadBuildings, loadInstitutes } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
+import { WebsiteLink } from '../../ui/WebsiteLink';
+import { WikiSection } from '../wiki/WikiSection';
 
 export function InstitutePanel({ id }: { id: string }) {
   const institute = use(loadInstitutes()).find((candidate) => candidate.id === id);
@@ -22,6 +24,8 @@ export function InstitutePanel({ id }: { id: string }) {
       onClose={clearSelection}
       routeTo={{ label: institute.sigla ?? institute.name, position: institute.center }}
     >
+      <WikiSection wiki={institute.wiki} />
+      <WebsiteLink url={institute.website} />
       <h3 className="list-title">{strings.institute.buildings}</h3>
       {named.length === 0 ? (
         <p className="muted">{strings.institute.noNamedBuildings}</p>

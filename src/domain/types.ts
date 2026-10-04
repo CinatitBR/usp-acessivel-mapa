@@ -48,8 +48,15 @@ export interface Building {
   height: number;
   minHeight: number;
   center: LngLat;
+  /** One-line street address. */
+  address?: string;
+  wiki?: WikiRef;
+  website?: string;
   access: AccessInfo;
 }
+
+/** A Portuguese Wikipedia article title, or a Wikidata id (`Q123`) that still has to be resolved to one. */
+export type WikiRef = string;
 
 /** A university unit or an independent institute with its own area on campus. */
 export interface Institute {
@@ -57,6 +64,8 @@ export interface Institute {
   name: string;
   sigla?: string;
   center: LngLat;
+  wiki?: WikiRef;
+  website?: string;
 }
 
 export type PoiCategory =
@@ -86,6 +95,8 @@ export interface Poi {
   /** Id of the building that contains it, or its own id when the POI is a building. */
   buildingId?: string;
   openingHours?: string;
+  wiki?: WikiRef;
+  website?: string;
 }
 
 export interface BusStop {

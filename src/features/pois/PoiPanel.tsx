@@ -4,6 +4,8 @@ import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { AccessSummary } from '../../ui/AccessSummary';
 import { BottomSheet } from '../../ui/BottomSheet';
+import { WebsiteLink } from '../../ui/WebsiteLink';
+import { WikiSection } from '../wiki/WikiSection';
 
 export function PoiPanel({ id }: { id: string }) {
   const poi = use(loadPois()).find((candidate) => candidate.id === id);
@@ -35,6 +37,8 @@ export function PoiPanel({ id }: { id: string }) {
           {strings.poi.openingHours}: {poi.openingHours}
         </p>
       )}
+      <WikiSection wiki={poi.wiki} />
+      <WebsiteLink url={poi.website} />
       <AccessSummary access={poi.access} />
     </BottomSheet>
   );

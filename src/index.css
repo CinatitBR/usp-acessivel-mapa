@@ -526,6 +526,129 @@ input {
   cursor: pointer;
 }
 
+/* Wikipedia description and photos */
+.wiki {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Roughly the height of a photo and a few lines, so the panel does not jump when the article arrives. */
+.wiki-loading {
+  min-height: 120px;
+  border-radius: 12px;
+  background: #f1f3f5;
+}
+
+.wiki-extract {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+}
+
+.wiki-source,
+.carousel-caption {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.wiki a,
+.external-link {
+  color: var(--accent);
+}
+
+.external-link {
+  align-self: flex-start;
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+}
+
+.carousel {
+  margin: 0;
+}
+
+.carousel-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #e9ecef;
+}
+
+.carousel-strip {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.carousel-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-image {
+  flex: none;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  scroll-snap-align: start;
+}
+
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0 0 3px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(17 24 39 / 70%);
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.carousel-button.previous {
+  left: 8px;
+}
+
+.carousel-button.next {
+  right: 8px;
+}
+
+.carousel-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.carousel-button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.carousel-count {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(17 24 39 / 70%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.carousel-caption {
+  margin-top: 4px;
+}
+
 /* Bus arrivals */
 .arrivals {
   margin: 0;
