@@ -14,7 +14,17 @@ import { poiCategory } from '../src/features/pois/categories';
 import { classifyAccessFeature } from './lib/accessibility';
 import { formatAddress, type NamedRoad, nearestRoad, type NominatimAddress, website, wikiRef } from './lib/address';
 import { type CampusRecord, mergeOverlay, type OverlayFeature } from './lib/mergeOverlay';
-import { alongLine, scatterInPolygon, selectTrees, treeAt } from './lib/trees';
+import {
+  areaSquareMeters,
+  circlePolygon,
+  clumpNoise,
+  isStreetRow,
+  keepSome,
+  projector,
+  SegmentIndex,
+  streetLineTrees,
+} from './lib/treePlacement';
+import { alongLine, scatterInPolygon, selectTrees, treeAt, unitHash } from './lib/trees';
 import {
   accessFeatureProperties,
   buildingProperties,
@@ -36,10 +46,42 @@ const INSTITUTE_AMENITIES = new Set(['college', 'research_institute', 'hospital'
 
 /** Same point as the app's CAMPUS_CENTER; tree positions are stored relative to it. */
 const TREE_ORIGIN: LngLat = [-46.7283, -23.5611];
-/** Instance budget of the 3D tree layer. */
-const MAX_TREES = 4000;
+/** How many trees to ship. The 3D tree layer can draw up to 4,000; fewer reads better and the woods take up the slack. */
+const MAX_TREES = 1000;
 const WOOD_SPACING_METERS = 12;
 const ROW_SPACING_METERS = 9;
+/**
+ * How the trees share the budget. The grid in a wood is much denser than what
+ * can be shipped, so a wood keeps the smallest share of its grid points; woods
+ * named in the tree overlay keep 4 times that; lawns, named grounds and mapped
+ * rows, which are sparse to begin with, 15 times; and individually mapped
+ * trees, the only ones that are really there, 34 times.
+ */
+const PRIORITY_WOOD_WEIGHT = 4;
+const OPEN_GROUND_WEIGHT = 15;
+const MAPPED_TREE_WEIGHT = 34;
+/** Hand-picked grounds to plant, beyond what OSM maps as green. */
+const TREE_AREAS = 'data/overlay/tree-areas.json';
+/** A mapped row within this distance of a street is a street row; of those, one tree in five is kept. */
+const STREET_ROW_METERS = 15;
+const STREET_TREE_METERS = 12;
+const STREET_LINE_NEIGHBOUR_METERS = 25;
+const STREET_KEEP_ONE_IN = 5;
+/** Parks, gardens and grass: sparser than woods, and only areas large enough to hold a few trees. */
+const LAWN_SPACING_METERS = 14;
+const LAWN_MIN_SQUARE_METERS = 1500;
+const GROUNDS_SPACING_METERS = 11;
+/** Share of grid points planted where the clump noise is lowest; it rises to all of them where it is highest. */
+const LAWN_MIN_COVER = 0.35;
+const CLUMP_SCALE_METERS = 70;
+/** Distance a generated tree keeps from a building wall and from the centre line of roads and paths. */
+const BUILDING_CLEARANCE_METERS = 4;
+const STREET_CLEARANCE_METERS = 8;
+const SERVICE_CLEARANCE_METERS = 5;
+const PATH_CLEARANCE_METERS = 2.5;
+const LAWN_LANDUSE = new Set(['grass', 'meadow', 'recreation_ground', 'village_green']);
+const LAWN_NATURAL = new Set(['scrub', 'grassland']);
+const NO_TREE_LEISURE = new Set(['pitch', 'track', 'swimming_pool', 'stadium', 'sports_centre', 'playground']);
 
 type RawElement = { type: string; id: number; tags?: OsmTags; nodes?: number[] };
 type Area = { id: string; geometry: Geometry; bbox: Bbox; size: number };
@@ -231,22 +273,174 @@ for (const record of records) {
 if (unused.length > 0) fail(`${OVERLAY} adds features that would not appear anywhere:`, unused);
 
 // --- Trees -------------------------------------------------------------------
+// Street rows are thinned, and trees are generated in woods, lawns and the
+// grounds listed in the tree overlay. Nothing here is shipped except trees.json.
 
-const insideBuilding = (point: LngLat) => containingArea(point, buildingAreas) !== undefined;
-const mappedTrees: Tree[] = [];
-const rowTrees: Tree[] = [];
-const woodTrees: Tree[] = [];
+const toXy = projector(TREE_ORIGIN);
+const lineOf = (coordinates: unknown) => (coordinates as LngLat[]).map(toXy);
+
+/** Streets and service roads: what a "street tree" stands beside. */
+const streets = new SegmentIndex();
+const carriageways = new SegmentIndex();
+const serviceRoads = new SegmentIndex();
+const paths = new SegmentIndex();
 for (const { tags, geometry } of records) {
-  if (tags.natural === 'tree' && geometry.type === 'Point') {
-    mappedTrees.push(treeAt(geometry.coordinates as LngLat, 7, 13));
-  } else if (tags.natural === 'tree_row' && geometry.type === 'LineString') {
-    for (const point of alongLine(geometry.coordinates as LngLat[], ROW_SPACING_METERS)) rowTrees.push(treeAt(point, 7, 12));
-  } else if ((tags.natural === 'wood' || tags.landuse === 'forest') && isArea(geometry)) {
-    for (const point of scatterInPolygon(geometry, WOOD_SPACING_METERS, insideBuilding)) woodTrees.push(treeAt(point, 9, 17));
+  if (!tags.highway || geometry.type !== 'LineString') continue;
+  const line = lineOf(geometry.coordinates);
+  if (ADDRESS_HIGHWAYS.test(tags.highway) || tags.highway === 'busway') {
+    streets.addLine(line);
+    (tags.highway === 'service' ? serviceRoads : carriageways).addLine(line);
+  } else {
+    paths.addLine(line);
   }
 }
-// Individually mapped trees and rows are kept whole; only the woods are thinned to fit the budget.
-const trees = selectTrees([...mappedTrees, ...rowTrees], woodTrees, MAX_TREES);
+const walls = new SegmentIndex();
+for (const { geometry } of buildingRecords) {
+  const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.type === 'MultiPolygon' ? geometry.coordinates : [];
+  for (const rings of polygons) for (const ring of rings) walls.addLine(lineOf(ring));
+}
+/** Ground a tree cannot grow on: parking, sports grounds and water. */
+const noTreeAreas = records
+  .filter(
+    ({ tags, geometry }) =>
+      isArea(geometry)
+      && (tags.amenity === 'parking'
+        || NO_TREE_LEISURE.has(tags.leisure ?? '')
+        || tags.natural === 'water'
+        || tags.natural === 'sand'
+        || tags.landuse === 'basin'),
+  )
+  .map(toArea)
+  .filter((area) => area !== undefined);
+
+const insideBuilding = (point: LngLat) => containingArea(point, buildingAreas) !== undefined;
+/** No generated tree on a building or hard against it, on a road or path, or on ground that has another use. */
+const blocked = (point: LngLat) => {
+  const xy = toXy(point);
+  return (
+    insideBuilding(point)
+    || walls.within(xy, BUILDING_CLEARANCE_METERS)
+    || carriageways.within(xy, STREET_CLEARANCE_METERS)
+    || serviceRoads.within(xy, SERVICE_CLEARANCE_METERS)
+    || paths.within(xy, PATH_CLEARANCE_METERS)
+    || containingArea(point, noTreeAreas) !== undefined
+  );
+};
+/** Lawns keep clearings: the denser the noise at a point, the likelier a tree. */
+const inClump = (point: LngLat) => {
+  const xy = toXy(point);
+  return unitHash(Math.round(xy[0] * 10), Math.round(xy[1] * 10), 8) < LAWN_MIN_COVER + (1 - LAWN_MIN_COVER) * clumpNoise(xy, CLUMP_SCALE_METERS);
+};
+
+// Mapped trees and rows: thinned where they line a street, kept elsewhere.
+const mappedPositions = records.flatMap(({ tags, geometry }) =>
+  tags.natural === 'tree' && geometry.type === 'Point' ? [geometry.coordinates as LngLat] : [],
+);
+const inStreetLine = streetLineTrees(mappedPositions.map(toXy), (xy) => streets.within(xy, STREET_TREE_METERS), STREET_LINE_NEIGHBOUR_METERS);
+const mappedTrees = mappedPositions
+  .filter((position, index) => !inStreetLine[index] || keepSome(toXy(position), STREET_KEEP_ONE_IN))
+  .map((position) => treeAt(position, 7, 13));
+
+const rowTrees: Tree[] = [];
+let streetRows = 0;
+let rowCandidates = 0;
+for (const { tags, geometry } of records) {
+  if (tags.natural !== 'tree_row' || geometry.type !== 'LineString') continue;
+  const points = alongLine(geometry.coordinates as LngLat[], ROW_SPACING_METERS);
+  rowCandidates += points.length;
+  const street = isStreetRow(points.map(toXy), (xy) => streets.within(xy, STREET_ROW_METERS));
+  if (street) streetRows += 1;
+  for (const point of points) {
+    if (!street || keepSome(toXy(point), STREET_KEEP_ONE_IN)) rowTrees.push(treeAt(point, 7, 12));
+  }
+}
+
+// Generated trees. An area filled by an earlier, denser kind is not filled again.
+const filled: Area[] = [];
+const alreadyFilled = (point: LngLat) => containingArea(point, filled) !== undefined;
+const isWood = (tags: OsmTags) => tags.natural === 'wood' || tags.landuse === 'forest';
+const isLawn = (tags: OsmTags) =>
+  tags.leisure === 'park' || tags.leisure === 'garden' || LAWN_LANDUSE.has(tags.landuse ?? '') || LAWN_NATURAL.has(tags.natural ?? '');
+
+type TreeAreas = {
+  /** Institutes whose grounds are planted, by sigla or id, optionally with their own spacing in metres. */
+  institutes: { institute: string; spacing?: number }[];
+  /** Circles around an OSM object, for places that have no area of their own. */
+  around: { name: string; id: string; radius: number; spacing?: number }[];
+  /** Woods (OSM ids) that stay dense when the tree budget forces thinning. */
+  priorityWoods: string[];
+};
+const treeAreas = JSON.parse(readFileSync(TREE_AREAS, 'utf8')) as TreeAreas;
+const unknownGrounds = treeAreas.priorityWoods
+  .filter((id) => !records.some((record) => record.id === id && isWood(record.tags)))
+  .map((id) => `priority wood ${id} is not a wood in the OSM data`);
+
+const woodTrees: Tree[] = [];
+const priorityWoodTrees = new Set<Tree>();
+for (const record of records) {
+  if (!isWood(record.tags) || !isArea(record.geometry)) continue;
+  const priority = treeAreas.priorityWoods.includes(record.id);
+  for (const point of scatterInPolygon(record.geometry, WOOD_SPACING_METERS, blocked)) {
+    const tree = treeAt(point, 9, 17);
+    woodTrees.push(tree);
+    if (priority) priorityWoodTrees.add(tree);
+  }
+}
+for (const record of records) if (isWood(record.tags)) filled.push(...[toArea(record)].filter((area) => area !== undefined));
+
+const lawnTrees: Tree[] = [];
+const lawnCounts: string[] = [];
+const lawns = records.filter(
+  (record) => isLawn(record.tags) && isArea(record.geometry) && areaSquareMeters(record.geometry, toXy) >= LAWN_MIN_SQUARE_METERS,
+);
+for (const record of lawns) {
+  const points = scatterInPolygon(record.geometry, LAWN_SPACING_METERS, (point) => blocked(point) || alreadyFilled(point) || !inClump(point));
+  for (const point of points) lawnTrees.push(treeAt(point, 6, 12));
+  if (record.tags.name) lawnCounts.push(`${record.tags.name} ${points.length}`);
+}
+for (const record of lawns) filled.push(...[toArea(record)].filter((area) => area !== undefined));
+
+// Grounds named in the overlay: institute areas and circles around a building.
+const grounds: { name: string; geometry: Geometry; spacing: number }[] = [];
+for (const { institute: wanted, spacing = GROUNDS_SPACING_METERS } of treeAreas.institutes) {
+  const institute = institutes.find((candidate) => candidate.id === wanted || candidate.sigla === wanted);
+  const record = institute && instituteRecords.find((candidate) => candidate.id === institute.id);
+  if (record && isArea(record.geometry)) grounds.push({ name: wanted, geometry: record.geometry, spacing });
+  else unknownGrounds.push(`institute "${wanted}" (needs the sigla or id of an institute that is an area)`);
+}
+for (const { name, id, radius, spacing = GROUNDS_SPACING_METERS } of treeAreas.around) {
+  const record = records.find((candidate) => candidate.id === id);
+  const center = record && geometryCenter(record.geometry);
+  if (center) grounds.push({ name, geometry: circlePolygon(center, radius), spacing });
+  else unknownGrounds.push(`"${name}": ${id} is not in the OSM data`);
+}
+if (unknownGrounds.length > 0) fail(`${TREE_AREAS} names areas that cannot be used:`, unknownGrounds);
+
+const groundTrees: Tree[] = [];
+const groundCounts: string[] = [];
+for (const { name, geometry, spacing } of grounds) {
+  const points = scatterInPolygon(geometry, spacing, (point) => blocked(point) || alreadyFilled(point) || !inClump(point));
+  for (const point of points) groundTrees.push(treeAt(point, 6, 13));
+  groundCounts.push(`${name} ${points.length}`);
+  const bbox = geometryBbox(geometry)!;
+  // Two grounds may overlap (a circle and an institute).
+  filled.push({ id: name, geometry, bbox, size: (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) });
+}
+
+// Every kind of tree is thinned evenly to fit the budget, each by its weight.
+const mappedSet = new Set(mappedTrees);
+const openGroundTrees = new Set([...rowTrees, ...groundTrees, ...lawnTrees]);
+const trees = selectTrees([], [...mappedTrees, ...rowTrees, ...groundTrees, ...lawnTrees, ...woodTrees], MAX_TREES, (tree) =>
+  mappedSet.has(tree)
+    ? MAPPED_TREE_WEIGHT
+    : openGroundTrees.has(tree)
+      ? OPEN_GROUND_WEIGHT
+      : priorityWoodTrees.has(tree)
+        ? PRIORITY_WOOD_WEIGHT
+        : 1,
+);
+const keptTrees = new Set(trees);
+const keptOf = (group: Iterable<Tree>) => [...group].filter((tree) => keptTrees.has(tree)).length;
 
 // --- Write and report ------------------------------------------------------
 
@@ -272,5 +466,10 @@ console.log(`  with a Wikipedia article:         ${count(buildings, (p) => p.wik
 console.log(`  buildings with an institute:      ${percent(count(buildings, (p) => p.inst), buildings.length)}`);
 console.log(`  buildings with known access:      ${percent(count(buildings, (p) => p.acc !== 'u'), buildings.length)}`);
 console.log(`  objects changed by the overlay:   ${records.filter((record) => record.curated).length}`);
-console.log(`  trees:                            ${mappedTrees.length} mapped, ${rowTrees.length} in rows, ${woodTrees.length} in woods, ${trees.length} kept (max ${MAX_TREES})`);
+console.log(`  trees kept:                       ${trees.length} (max ${MAX_TREES})`);
+console.log(`    mapped:                         ${keptOf(mappedTrees)} of ${mappedPositions.length} (${inStreetLine.filter(Boolean).length} in street lines, thinned)`);
+console.log(`    rows:                           ${keptOf(rowTrees)} of ${rowCandidates} (${streetRows} street rows, thinned)`);
+console.log(`    named grounds:                  ${keptOf(groundTrees)} of ${groundTrees.length} (before thinning: ${groundCounts.join(', ')})`);
+console.log(`    parks, gardens and grass:       ${keptOf(lawnTrees)} of ${lawnTrees.length} in ${lawns.length} areas (before thinning: ${lawnCounts.join(', ')})`);
+console.log(`    woods:                          ${keptOf(woodTrees)} of ${woodTrees.length} (${keptOf(priorityWoodTrees)} of ${priorityWoodTrees.size} in priority woods)`);
 console.log(`  accessibility features:           ${[...byKind].map(([kind, n]) => `${kind} ${n}`).join(', ') || 'none'}`);

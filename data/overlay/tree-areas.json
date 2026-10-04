@@ -1,0 +1,11 @@
+{
+  "institutes": [
+    { "institute": "IB" },
+    { "institute": "IP" },
+    { "institute": "IPEN", "spacing": 16 }
+  ],
+  "around": [
+    { "name": "Inova USP e AUCANI", "id": "way/422962269", "radius": 130 }
+  ],
+  "priorityWoods": ["relation/2114197", "relation/2293187"]
+}

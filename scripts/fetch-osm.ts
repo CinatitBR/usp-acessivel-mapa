@@ -32,11 +32,13 @@ const QUERY = `
   nwr(area.campus)["entrance"];
   nwr(area.campus)["kerb"];
   node(area.campus)["highway"~"^(elevator|bus_stop|crossing)$"];
-  way(area.campus)["highway"="steps"];
-  way(area.campus)["highway"]["name"];
+  // Every road and path: steps for accessibility, named streets for addresses, all of them to keep trees off them.
+  way(area.campus)["highway"];
   node(area.campus)["natural"="tree"];
-  way(area.campus)["natural"~"^(wood|tree_row)$"];
-  way(area.campus)["landuse"="forest"];
+  way(area.campus)["natural"="tree_row"];
+  // Where trees are generated (woods, lawns, scrub) and where they must not be (water).
+  wr(area.campus)["natural"~"^(wood|scrub|grassland|water)$"];
+  wr(area.campus)["landuse"~"^(forest|grass|meadow|recreation_ground|village_green|basin)$"];
   ${BOUNDARIES}
 );
 out geom;

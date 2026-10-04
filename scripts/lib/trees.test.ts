@@ -82,6 +82,13 @@ describe('selectTrees', () => {
     expect(west).toBeLessThan(70);
   });
 
+  it('keeps a larger share of the trees given more weight', () => {
+    const heavy = new Set(generated.slice(0, generated.length / 2));
+    const kept = selectTrees([], generated, generated.length / 4, (tree) => (heavy.has(tree) ? 4 : 1));
+    const keptHeavy = kept.filter((tree) => heavy.has(tree)).length;
+    expect(keptHeavy).toBeGreaterThan((kept.length - keptHeavy) * 2);
+  });
+
   it('returns everything when under budget', () => {
     expect(selectTrees(mapped, generated, 10_000)).toHaveLength(mapped.length + generated.length);
   });

@@ -69,13 +69,16 @@ export function alongLine(line: LngLat[], spacing: number): LngLat[] {
 
 /**
  * Keeps at most `max` trees: every mapped tree first, then the generated ones
- * thinned evenly (by seed order, which is unrelated to position) rather than
- * dropping a whole area.
+ * thinned evenly (by a hash of the position, which is unrelated to where the
+ * tree is) rather than dropping a whole area. `weightOf` makes some trees
+ * likelier to survive: a weight of 3 keeps about three times the share.
  */
-export function selectTrees(mapped: Tree[], generated: Tree[], max: number): Tree[] {
+export function selectTrees(mapped: Tree[], generated: Tree[], max: number, weightOf: (tree: Tree) => number = () => 1): Tree[] {
   const room = Math.max(0, max - mapped.length);
-  const thinned = [...generated]
-    .sort((a, b) => unitHash(...cell(a.position), 5) - unitHash(...cell(b.position), 5))
-    .slice(0, room);
+  const thinned = generated
+    .map((tree) => ({ tree, rank: unitHash(...cell(tree.position), 5) / weightOf(tree) }))
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, room)
+    .map(({ tree }) => tree);
   return [...mapped.slice(0, max), ...thinned];
 }

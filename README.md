@@ -120,6 +120,18 @@ Stairs on a route are drawn dashed in orange and flagged in the step list. openr
 
 Trees and 3D buses are drawn by one Three.js layer, loaded after the map. Lite mode leaves that layer (and its download) out: no trees, and buses as flat markers. It starts automatically when the device asks for reduced motion, has no WebGL 2, reports 2 GB of memory or less, or is a phone with 4 cores or fewer; it also switches on by itself, with an "undo", if the 3D map stays below about 25 fps for three seconds while you move it. The **Visualização 3D** switch in the layer menu overrides all of that, and the choice is remembered on the device.
 
+## Trees
+
+`npm run data:build` writes `public/data/trees.json` (1,000 trees; the 3D layer can draw up to 4,000). Trees come from:
+
+- trees and tree rows mapped in OSM. Those that line a street are thinned to about one in five, so the map does not show a row of trees along every road;
+- woods, parks, gardens and grass areas mapped in OSM, filled on an irregular grid with clumps and clearings;
+- grounds listed by hand in `data/overlay/tree-areas.json`: `institutes` (the area of an institute, by sigla or id, with an optional `spacing` in metres), `around` (a circle of `radius` metres around any OSM object, for places with no area of their own) and `priorityWoods` (woods that keep a larger share of their trees).
+
+Every kind of tree is thinned evenly to fit the total: individually mapped trees least, then rows, lawns and named grounds, and ordinary woods most (`MAX_TREES` and the weights at the top of `scripts/build-campus.ts`).
+
+No generated tree stands on a building, road, path, parking lot, sports ground or water. The build report lists how many trees each source and each named area got. Positions are derived from a hash of the coordinates, so two builds give the same file.
+
 ## Places on the map
 
 The layer menu (the round button under the zoom controls) chooses which categories of places are drawn; the choice is remembered on the device. Categories, colours, icons and which ones start switched on are all in `src/features/pois/style.ts`. Places are hidden while the accessibility view is on, which has its own symbols.
