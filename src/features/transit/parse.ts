@@ -1,7 +1,7 @@
 import type { Geometry } from 'geojson';
 import { type AccessCode, decodeAccess } from '../../domain/access';
 import { geometryCenter } from '../../domain/geo';
-import type { BusStop } from '../../domain/types';
+import type { BusStop, LineDirection, LngLat } from '../../domain/types';
 import { optionalString } from '../buildings/parse';
 
 /** Property schema of public/data/stops.geojson, written by scripts/build-transit.ts. */
@@ -30,6 +30,23 @@ export type BusLineProperties = {
   /** Olho Vivo line code (`cl`) for this direction; absent until resolved with a token. */
   code?: number;
 };
+
+export function parseLineDirection(feature: {
+  properties: Record<string, unknown> | null;
+  geometry: Geometry;
+}): LineDirection | undefined {
+  const properties = feature.properties;
+  if (!properties || typeof properties.id !== 'string' || feature.geometry.type !== 'LineString') return undefined;
+  return {
+    lineId: properties.id,
+    direction: properties.dir === 1 ? 1 : 0,
+    headsign: optionalString(properties.head) ?? '',
+    name: optionalString(properties.name) ?? properties.id,
+    color: optionalString(properties.color) ?? '#1f2933',
+    ...(typeof properties.code === 'number' && { code: properties.code }),
+    shape: feature.geometry.coordinates as LngLat[],
+  };
+}
 
 export function parseStop(feature: {
   properties: Record<string, unknown> | null;

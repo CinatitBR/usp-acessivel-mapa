@@ -3,6 +3,7 @@ import { AccessFeaturePanel } from '../features/accessibility/AccessFeaturePanel
 import { BuildingPanel } from '../features/buildings/BuildingPanel';
 import { InstitutePanel } from '../features/institutes/InstitutePanel';
 import { PoiPanel } from '../features/pois/PoiPanel';
+import { BusPanel } from '../features/transit/BusPanel';
 import { StopPanel } from '../features/transit/StopPanel';
 import { type Selection, useAppStore } from '../state/store';
 import { strings } from '../strings/pt-BR';
@@ -35,6 +36,8 @@ function panelFor(selection: Selection, onClose: () => void) {
       return <AccessFeaturePanel id={selection.id} />;
     case 'stop':
       return <StopPanel id={selection.id} />;
+    case 'bus':
+      return <BusPanel id={selection.id} />;
     case 'place':
       return (
         <BottomSheet title={selection.label} subtitle={strings.place.offCampus} onClose={onClose}>

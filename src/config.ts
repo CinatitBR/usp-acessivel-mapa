@@ -19,6 +19,9 @@ export const MAP_MAX_BOUNDS: [west: number, south: number, east: number, north: 
 export const API_BASE =
   (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') || (import.meta.env.DEV ? '/api' : '');
 
+/** From this zoom on, buses are 3D models; below it (and always in lite mode) they are flat markers. */
+export const BUS_3D_MIN_ZOOM = 15.5;
+
 export const INITIAL_ZOOM = 15.5;
 /** Tilted by default so building extrusions read as 3D. */
 export const INITIAL_PITCH = 50;

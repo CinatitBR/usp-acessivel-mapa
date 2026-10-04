@@ -75,6 +75,13 @@ export const strings = {
     today: 'hoje',
     tomorrow: 'amanhã',
     accessibleBus: 'acessível',
+    bus: 'Ônibus',
+    busAccessible: 'Ônibus acessível para cadeira de rodas.',
+    busNotAccessible: 'Ônibus sem acessibilidade para cadeira de rodas.',
+    busPrefix: 'Prefixo',
+    busSeen: (seconds: number) => (seconds < 90 ? `posição de ${seconds} s atrás` : `posição de ${Math.round(seconds / 60)} min atrás`),
+    busGone: 'Este ônibus não está mais no mapa.',
+    busesUnavailable: 'Ônibus ao vivo indisponíveis',
   },
   place: {
     offCampus: 'Local fora do campus',

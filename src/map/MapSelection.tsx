@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { ACCESS_LAYER } from '../features/accessibility/layers';
 import { BUILDINGS_LAYER, BUILDINGS_SOURCE } from '../features/buildings/layers';
 import { STOPS_LAYER } from '../features/transit/layers';
+import { BUSES_LAYER } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
 
 const FLY_MIN_ZOOM = 17;
@@ -22,11 +23,12 @@ export function MapSelection() {
     const onClick = (event: MapMouseEvent) => {
       const { select, clearSelection } = useAppStore.getState();
       // Small symbols win over the building underneath them.
-      const layers = [ACCESS_LAYER, STOPS_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
+      const layers = [BUSES_LAYER, ACCESS_LAYER, STOPS_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
       const feature = layers.length > 0 ? map.queryRenderedFeatures(event.point, { layers })[0] : undefined;
       const id: unknown = feature?.properties.id;
       const kind = feature && POINT_KINDS[feature.layer.id];
       if (typeof id !== 'string') clearSelection();
+      else if (feature?.layer.id === BUSES_LAYER) select({ kind: 'bus', id });
       else if (kind) select({ kind, id, position: event.lngLat.toArray() });
       else select({ kind: 'building', id });
     };
@@ -54,6 +56,6 @@ export function MapSelection() {
     map.flyTo({ center: flyTarget.position, zoom: Math.max(map.getZoom(), FLY_MIN_ZOOM) });
   }, [map, flyTarget]);
 
-  if (!selection || selection.kind === 'building') return null;
+  if (!selection || !('position' in selection)) return null;
   return <Marker longitude={selection.position[0]} latitude={selection.position[1]} anchor="bottom" />;
 }

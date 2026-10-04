@@ -1,7 +1,7 @@
 import { API_BASE } from '../../../config';
-import type { Arrival } from '../../../domain/types';
+import type { Arrival, BusVehicle, LineDirection } from '../../../domain/types';
 import { fetchJson, ProviderError } from '../../../lib/http';
-import { type ArrivalsProvider, MAX_ARRIVALS } from './types';
+import { type ArrivalsProvider, MAX_ARRIVALS, type VehiclesProvider } from './types';
 
 const PROVIDER = 'olhovivo';
 
@@ -76,5 +76,53 @@ export const olhoVivoArrivals: ArrivalsProvider = {
     if (!API_BASE) throw new ProviderError(PROVIDER, 'network', 'VITE_API_BASE is not set');
     const url = `${API_BASE}/olhovivo/Previsao/Parada?codigoParada=${encodeURIComponent(stop.id)}`;
     return parseOlhoVivoArrivals(await fetchJson(url, { provider: PROVIDER, signal, timeoutMs: 10_000 }), Date.now());
+  },
+};
+
+type OlhoVivoPosition = { p?: unknown; a?: unknown; ta?: unknown; py?: unknown; px?: unknown };
+type OlhoVivoLinePositions = { codigo?: unknown; body?: { vs?: OlhoVivoPosition[] } | null };
+
+/**
+ * Converts the Worker's `/Posicao/Linhas` response (one raw Olho Vivo body per
+ * line code) into vehicles. Codes that are not in `lines` are ignored.
+ */
+export function parseOlhoVivoVehicles(json: unknown, lines: LineDirection[]): BusVehicle[] {
+  if (!Array.isArray(json)) return [];
+  const byCode = new Map(lines.flatMap((line) => (line.code === undefined ? [] : [[line.code, line] as const])));
+
+  const vehicles: BusVehicle[] = [];
+  for (const entry of json as OlhoVivoLinePositions[]) {
+    const line = typeof entry.codigo === 'number' ? byCode.get(entry.codigo) : undefined;
+    if (!line || !Array.isArray(entry.body?.vs)) continue;
+    for (const vehicle of entry.body.vs) {
+      const recordedAt = typeof vehicle.ta === 'string' ? Date.parse(vehicle.ta) : NaN;
+      if (
+        (typeof vehicle.p !== 'string' && typeof vehicle.p !== 'number')
+        || typeof vehicle.px !== 'number'
+        || typeof vehicle.py !== 'number'
+        || !Number.isFinite(recordedAt)
+      ) continue;
+      vehicles.push({
+        id: String(vehicle.p),
+        lineId: line.lineId,
+        direction: line.direction,
+        position: [vehicle.px, vehicle.py],
+        recordedAt,
+        accessible: vehicle.a === true,
+      });
+    }
+  }
+  return vehicles;
+}
+
+/** Live bus positions from Olho Vivo, all tracked directions in one request to the Worker. */
+export const olhoVivoVehicles: VehiclesProvider = {
+  id: PROVIDER,
+  async getVehicles(lines, signal) {
+    const codes = lines.flatMap((line) => (line.code === undefined ? [] : [line.code]));
+    if (!API_BASE) throw new ProviderError(PROVIDER, 'network', 'VITE_API_BASE is not set');
+    if (codes.length === 0) return [];
+    const url = `${API_BASE}/olhovivo/Posicao/Linhas?codigos=${codes.join(',')}`;
+    return parseOlhoVivoVehicles(await fetchJson(url, { provider: PROVIDER, signal, timeoutMs: 12_000 }), lines);
   },
 };

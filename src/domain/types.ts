@@ -101,6 +101,34 @@ export interface BusStop {
   access: AccessStatus;
 }
 
+/** One direction of a line that is drawn on the map and tracked live. */
+export interface LineDirection {
+  /** Line id, e.g. `8082-10`. */
+  lineId: string;
+  /** GTFS direction_id. */
+  direction: 0 | 1;
+  /** Destination shown on the bus. */
+  headsign: string;
+  name: string;
+  color: string;
+  /** Olho Vivo line code for this direction; without it the direction has no live positions. */
+  code?: number;
+  shape: LngLat[];
+}
+
+/** One GPS fix of a bus. */
+export interface BusVehicle {
+  /** Fleet number ("prefixo"), unique per bus. */
+  id: string;
+  lineId: string;
+  direction: 0 | 1;
+  position: LngLat;
+  /** Epoch milliseconds of the fix. */
+  recordedAt: number;
+  /** The bus is wheelchair accessible. */
+  accessible: boolean;
+}
+
 export interface Arrival {
   lineId: string;
   /** Destination shown on the bus. */

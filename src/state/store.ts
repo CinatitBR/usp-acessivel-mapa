@@ -10,6 +10,8 @@ export type Selection =
   | { kind: 'institute'; id: string; position: LngLat }
   | { kind: 'access'; id: string; position: LngLat }
   | { kind: 'stop'; id: string; position: LngLat }
+  /** A moving bus: no fixed position, so no marker. */
+  | { kind: 'bus'; id: string }
   | { kind: 'place'; label: string; detail?: string; position: LngLat };
 
 type AppState = {
@@ -29,7 +31,19 @@ type AppState = {
   /** Kinds the user switched off in the legend. */
   hiddenAccessKinds: readonly AccessFeatureKind[];
   toggleAccessKind: (kind: AccessFeatureKind) => void;
+
+  /** Lite mode: no Three.js layer; buses stay flat markers. */
+  lite: boolean;
+  /** True while the Three.js layer is on the map. */
+  scene3dActive: boolean;
+  setScene3dActive: (active: boolean) => void;
+  /** Live bus positions could not be fetched. */
+  busesUnavailable: boolean;
+  setBusesUnavailable: (unavailable: boolean) => void;
 };
+
+const prefersReducedMotion = () =>
+  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export const useAppStore = create<AppState>((set) => ({
   mapStatus: 'loading',
@@ -47,4 +61,10 @@ export const useAppStore = create<AppState>((set) => ({
     set(({ hiddenAccessKinds: hidden }) => ({
       hiddenAccessKinds: hidden.includes(kind) ? hidden.filter((other) => other !== kind) : [...hidden, kind],
     })),
+
+  lite: prefersReducedMotion(),
+  scene3dActive: false,
+  setScene3dActive: (scene3dActive) => set({ scene3dActive }),
+  busesUnavailable: false,
+  setBusesUnavailable: (busesUnavailable) => set({ busesUnavailable }),
 }));

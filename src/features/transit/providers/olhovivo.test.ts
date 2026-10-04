@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import type { LineDirection } from '../../../domain/types';
+import recordedPositions from './fixtures/olhovivo-posicao-linhas.json';
 import recorded from './fixtures/olhovivo-previsao-parada.json';
-import { parseOlhoVivoArrivals, predictionTime } from './olhovivo';
+import { parseOlhoVivoArrivals, parseOlhoVivoVehicles, predictionTime } from './olhovivo';
 
 /** 2026-10-05 14:30 in São Paulo (UTC−3). */
 const NOW = Date.UTC(2026, 9, 5, 17, 30);
@@ -88,5 +90,45 @@ describe('parseOlhoVivoArrivals', () => {
     expect(parseOlhoVivoArrivals({ Message: 'Authorization has been denied for this request.' }, NOW)).toEqual([]);
     expect(parseOlhoVivoArrivals(null, NOW)).toEqual([]);
     expect(parseOlhoVivoArrivals({ p: { l: [{ c: '8082-10', vs: [{ t: 'x' }] }] } }, NOW)).toEqual([]);
+  });
+});
+
+describe('parseOlhoVivoVehicles', () => {
+  const line = (lineId: string, direction: 0 | 1, code: number): LineDirection => ({
+    lineId, direction, code, headsign: '', name: '', color: '#000000', shape: [],
+  });
+  // Codes as resolved for these lines on 2026-10-04.
+  const lines = [line('8012-10', 0, 2023), line('8012-10', 1, 34791), line('8022-10', 0, 2085)];
+
+  it('reads a recorded response from the real API', () => {
+    const vehicles = parseOlhoVivoVehicles(recordedPositions, lines);
+    const expected = recordedPositions
+      .filter((entry) => [2023, 34791, 2085].includes(entry.codigo))
+      .reduce((total, entry) => total + entry.body.vs.length, 0);
+    expect(vehicles).toHaveLength(expected);
+    expect(expected).toBeGreaterThan(0);
+
+    const first = recordedPositions[0]!.body.vs[0]!;
+    expect(vehicles[0]).toEqual({
+      id: first.p,
+      lineId: '8012-10',
+      direction: 0,
+      position: [first.px, first.py],
+      recordedAt: Date.parse(first.ta),
+      accessible: first.a,
+    });
+  });
+
+  it('ignores codes it was not asked about and malformed vehicles', () => {
+    expect(parseOlhoVivoVehicles([{ codigo: 999, body: { vs: [{ p: '1', px: 1, py: 2, ta: '2026-10-04T09:53:02Z' }] } }], lines)).toEqual([]);
+    expect(
+      parseOlhoVivoVehicles([{ codigo: 2023, body: { vs: [{ p: '1', px: 'x', py: 2, ta: '2026-10-04T09:53:02Z' }, { p: '2', px: 1, py: 2 }] } }], lines),
+    ).toEqual([]);
+  });
+
+  it('tolerates empty and malformed responses', () => {
+    expect(parseOlhoVivoVehicles([{ codigo: 2023, body: { hr: '06:53', vs: [] } }], lines)).toEqual([]);
+    expect(parseOlhoVivoVehicles([{ codigo: 2023, body: null }], lines)).toEqual([]);
+    expect(parseOlhoVivoVehicles({ error: 'upstream' }, lines)).toEqual([]);
   });
 });

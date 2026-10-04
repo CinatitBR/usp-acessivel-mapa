@@ -7,6 +7,7 @@ import { SelectionSheet } from './ui/SelectionSheet';
 
 export function App() {
   const mapStatus = useAppStore((state) => state.mapStatus);
+  const busesUnavailable = useAppStore((state) => state.busesUnavailable);
 
   return (
     <main className="app">
@@ -17,6 +18,11 @@ export function App() {
         {mapStatus !== 'ready' && (
           <p className="map-status" role="status">
             {mapStatus === 'error' ? strings.map.error : strings.map.loading}
+          </p>
+        )}
+        {mapStatus === 'ready' && busesUnavailable && (
+          <p className="map-status" role="status">
+            {strings.transit.busesUnavailable}
           </p>
         )}
       </div>
