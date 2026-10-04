@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildingHeights, buildingProperties, parseMeters, poiProperties, roundGeometry } from './normalize';
+import {
+  accessFeatureProperties,
+  buildingHeights,
+  buildingProperties,
+  parseMeters,
+  poiProperties,
+  roundGeometry,
+} from './normalize';
 
 describe('parseMeters', () => {
   it('reads plain and suffixed metric values', () => {
@@ -57,15 +64,45 @@ describe('buildingProperties', () => {
   });
 
   it('records the containing institute', () => {
-    expect(buildingProperties('way/4', { building: 'yes' }, 'way/9').inst).toBe('way/9');
+    expect(buildingProperties('way/4', { building: 'yes' }, { institute: 'way/9' }).inst).toBe('way/9');
     expect(buildingProperties('way/4', { building: 'yes' })).not.toHaveProperty('inst');
+  });
+});
+
+describe('building accessibility details', () => {
+  it('reads toilets, elevator, reserved parking and curated notes', () => {
+    expect(
+      buildingProperties(
+        'way/7',
+        {
+          building: 'yes', wheelchair: 'yes', 'toilets:wheelchair': 'no', elevator: 'yes', 'capacity:disabled': '3',
+          note: 'Rampa pela entrada lateral', checked: '2026-10-10',
+        },
+        { source: 'curated' },
+      ),
+    ).toMatchObject({
+      acc: 'y', wc: 'n', elev: true, park: 3, note: 'Rampa pela entrada lateral', chk: '2026-10-10', src: 'curated',
+    });
+  });
+
+  it('omits details nobody recorded', () => {
+    const properties = buildingProperties('way/8', { building: 'yes' });
+    for (const key of ['wc', 'elev', 'park', 'note', 'chk']) expect(properties).not.toHaveProperty(key);
+  });
+});
+
+describe('accessFeatureProperties', () => {
+  it('keeps kind, status, building, level and source', () => {
+    expect(
+      accessFeatureProperties('node/9', { highway: 'elevator', level: '0-3' }, { kind: 'elevator', status: 'yes' }, { building: 'way/1' }),
+    ).toEqual({ id: 'node/9', kind: 'elevator', acc: 'y', bld: 'way/1', lvl: '0-3', src: 'osm' });
   });
 });
 
 describe('poiProperties', () => {
   it('keeps name, category, access, building and opening hours', () => {
     expect(
-      poiProperties('node/5', { amenity: 'restaurant', name: 'Bandejão Central', wheelchair: 'yes', opening_hours: 'Mo-Fr 11:00-14:00' }, 'food', 'way/1'),
+      poiProperties('node/5', { amenity: 'restaurant', name: 'Bandejão Central', wheelchair: 'yes', opening_hours: 'Mo-Fr 11:00-14:00' }, 'food', { building: 'way/1' }),
     ).toEqual({ id: 'node/5', name: 'Bandejão Central', cat: 'food', acc: 'y', bld: 'way/1', oh: 'Mo-Fr 11:00-14:00', src: 'osm' });
   });
 

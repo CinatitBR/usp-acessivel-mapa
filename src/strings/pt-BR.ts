@@ -1,4 +1,4 @@
-import type { AccessStatus, PoiCategory } from '../domain/types';
+import type { AccessFeatureKind, AccessStatus, PoiCategory } from '../domain/types';
 
 /** Every user-facing string lives here so the UI can be translated later. */
 export const strings = {
@@ -73,7 +73,33 @@ export const strings = {
     } satisfies Record<AccessStatus, string>,
     unknownHint: 'Ninguém registrou ainda a acessibilidade deste local.',
     source: { osm: 'Fonte: OpenStreetMap', curated: 'Fonte: levantamento do projeto' },
+    toggle: 'Acessibilidade',
+    legend: 'Legenda de acessibilidade',
+    show: 'Mostrar no mapa',
+    kinds: {
+      ramp: 'Rampa',
+      elevator: 'Elevador',
+      entrance: 'Entrada',
+      toilet: 'Banheiro',
+      parking: 'Estacionamento',
+      kerb: 'Meio-fio',
+      steps: 'Escada',
+    } satisfies Record<AccessFeatureKind, string>,
+    toilet: 'Banheiro acessível',
+    elevator: 'Elevador',
+    parking: 'Vagas reservadas',
+    level: 'Andar',
+    checked: 'Verificado em',
+    features: 'Recursos neste prédio',
+    yes: 'Sim',
+    no: 'Não',
   },
 } as const;
+
+/** `2026-10-10` → `10/10/2026`, without going through a time zone. Other formats are shown as written. */
+export function formatDate(iso: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : iso;
+}
 
 export const buildingKindLabel = (kind: string) => strings.building.kinds[kind] ?? strings.building.kinds.yes!;

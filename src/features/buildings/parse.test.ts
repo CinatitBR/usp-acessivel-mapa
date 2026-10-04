@@ -28,6 +28,16 @@ describe('parseBuilding', () => {
     expect(building?.center[0]).toBeCloseTo(-46.725);
   });
 
+  it('reads building-level accessibility details', () => {
+    const building = parseBuilding({
+      geometry: square,
+      properties: { id: 'way/5', h: 6, mh: 0, acc: 'y', wc: 'n', elev: true, park: 2, note: 'Rampa lateral', chk: '2026-10-10' },
+    });
+    expect(building?.access).toMatchObject({
+      status: 'yes', toilet: 'no', elevator: true, parking: 2, note: 'Rampa lateral', checked: '2026-10-10',
+    });
+  });
+
   it('defaults missing optional values', () => {
     const building = parseBuilding({ geometry: square, properties: { id: 'way/2', h: 6, mh: 0 } });
     expect(building).toMatchObject({ kind: 'yes', access: { status: 'unknown', source: 'osm' } });

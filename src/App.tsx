@@ -1,3 +1,4 @@
+import { AccessControl } from './features/accessibility/AccessControl';
 import { SearchBox } from './features/search/SearchBox';
 import { CampusMap } from './map/CampusMap';
 import { useAppStore } from './state/store';
@@ -12,6 +13,7 @@ export function App() {
       <div className="map-area" aria-label={strings.map.ariaLabel}>
         <CampusMap />
         <SearchBox />
+        <AccessControl />
         {mapStatus !== 'ready' && (
           <p className="map-status" role="status">
             {mapStatus === 'error' ? strings.map.error : strings.map.loading}

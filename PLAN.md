@@ -274,11 +274,13 @@ Coordinates are rounded to 6 decimals. No geometry simplification: `buildings.ge
       "note": "Rampa pela entrada lateral", "checked": "2026-10-10" } },
   // 2. New feature: no "osm", needs "kind" and a geometry.
   { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-46.7346, -23.5609] },
-    "properties": { "kind": "elevator", "wheelchair": "yes", "building": "way/158789266", "level": "0-3" } },
+    "properties": { "kind": "elevator", "wheelchair": "yes", "building_id": "way/158789266", "level": "0-3" } },
   // 3. Removal of a wrong OSM object.
   { "type": "Feature", "geometry": null, "properties": { "osm": "node/999", "delete": true } }
 ] }
 ```
+
+As built (M3): overlay properties are OSM tags applied before normalization, so one code path handles OSM and curated data; booleans become `yes`/`no`. The key for a point's building is `building_id` (plain `building` is the OSM tag). `institute` accepts a sigla or id. The build itself (`npm run data:build`), not `check:data`, fails on unknown ids and prints the coverage report. Full reference: README, "Como editar o overlay".
 
 Merge rules (`scripts/lib/mergeOverlay.ts`, unit-tested):
 1. Normalize OSM elements to internal records keyed `type/id`.
@@ -372,7 +374,8 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 
 ### M3: Accessibility layer and curated overlay
 - **Goal:** accessibility as a first-class layer, fed by OSM plus your overlay.
-- **Files:** `data/overlay/campus-overlay.geojson` (seeded with a few real examples), `scripts/lib/mergeOverlay.ts` (+ test), update `build-campus.ts` and `check-data.ts`, `public/data/accessibility.geojson`, `src/features/accessibility/layers.tsx`, `legend.tsx`, `filters.ts`, `parse.ts` (+ test), `README.md` section "Como editar o overlay".
+- **Files:** `data/overlay/campus-overlay.geojson` (starts empty: no accessibility facts are invented), `scripts/lib/mergeOverlay.ts` (+ test), `scripts/lib/accessibility.ts` (+ test), update `build-campus.ts` and `normalize.ts`, `public/data/accessibility.geojson`, `src/features/accessibility/layers.tsx`, `icons.ts` (icons drawn on a canvas at runtime), `AccessControl.tsx` (toggle, legend, filter chips), `AccessFeaturePanel.tsx`, `parse.ts` (+ test), `README.md` section "Como editar o overlay".
+- **As built:** ramps, elevators, kerbs and steps from OSM are always in the layer; entrances, toilets and parking only when their accessibility is recorded. Status is encoded by icon shape as well as colour (circle, rounded square, diamond, hollow circle).
 - **Notes:** point kinds: ramp, elevator, entrance, toilet, parking, kerb, steps. Icons use shape and symbol as well as color (not color alone). A top-level "Acessibilidade" toggle recolors building extrusions by status (green, amber, red, gray) and shows the point layer; per-kind filter chips. The building panel lists its accessibility features and shows `note` and `checked`.
 - **Acceptance:** overlay patch, addition and deletion all take effect after `npm run data:build`; an unknown `osm` id fails `check:data`; the coverage report prints.
 - **Verify:** `npm run data:build && npm run check:data && npm test`; on the phone, toggle the layer and open a building you patched.

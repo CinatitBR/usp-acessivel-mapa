@@ -29,6 +29,51 @@ npm run data:build    # write public/data/*.geojson
 npm run check:data    # fail if public/data exceeds 1 MB
 ```
 
+## Como editar o overlay (curated accessibility data)
+
+OpenStreetMap has little accessibility data for the campus, so most of it comes from `data/overlay/campus-overlay.geojson`, a GeoJSON file you edit by hand or in [geojson.io](https://geojson.io). After editing, run `npm run data:build`; it prints a coverage report and stops with an error if the overlay refers to something that does not exist.
+
+Each feature does one of three things:
+
+```jsonc
+{ "type": "FeatureCollection", "features": [
+
+  // 1. Patch an existing OSM object: give its id in "osm". Geometry can be null.
+  //    The other properties are OSM tags and override what OSM has (null removes a tag).
+  { "type": "Feature", "geometry": null,
+    "properties": { "osm": "way/158789266", "name": "Instituto de Física – Ala Central",
+      "institute": "IFUSP", "wheelchair": "limited", "elevator": true,
+      "toilets:wheelchair": "yes", "capacity:disabled": 2,
+      "note": "Rampa pela entrada lateral", "checked": "2026-10-10" } },
+
+  // 2. Add something OSM does not have: no "osm", a geometry, and a "kind".
+  { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-46.7346, -23.5609] },
+    "properties": { "kind": "elevator", "wheelchair": "yes",
+      "building_id": "way/158789266", "level": "0-3", "note": "Ao lado da biblioteca" } },
+
+  // 3. Remove a wrong OSM object.
+  { "type": "Feature", "geometry": null, "properties": { "osm": "node/999", "delete": true } }
+] }
+```
+
+| Property | Meaning |
+|---|---|
+| `osm` | Id of the object to patch or delete: `way/123`, `node/45`, `relation/6`. The app shows nothing for an id it cannot find, so the build fails instead |
+| `wheelchair` | `yes`, `limited`, `no`. Sets the status shown for a building, POI or feature |
+| `kind` | For new points: `ramp`, `elevator`, `entrance`, `toilet`, `parking`, `kerb`, `steps` |
+| `building_id` | Building a new point belongs to. Optional: a point inside a building footprint is assigned automatically |
+| `institute` | Sigla or id from `public/data/institutes.json`, to override the institute found by location |
+| `toilets:wheelchair`, `elevator`, `capacity:disabled` | Building details: accessible toilet (`yes`/`no`), has an elevator (`true`/`false`), number of reserved parking spaces |
+| `note`, `checked` | Free text shown in the panel, and the date you checked it on site (`YYYY-MM-DD`) |
+| `level` | Floor of a point, as in OSM (`0`, `1`, `0-3`) |
+| `name`, `short_name`, `height`, `building:levels`, ... | Any other OSM tag works the same way |
+
+A new feature can also be a building (a polygon with `"building": "yes"`) or a POI (for example `"amenity": "toilets"`).
+
+To find an object's id, open it on [openstreetmap.org](https://www.openstreetmap.org) (the URL ends in `way/123`), or look it up in `public/data/buildings.geojson`.
+
+Institute siglas missing from OSM go in `data/overlay/institutes.json`, keyed by the institute's OSM id.
+
 ## Basemap style
 
 `public/styles/campus.json` is the single source of truth for the basemap. Edit it by hand or in [Maputnik](https://maplibre.org/maputnik/). It currently is OpenFreeMap "liberty" with three changes: the `building-3d` layer is removed, a `light` block is added, and four empty anchor layers are inserted.

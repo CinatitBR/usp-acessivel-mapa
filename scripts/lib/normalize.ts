@@ -1,8 +1,10 @@
 import type { Geometry, Position } from 'geojson';
 import { deriveAccessStatus, encodeAccess } from '../../src/domain/access';
-import type { PoiCategory } from '../../src/domain/types';
+import type { AccessFeatureKind, AccessStatus, DataSource, PoiCategory } from '../../src/domain/types';
+import type { AccessFeatureProperties } from '../../src/features/accessibility/parse';
 import type { BuildingProperties } from '../../src/features/buildings/parse';
 import type { PoiProperties } from '../../src/features/pois/parse';
+import { reservedParking } from './accessibility';
 
 export type OsmTags = Record<string, string>;
 
@@ -52,10 +54,25 @@ export function buildingHeights(tags: OsmTags): { h: number; mh: number } {
 
 const clean = (value: string | undefined) => value?.trim() || undefined;
 
-/** `id` is the OSM-style id, e.g. `way/123`; `institute` is the id of the institute area containing the building. */
-export function buildingProperties(id: string, tags: OsmTags, institute?: string): BuildingProperties {
+/** Details that only the curated overlay provides. */
+function curatedDetails(tags: OsmTags) {
+  const note = clean(tags.note);
+  const checked = clean(tags.checked);
+  return { ...(note && { note }), ...(checked && { chk: checked }) };
+}
+
+type BuildingContext = { institute?: string; source?: DataSource };
+
+/** `id` is the OSM-style id, e.g. `way/123`; `institute` is the id of the institute the building belongs to. */
+export function buildingProperties(
+  id: string,
+  tags: OsmTags,
+  { institute, source = 'osm' }: BuildingContext = {},
+): BuildingProperties {
   const name = clean(tags.name);
   const shortName = clean(tags.short_name);
+  const toilet = deriveAccessStatus(tags['toilets:wheelchair']);
+  const parking = reservedParking(tags);
   return {
     id,
     ...(name && { name }),
@@ -64,11 +81,40 @@ export function buildingProperties(id: string, tags: OsmTags, institute?: string
     kind: clean(tags.building) ?? 'yes',
     ...buildingHeights(tags),
     acc: encodeAccess(deriveAccessStatus(tags.wheelchair)),
-    src: 'osm',
+    ...(toilet !== 'unknown' && { wc: encodeAccess(toilet) }),
+    ...((tags.elevator === 'yes' || tags.elevator === 'no') && { elev: tags.elevator === 'yes' }),
+    ...(parking !== undefined && { park: parking }),
+    ...curatedDetails(tags),
+    src: source,
   };
 }
 
-export function poiProperties(id: string, tags: OsmTags, category: PoiCategory, building?: string): PoiProperties {
+type FeatureContext = { building?: string; source?: DataSource };
+
+export function accessFeatureProperties(
+  id: string,
+  tags: OsmTags,
+  classified: { kind: AccessFeatureKind; status: AccessStatus },
+  { building, source = 'osm' }: FeatureContext = {},
+): AccessFeatureProperties {
+  const level = clean(tags.level);
+  return {
+    id,
+    kind: classified.kind,
+    acc: encodeAccess(classified.status),
+    ...(building && { bld: building }),
+    ...(level && { lvl: level }),
+    ...curatedDetails(tags),
+    src: source,
+  };
+}
+
+export function poiProperties(
+  id: string,
+  tags: OsmTags,
+  category: PoiCategory,
+  { building, source = 'osm' }: FeatureContext = {},
+): PoiProperties {
   const name = clean(tags.name);
   const openingHours = clean(tags.opening_hours);
   return {
@@ -78,7 +124,7 @@ export function poiProperties(id: string, tags: OsmTags, category: PoiCategory, 
     acc: encodeAccess(deriveAccessStatus(tags.wheelchair)),
     ...(building && { bld: building }),
     ...(openingHours && { oh: openingHours }),
-    src: 'osm',
+    src: source,
   };
 }
 

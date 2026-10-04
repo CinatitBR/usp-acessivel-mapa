@@ -70,6 +70,8 @@ input {
 /* Search */
 .search {
   position: absolute;
+  /* Results drop over the accessibility toggle below. */
+  z-index: 2;
   top: calc(env(safe-area-inset-top) + 10px);
   left: calc(env(safe-area-inset-left) + 10px);
   /* Leaves room for the map's zoom and compass buttons. */
@@ -242,20 +244,128 @@ input {
   font-size: 0.875rem;
 }
 
-.access-yes .access-symbol {
-  background: #1a7f37;
+.access-details {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 0.9375rem;
 }
 
-.access-partial .access-symbol {
-  background: #9a6700;
+.link-row .access-status {
+  font-weight: 400;
 }
 
-.access-no .access-symbol {
-  background: #c62828;
+/* Accessibility view: toggle and legend, under the search box */
+.access-control {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 64px);
+  left: calc(env(safe-area-inset-left) + 10px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: min(340px, calc(100% - 76px));
 }
 
-.access-unknown .access-symbol {
-  background: #6b7780;
+.access-toggle,
+.chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.access-toggle {
+  box-shadow: var(--shadow);
+  font-weight: 600;
+}
+
+.access-toggle[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.access-toggle:focus-visible,
+.chip:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.access-legend {
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 0.875rem;
+}
+
+.legend-statuses {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend-statuses li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Same shapes as the map icons: circle, rounded square, diamond, hollow circle. */
+.legend-swatch {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--status-color);
+}
+
+.legend-partial {
+  border-radius: 4px;
+}
+
+.legend-no {
+  border-radius: 0;
+  transform: rotate(45deg) scale(0.8);
+}
+
+.legend-unknown {
+  border: 2px solid var(--status-color);
+  background: transparent;
+}
+
+/* One scrollable row keeps the legend short on phones. */
+.chips {
+  display: flex;
+  gap: 6px;
+  margin: 10px -12px 0;
+  padding: 2px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chip {
+  flex: none;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 0.8125rem;
+}
+
+.chip[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: #e8f0fa;
+}
+
+.chip[aria-pressed='false'] {
+  color: var(--muted);
+  text-decoration: line-through;
 }
 
 .access-note {

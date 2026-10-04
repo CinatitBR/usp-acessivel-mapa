@@ -1,5 +1,6 @@
 import type { FeatureCollection } from 'geojson';
-import type { Building, Institute, Poi } from '../domain/types';
+import type { AccessibilityFeature, Building, Institute, Poi } from '../domain/types';
+import { parseAccessFeature } from '../features/accessibility/parse';
 import { parseBuilding } from '../features/buildings/parse';
 import { parsePoi } from '../features/pois/parse';
 
@@ -38,6 +39,11 @@ export const loadPois = () =>
   loadOnce('pois.geojson', (json) =>
     (json as FeatureCollection).features.map(parsePoi).filter(defined),
   ) satisfies Promise<Poi[]>;
+
+export const loadAccessFeatures = () =>
+  loadOnce('accessibility.geojson', (json) =>
+    (json as FeatureCollection).features.map(parseAccessFeature).filter(defined),
+  ) satisfies Promise<AccessibilityFeature[]>;
 
 /** institutes.json is already in domain shape. */
 export const loadInstitutes = () => loadOnce('institutes.json', (json) => json as Institute[]);

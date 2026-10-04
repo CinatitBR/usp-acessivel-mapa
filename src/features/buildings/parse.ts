@@ -17,6 +17,15 @@ export type BuildingProperties = {
   /** Base height in metres (above 0 for roofs and raised parts). */
   mh: number;
   acc: AccessCode;
+  /** Accessible toilet inside. */
+  wc?: AccessCode;
+  /** Has an elevator. */
+  elev?: boolean;
+  /** Reserved parking spaces. */
+  park?: number;
+  note?: string;
+  /** ISO date of the last on-site check. */
+  chk?: string;
   src: DataSource;
 };
 
@@ -46,6 +55,11 @@ export function parseBuilding(feature: {
     access: {
       status: decodeAccess(properties.acc),
       source: properties.src === 'curated' ? 'curated' : 'osm',
+      ...(properties.wc !== undefined && { toilet: decodeAccess(properties.wc) }),
+      ...(typeof properties.elev === 'boolean' && { elevator: properties.elev }),
+      ...(typeof properties.park === 'number' && { parking: properties.park }),
+      note: optionalString(properties.note),
+      checked: optionalString(properties.chk),
     },
   };
 }

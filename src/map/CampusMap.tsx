@@ -10,6 +10,7 @@ import {
   MIN_ZOOM,
   STYLE_URL,
 } from '../config';
+import { AccessibilityLayers } from '../features/accessibility/layers';
 import { BuildingLayers } from '../features/buildings/layers';
 import { useAppStore } from '../state/store';
 import { missingAnchors } from './anchors';
@@ -48,6 +49,7 @@ export function CampusMap() {
       <AttributionControl compact customAttribution={MAPLIBRE_ATTRIBUTION} position="bottom-right" />
       <NavigationControl position="top-right" visualizePitch />
       <BuildingLayers />
+      <AccessibilityLayers />
       <MapSelection />
     </Map>
   );

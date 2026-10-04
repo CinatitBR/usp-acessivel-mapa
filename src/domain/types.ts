@@ -8,6 +8,31 @@ export type DataSource = 'osm' | 'curated';
 export interface AccessInfo {
   status: AccessStatus;
   source: DataSource;
+  /** Accessible toilet inside. */
+  toilet?: AccessStatus;
+  elevator?: boolean;
+  /** Number of reserved parking spaces. */
+  parking?: number;
+  /** Free text in pt-BR, from the curated overlay. */
+  note?: string;
+  /** ISO date of the last on-site check. */
+  checked?: string;
+}
+
+export type AccessFeatureKind = 'ramp' | 'elevator' | 'entrance' | 'toilet' | 'parking' | 'kerb' | 'steps';
+
+/** A single point that helps or hinders step-free movement. */
+export interface AccessibilityFeature {
+  id: string;
+  kind: AccessFeatureKind;
+  status: AccessStatus;
+  position: LngLat;
+  buildingId?: string;
+  /** Floor, as in the OSM `level` tag. */
+  level?: string;
+  note?: string;
+  checked?: string;
+  source: DataSource;
 }
 
 export interface Building {

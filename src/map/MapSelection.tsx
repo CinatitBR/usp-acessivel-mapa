@@ -1,12 +1,13 @@
 import { Marker, useMap } from '@vis.gl/react-maplibre';
 import type { MapMouseEvent } from 'maplibre-gl';
 import { useEffect } from 'react';
+import { ACCESS_LAYER } from '../features/accessibility/layers';
 import { BUILDINGS_LAYER, BUILDINGS_SOURCE } from '../features/buildings/layers';
 import { useAppStore } from '../state/store';
 
 const FLY_MIN_ZOOM = 17;
 
-/** Connects the map to the selection: taps select buildings, and the selection drives highlight, marker and camera. */
+/** Connects the map to the selection: taps select buildings and accessibility points, and the selection drives highlight, marker and camera. */
 export function MapSelection() {
   const { current: map } = useMap();
   const selection = useAppStore((state) => state.selection);
@@ -16,12 +17,13 @@ export function MapSelection() {
     if (!map) return;
     const onClick = (event: MapMouseEvent) => {
       const { select, clearSelection } = useAppStore.getState();
-      const feature = map.getLayer(BUILDINGS_LAYER)
-        ? map.queryRenderedFeatures(event.point, { layers: [BUILDINGS_LAYER] })[0]
-        : undefined;
+      // Small symbols win over the building underneath them.
+      const layers = [ACCESS_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
+      const feature = layers.length > 0 ? map.queryRenderedFeatures(event.point, { layers })[0] : undefined;
       const id: unknown = feature?.properties.id;
-      if (typeof id === 'string') select({ kind: 'building', id });
-      else clearSelection();
+      if (typeof id !== 'string') clearSelection();
+      else if (feature?.layer.id === ACCESS_LAYER) select({ kind: 'access', id, position: event.lngLat.toArray() });
+      else select({ kind: 'building', id });
     };
     map.on('click', onClick);
     return () => {
