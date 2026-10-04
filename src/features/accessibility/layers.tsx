@@ -2,6 +2,7 @@ import { Layer, Source, useMap } from '@vis.gl/react-maplibre';
 import type { FilterSpecification, SymbolLayerSpecification } from 'maplibre-gl';
 import { useEffect, useState } from 'react';
 import { ANCHORS } from '../../map/anchors';
+import { SELECTED_SUFFIX } from '../../map/badgeIcon';
 import { dataUrl } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { ACCESS_ICON_PREFIX, addAccessIcons } from './icons';
@@ -9,6 +10,7 @@ import { ACCESS_KINDS } from './parse';
 
 export const ACCESS_SOURCE = 'accessibility';
 export const ACCESS_LAYER = 'accessibility-points';
+export const ACCESS_SELECTED_LAYER = 'accessibility-selected';
 
 const ACCESS_URL = dataUrl('accessibility.geojson');
 const MIN_ZOOM = 15;
@@ -20,11 +22,18 @@ const layout: SymbolLayerSpecification['layout'] = {
   'icon-allow-overlap': true,
 };
 
-/** Points of the accessibility view. Mounted only while the view is on. */
+const selectedLayout: SymbolLayerSpecification['layout'] = {
+  'icon-image': ['concat', ACCESS_ICON_PREFIX, ['get', 'kind'], '-', ['get', 'acc'], SELECTED_SUFFIX],
+  'icon-allow-overlap': true,
+  'icon-ignore-placement': true,
+};
+
+/** Points of the accessibility view; the selected one is drawn larger, with a ring. Mounted only while the view is on. */
 export function AccessibilityLayers() {
   const { current: map } = useMap();
   const accessMode = useAppStore((state) => state.accessMode);
   const hidden = useAppStore((state) => state.hiddenAccessKinds);
+  const selectedId = useAppStore((state) => (state.selection?.kind === 'access' ? state.selection.id : ''));
   // Images can only be added once the style is in place. `map.isStyleLoaded()`
   // is no use here: it is also false whenever tiles are still loading.
   const mapReady = useAppStore((state) => state.mapStatus === 'ready');
@@ -39,10 +48,12 @@ export function AccessibilityLayers() {
   if (!accessMode || !iconsReady) return null;
 
   const visible = ACCESS_KINDS.filter((kind) => !hidden.includes(kind));
-  const filter: FilterSpecification = ['in', ['get', 'kind'], ['literal', visible]];
+  const isSelected: FilterSpecification = ['==', ['get', 'id'], selectedId];
+  const filter: FilterSpecification = ['all', ['in', ['get', 'kind'], ['literal', visible]], ['!', isSelected]];
   return (
     <Source id={ACCESS_SOURCE} type="geojson" data={ACCESS_URL} promoteId="id">
       <Layer id={ACCESS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={MIN_ZOOM} layout={layout} filter={filter} />
+      <Layer id={ACCESS_SELECTED_LAYER} type="symbol" beforeId={ANCHORS.labels} layout={selectedLayout} filter={isSelected} />
     </Source>
   );
 }

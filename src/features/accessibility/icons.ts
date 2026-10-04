@@ -1,7 +1,7 @@
 import type { Map as MaplibreMap } from 'maplibre-gl';
 import { ACCESS_COLORS, ACCESS_STATUSES, encodeAccess } from '../../domain/access';
 import type { AccessFeatureKind, AccessStatus } from '../../domain/types';
-import { BADGE_PIXEL_RATIO, type BadgeShape, drawBadge, type Glyph } from '../../map/badgeIcon';
+import { addBadgeImages, type Badge, type BadgeShape, type Glyph } from '../../map/badgeIcon';
 import { ACCESS_KINDS } from './parse';
 
 const GLYPHS: Record<AccessFeatureKind, Glyph> = {
@@ -26,27 +26,24 @@ export const ACCESS_ICON_PREFIX = 'access-';
 /** Image name used by the symbol layer; `code` is the `acc` property of the data. */
 export const accessIconId = (kind: string, code: string) => `${ACCESS_ICON_PREFIX}${kind}-${code}`;
 
-function drawIcon(kind: AccessFeatureKind, status: AccessStatus): ImageData | undefined {
+function badgeOf(kind: AccessFeatureKind, status: AccessStatus): Badge {
   const color = ACCESS_COLORS[status];
   const hollow = status === 'unknown';
-  return drawBadge({
+  return {
     shape: SHAPES[status],
     fill: hollow ? '#ffffff' : color,
     outline: hollow ? color : '#ffffff',
     outlineWidth: hollow ? 2 : 1.5,
     ink: hollow ? color : '#ffffff',
     glyph: GLYPHS[kind],
-  });
+  };
 }
 
-/** Registers one image per kind and status. Safe to call more than once. */
+/** Registers one image per kind and status, plus its selected form. Safe to call more than once. */
 export function addAccessIcons(map: Pick<MaplibreMap, 'hasImage' | 'addImage'>) {
   for (const kind of ACCESS_KINDS) {
     for (const status of ACCESS_STATUSES) {
-      const id = accessIconId(kind, encodeAccess(status));
-      if (map.hasImage(id)) continue;
-      const image = drawIcon(kind, status);
-      if (image) map.addImage(id, image, { pixelRatio: BADGE_PIXEL_RATIO });
+      addBadgeImages(map, accessIconId(kind, encodeAccess(status)), badgeOf(kind, status), ACCESS_COLORS[status]);
     }
   }
 }

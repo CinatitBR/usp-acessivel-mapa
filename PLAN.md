@@ -499,6 +499,16 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 - **Acceptance:** each region you named (around IB, Parque Esporte para Todos, around IPEN, around the Instituto de Psicologia, around Inova USP and AUCANI) shows scattered trees in the 3D view; no tree stands on a building, road, parking lot, pitch or water; streets no longer show continuous lines of trees; the tree count stays at or under 4,000; two consecutive builds produce an identical `trees.json`; nothing under `src/` changes.
 - **Verify:** `npm test` (distance to roads, street-line detection, thinning ratio, blockers, deterministic output); `npm run data:osm && npm run data:build && npm run check:data`; headless Chrome screenshots at zoom 16 of each named region, before and after, with 3D on.
 
+### M13: Bus stop icons and a larger ring on the selected symbol
+- **Goal:** bus stops look like Katu-Maps' (white disc, blue bus pictogram, name underneath), and a tapped stop, POI or accessibility symbol grows into a larger disc with a ring.
+- **As built (2026-10-04):**
+  - Stops are a symbol layer (`src/features/transit/layers.tsx`, icon in `stopIcon.ts`) instead of white dots, shown from zoom 14 and named from zoom 17. A stop never gives way to another symbol. The pictogram was drawn for this project from a screenshot; no Katu-Maps file was opened.
+  - `src/map/badgeIcon.ts` draws every badge twice: the normal one and `…-selected`, a 42 px white disc with a 3 px ring in the badge's colour and the normal badge in its centre. The ring is always round, so the accessibility shapes keep their meaning.
+  - `icon-size` cannot use feature-state, so each feature has a second layer (`bus-stops-selected`, `pois-selected`, `accessibility-selected`) filtered to the selected id, and the base layer filters that id out. The change is instant, not animated.
+  - The selected POI is drawn even when its category is switched off or the accessibility view is on, so a POI opened from search is always marked.
+  - The pin is now only for selections without a symbol: an institute, an off-campus place, and an accessibility point while the accessibility view is off.
+  - Checked in headless Chrome at desktop and phone width: stop, POI and accessibility point selected, tapped again and deselected.
+
 ## 10. Later phases
 
 | Item | What the MVP already provides |
