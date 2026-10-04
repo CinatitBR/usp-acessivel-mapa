@@ -142,7 +142,18 @@ First-time setup, already done for this project:
 
 ## Basemap style
 
-`public/styles/campus.json` is the single source of truth for the basemap. Edit it by hand or in [Maputnik](https://maplibre.org/maputnik/). It currently is OpenFreeMap "liberty" with three changes: the `building-3d` layer is removed, a `light` block is added, and four empty anchor layers are inserted.
+`public/styles/campus.json` is the single source of truth for the basemap: plain JSON, loaded as is. Its look comes from Katu-Maps' main style, pruned for a flat, street-scale map.
+
+<!-- Basemap style derived from Katu-Maps, MIT License, Copyright (c) 2026 Karri Ojala. -->
+
+It was generated once by `scripts/export-katu-style.ts`, which evaluates Katu-Maps' `GLOBAL_MAP_STYLE` and then:
+
+- keeps roads, paths, land use, water, rail, labels and the `light` (which is also the sun of the 3D trees and buses);
+- removes the globe projection, terrain and hillshade, globe biomes, airports, tunnel portals, hiking and other layers Katu-Maps keeps hidden, layers only visible below zoom 13, its building extrusions (the app draws the campus buildings) and its bus stops;
+- fixes label names to Portuguese, then the local name;
+- inserts the four anchor layers.
+
+You can edit `campus.json` by hand or in [Maputnik](https://maplibre.org/maputnik/); just remember that running the script again (`npx tsx scripts/export-katu-style.ts [path to Katu-Maps]`) overwrites it. Check an edited style with `npx gl-style-validate public/styles/campus.json`.
 
 App layers are always inserted before one of the anchors (see `src/map/anchors.ts`), never before a basemap layer id, so keep these four when you edit the style:
 
@@ -155,4 +166,4 @@ App layers are always inserted before one of the anchors (see `src/map/anchors.t
 
 ## Attribution
 
-Map rendering by [MapLibre GL JS](https://maplibre.org/). Tiles by [OpenFreeMap](https://openfreemap.org/), schema © [OpenMapTiles](https://openmaptiles.org/), data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
+Map rendering by [MapLibre GL JS](https://maplibre.org/). Tiles by [OpenFreeMap](https://openfreemap.org/), schema © [OpenMapTiles](https://openmaptiles.org/), data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors. Basemap style based on Katu-Maps (MIT License, © 2026 Karri Ojala). Walking routes by [Valhalla](https://valhalla1.openstreetmap.de/) (FOSSGIS) and [openrouteservice](https://openrouteservice.org/).

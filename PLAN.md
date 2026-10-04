@@ -422,6 +422,7 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 - **Verify:** `npm test`; block each host in DevTools in turn; on the phone, walk a short route and compare.
 
 ### M9: Katu-style basemap
+- **As built:** `scripts/export-katu-style.ts` (kept, documented as one-off) bundles `GlobalMapStyle.ts` with esbuild, stubbing `import.meta.env` and `navigator`, runs it, prunes 129 layers to 87 plus the four anchors, and writes `campus.json`. Beyond the planned removals it drops layers hidden in Katu-Maps, layers only visible below zoom 13, and Katu's bus-stop dots; Katu's hidden flat-footprint layer is switched on so buildings outside the campus still show. The style needs no sprite. No file under `src/` changed.
 - **Goal:** replace liberty with a pruned export of Katu's `GLOBAL_MAP_STYLE`, with no app code change.
 - **Files:** `scripts/export-katu-style.ts` (one-off), `public/styles/campus.json`, `README.md` (credit).
 - **Notes:** needs `/home/cinatit/projects/Katu-Maps` added back as a working directory. Run with `tsx`, stubbing `import.meta.env` and `navigator`, import `GLOBAL_MAP_STYLE` and `JSON.stringify` it; never open the file. Then prune (mercator projection, drop terrain, globe biomes, aeroway, tunnel portals, bridge fallback sources, hiking), set label text to `["coalesce", ["get", "name:pt"], ["get", "name"]]`, drop its building extrusion layer, keep `light`, re-insert the four anchors at the same logical positions.
