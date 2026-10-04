@@ -1,6 +1,6 @@
 import { useMap } from '@vis.gl/react-maplibre';
 import { useEffect } from 'react';
-import { selectLite, useAppStore } from '../../state/store';
+import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { createFrameMonitor } from './fpsWatchdog';
 
@@ -34,22 +34,4 @@ export function FpsWatchdog() {
   }, [map, watching]);
 
   return null;
-}
-
-/** Switch between the 3D view and lite mode. The choice is remembered on this device. */
-export function LiteToggle() {
-  const lite = useAppStore(selectLite);
-  const setLiteChoice = useAppStore((state) => state.setLiteChoice);
-  return (
-    <button
-      type="button"
-      className="map-button lite-toggle"
-      aria-pressed={!lite}
-      title={lite ? strings.lite.enable3d : strings.lite.disable3d}
-      aria-label={strings.lite.label}
-      onClick={() => setLiteChoice(lite ? 'off' : 'on')}
-    >
-      3D
-    </button>
-  );
 }

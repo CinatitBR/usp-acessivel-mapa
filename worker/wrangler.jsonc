@@ -10,8 +10,8 @@
 
   "vars": {
     // Comma-separated origins allowed to call this Worker from a browser.
-    // Add the production https://<project>.pages.dev origin before deploying.
-    "ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:4173"
+    // Local dev and preview, plus the production site.
+    "ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:4173,https://usp-campus-map.pages.dev"
   },
 
   // Per-client limit on the Olho Vivo routes: 60 requests per minute.

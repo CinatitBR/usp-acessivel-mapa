@@ -13,6 +13,7 @@ import {
 import { AccessibilityLayers } from '../features/accessibility/layers';
 import { BuildingLayers } from '../features/buildings/layers';
 import { FpsWatchdog } from '../features/litemode/LiteMode';
+import { PoiLayers } from '../features/pois/layers';
 import { TransitLayers } from '../features/transit/layers';
 import { LiveBuses } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
@@ -55,6 +56,7 @@ export function CampusMap() {
       <AttributionControl compact customAttribution={MAPLIBRE_ATTRIBUTION} position="bottom-right" />
       <NavigationControl position="top-right" visualizePitch />
       <BuildingLayers />
+      <PoiLayers />
       <TransitLayers />
       <LiveBuses />
       <Scene3D />

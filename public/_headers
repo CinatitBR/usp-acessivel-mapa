@@ -1,0 +1,7 @@
+# Cloudflare Pages response headers.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+/sw.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache

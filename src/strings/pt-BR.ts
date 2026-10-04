@@ -85,10 +85,24 @@ export const strings = {
   },
   lite: {
     label: 'Visualização 3D',
-    enable3d: 'Ativar 3D (árvores e ônibus em 3D)',
-    disable3d: 'Desativar 3D (modo leve)',
+    hint: 'Árvores e ônibus em 3D. Desative se o mapa ficar lento.',
     autoEnabled: 'Modo leve ativado para o mapa ficar mais fluido.',
     undo: 'Desfazer',
+  },
+  layers: {
+    button: 'Camadas do mapa',
+    title: 'Camadas',
+    pois: 'Locais no mapa',
+    otherPois: 'Outros',
+    hiddenInAccessMode: 'Os locais ficam ocultos enquanto a visão de acessibilidade está ativa.',
+  },
+  offline: {
+    banner: 'Sem conexão · ônibus ao vivo indisponíveis',
+    arrivals: 'Sem conexão. As previsões voltam quando a internet voltar.',
+  },
+  update: {
+    available: 'Há uma nova versão do mapa.',
+    reload: 'Atualizar',
   },
   place: {
     offCampus: 'Local fora do campus',

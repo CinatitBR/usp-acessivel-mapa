@@ -3,6 +3,7 @@ import type { MapMouseEvent } from 'maplibre-gl';
 import { useEffect } from 'react';
 import { ACCESS_LAYER } from '../features/accessibility/layers';
 import { BUILDINGS_LAYER, BUILDINGS_SOURCE } from '../features/buildings/layers';
+import { POIS_LAYER } from '../features/pois/layers';
 import { STOPS_LAYER } from '../features/transit/layers';
 import { BUSES_LAYER } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
@@ -10,9 +11,13 @@ import { useAppStore } from '../state/store';
 const FLY_MIN_ZOOM = 17;
 
 /** Point layers that can be tapped, and the selection each one produces. */
-const POINT_KINDS: Record<string, 'access' | 'stop'> = { [ACCESS_LAYER]: 'access', [STOPS_LAYER]: 'stop' };
+const POINT_KINDS: Record<string, 'access' | 'stop' | 'poi'> = {
+  [ACCESS_LAYER]: 'access',
+  [STOPS_LAYER]: 'stop',
+  [POIS_LAYER]: 'poi',
+};
 
-/** Connects the map to the selection: taps select buildings and accessibility points, and the selection drives highlight, marker and camera. */
+/** Connects the map to the selection: taps select buildings and point symbols, and the selection drives highlight, marker and camera. */
 export function MapSelection() {
   const { current: map } = useMap();
   const selection = useAppStore((state) => state.selection);
@@ -23,7 +28,7 @@ export function MapSelection() {
     const onClick = (event: MapMouseEvent) => {
       const { select, clearSelection } = useAppStore.getState();
       // Small symbols win over the building underneath them.
-      const layers = [BUSES_LAYER, ACCESS_LAYER, STOPS_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
+      const layers = [BUSES_LAYER, ACCESS_LAYER, STOPS_LAYER, POIS_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
       const feature = layers.length > 0 ? map.queryRenderedFeatures(event.point, { layers })[0] : undefined;
       const id: unknown = feature?.properties.id;
       const kind = feature && POINT_KINDS[feature.layer.id];

@@ -3,13 +3,13 @@ import { useAppStore } from '../state/store';
 
 const VISIBLE_MS = 9_000;
 
-/** One short message at a time, optionally with an action. It goes away by itself. */
+/** One short message at a time, optionally with an action. It goes away by itself unless it is sticky. */
 export function Toast() {
   const toast = useAppStore((state) => state.toast);
   const dismissToast = useAppStore((state) => state.dismissToast);
 
   useEffect(() => {
-    if (!toast) return;
+    if (!toast || toast.sticky) return;
     const timer = setTimeout(dismissToast, VISIBLE_MS);
     return () => clearTimeout(timer);
   }, [toast, dismissToast]);

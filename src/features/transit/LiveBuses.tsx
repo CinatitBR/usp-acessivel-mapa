@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { BUS_3D_MIN_ZOOM } from '../../config';
 import type { LineDirection } from '../../domain/types';
 import { ANCHORS } from '../../map/anchors';
+import { useOnline } from '../../lib/useOnline';
 import { loadLines } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { busTracker } from './busTracker';
@@ -53,11 +54,13 @@ export function LiveBuses() {
   }, [setBusesUnavailable]);
 
   const { data, isError } = useVehicles(lines);
+  // Offline, polling pauses and the last positions would stay frozen on the map.
+  const online = useOnline();
   useEffect(() => {
-    if (data) busTracker.ingest(data, Date.now());
-    if (isError) busTracker.clear();
+    if (isError || !online) busTracker.clear();
+    else if (data) busTracker.ingest(data, Date.now());
     setBusesUnavailable(isError);
-  }, [data, isError, setBusesUnavailable]);
+  }, [data, isError, online, setBusesUnavailable]);
 
   useEffect(() => {
     const timer = setInterval(() => {

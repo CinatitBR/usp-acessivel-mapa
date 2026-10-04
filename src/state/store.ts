@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AccessFeatureKind, LngLat } from '../domain/types';
+import type { AccessFeatureKind, LngLat, PoiCategory } from '../domain/types';
 import {
   type LiteChoice,
   readDeviceHints,
@@ -8,6 +8,7 @@ import {
   shouldStartLite,
   storeLiteChoice,
 } from '../features/litemode/detect';
+import { readPoiCategories, storePoiCategories, togglePoiCategory } from '../features/pois/visibility';
 
 export type MapStatus = 'loading' | 'ready' | 'error';
 
@@ -40,6 +41,10 @@ type AppState = {
   hiddenAccessKinds: readonly AccessFeatureKind[];
   toggleAccessKind: (kind: AccessFeatureKind) => void;
 
+  /** POI categories drawn on the map, chosen in the layer menu and remembered on this device. */
+  poiCategories: readonly PoiCategory[];
+  togglePoiCategory: (category: PoiCategory) => void;
+
   /** The user's explicit choice for lite mode (no Three.js layer); `auto` follows the device. */
   liteChoice: LiteChoice;
   setLiteChoice: (choice: LiteChoice) => void;
@@ -60,7 +65,8 @@ type AppState = {
   dismissToast: () => void;
 };
 
-export type Toast = { message: string; actionLabel?: string; action?: () => void };
+/** `sticky` toasts stay until dismissed or replaced. */
+export type Toast = { message: string; actionLabel?: string; action?: () => void; sticky?: boolean };
 
 /** Lite mode is on: no trees, flat buses, and the 3D code is not even downloaded. */
 export const selectLite = (state: AppState) => resolveLite(state.liteChoice, state.liteDetected, state.watchdogTripped);
@@ -81,6 +87,14 @@ export const useAppStore = create<AppState>((set) => ({
     set(({ hiddenAccessKinds: hidden }) => ({
       hiddenAccessKinds: hidden.includes(kind) ? hidden.filter((other) => other !== kind) : [...hidden, kind],
     })),
+
+  poiCategories: readPoiCategories(),
+  togglePoiCategory: (category) =>
+    set((state) => {
+      const poiCategories = togglePoiCategory(state.poiCategories, category);
+      storePoiCategories(poiCategories);
+      return { poiCategories };
+    }),
 
   liteChoice: readLiteChoice(),
   setLiteChoice: (liteChoice) => {

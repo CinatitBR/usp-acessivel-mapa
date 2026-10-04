@@ -1,5 +1,6 @@
 import { use, useEffect, useState } from 'react';
 import type { Arrival, BusStop } from '../../domain/types';
+import { useOnline } from '../../lib/useOnline';
 import { loadStops } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
@@ -37,7 +38,10 @@ function ArrivalRow({ arrival, now }: { arrival: Arrival; now: number }) {
 function Arrivals({ stop }: { stop: BusStop }) {
   const { data, isPending, isError } = useArrivals(stop);
   const now = useNow();
+  const online = useOnline();
 
+  // Offline, the request is paused rather than failed, and old predictions would mislead.
+  if (!online) return <p className="muted">{strings.offline.arrivals}</p>;
   if (isPending) return <p className="muted">{strings.loading}</p>;
   if (isError) return <p className="muted">{strings.transit.unavailable}</p>;
   if (data.arrivals.length === 0) {

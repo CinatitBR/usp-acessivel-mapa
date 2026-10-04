@@ -93,13 +93,41 @@ npm run worker:dev                             # Worker on http://localhost:8787
 npm run dev -- --host                          # in another terminal
 ```
 
-In dev the app reaches the Worker through Vite's `/api` proxy, so nothing else needs configuring and it also works from a phone on the same Wi-Fi. A production build needs `VITE_API_BASE` set to the deployed Worker's URL (see `.env.example`); without it the app skips live data and shows timetable times.
+In dev the app reaches the Worker through Vite's `/api` proxy, so nothing else needs configuring and it also works from a phone on the same Wi-Fi. A production build takes the Worker's URL from `VITE_API_BASE` in `.env.production`; without it the app skips live data and shows timetable times.
 
 With the token in place, run `npm run data:transit` once more: it also looks up each line's Olho Vivo code, needed for live bus positions.
 
 ## 3D and lite mode
 
-Trees and 3D buses are drawn by one Three.js layer, loaded after the map. Lite mode leaves that layer (and its download) out: no trees, and buses as flat markers. It starts automatically when the device asks for reduced motion, has no WebGL 2, reports 2 GB of memory or less, or is a phone with 4 cores or fewer; it also switches on by itself, with an "undo", if the 3D map stays below about 25 fps for three seconds while you move it. The round **3D** button overrides all of that, and the choice is remembered on the device.
+Trees and 3D buses are drawn by one Three.js layer, loaded after the map. Lite mode leaves that layer (and its download) out: no trees, and buses as flat markers. It starts automatically when the device asks for reduced motion, has no WebGL 2, reports 2 GB of memory or less, or is a phone with 4 cores or fewer; it also switches on by itself, with an "undo", if the 3D map stays below about 25 fps for three seconds while you move it. The **Visualização 3D** switch in the layer menu overrides all of that, and the choice is remembered on the device.
+
+## Places on the map
+
+The layer menu (the round button under the zoom controls) chooses which categories of places are drawn; the choice is remembered on the device. Categories, colours, icons and which ones start switched on are all in `src/features/pois/style.ts`. Places are hidden while the accessibility view is on, which has its own symbols.
+
+## Offline and installing
+
+The app is a PWA (`vite-plugin-pwa`, configured in `vite.config.ts`). On the first visit the service worker stores the app, the basemap style and all campus data, so the map, buildings, search and the accessibility view work without a connection. Basemap tiles, fonts and icons are stored as they are viewed. Live buses and arrivals always need the network; offline, the app says so. The 3D code is stored only once it has been used, so lite mode still never downloads it.
+
+A new version is not applied behind the user's back: the app shows "Há uma nova versão do mapa" with an **Atualizar** button.
+
+`assets/icon.png` is the source of the icons in `public/icons/` (192, 512 and 180 px copies).
+
+## Deploy
+
+The site is on Cloudflare Pages at <https://usp-campus-map.pages.dev> and the Worker at `https://usp-campus-map-api.rochinha.workers.dev`.
+
+```sh
+npx wrangler login      # once
+npm run deploy:worker   # after changing worker/
+npm run deploy:pages    # builds and publishes dist/
+```
+
+First-time setup, already done for this project:
+
+- `npx wrangler pages project create usp-campus-map --production-branch main --force` (`--force` keeps it on classic Pages, with a `*.pages.dev` address).
+- `npx wrangler deploy -c worker/wrangler.jsonc --secrets-file worker/.dev.vars` uploads the Olho Vivo token as a secret along with the first deploy. To change it later: `npx wrangler secret put OLHOVIVO_TOKEN -c worker/wrangler.jsonc`.
+- The Worker only answers browsers on the origins in `ALLOWED_ORIGINS` (`worker/wrangler.jsonc`). Add any new address of the site there and redeploy the Worker. Pages preview addresses (`<hash>.usp-campus-map.pages.dev`) are not on the list, so live data only works on the main address.
 
 ## Basemap style
 

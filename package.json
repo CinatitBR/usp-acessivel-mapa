@@ -14,7 +14,9 @@
     "data:transit": "tsx scripts/build-transit.ts",
     "check:data": "tsx scripts/check-data.ts",
     "worker:types": "wrangler types worker/worker-configuration.d.ts -c worker/wrangler.jsonc",
-    "worker:dev": "wrangler dev -c worker/wrangler.jsonc"
+    "worker:dev": "wrangler dev -c worker/wrangler.jsonc",
+    "deploy:worker": "wrangler deploy -c worker/wrangler.jsonc",
+    "deploy:pages": "npm run build && wrangler pages deploy dist --project-name usp-campus-map --branch main"
   },
   "dependencies": {
     "@tanstack/react-query": "5.104.1",
@@ -38,7 +40,9 @@
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.2",
+    "vite-plugin-pwa": "2.0.0",
     "vitest": "5.0.3",
+    "workbox-window": "7.4.1",
     "wrangler": "4.147.0"
   }
 }
