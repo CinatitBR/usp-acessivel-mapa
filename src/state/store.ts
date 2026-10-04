@@ -1,5 +1,13 @@
 import { create } from 'zustand';
 import type { AccessFeatureKind, LngLat } from '../domain/types';
+import {
+  type LiteChoice,
+  readDeviceHints,
+  readLiteChoice,
+  resolveLite,
+  shouldStartLite,
+  storeLiteChoice,
+} from '../features/litemode/detect';
 
 export type MapStatus = 'loading' | 'ready' | 'error';
 
@@ -32,18 +40,30 @@ type AppState = {
   hiddenAccessKinds: readonly AccessFeatureKind[];
   toggleAccessKind: (kind: AccessFeatureKind) => void;
 
-  /** Lite mode: no Three.js layer; buses stay flat markers. */
-  lite: boolean;
+  /** The user's explicit choice for lite mode (no Three.js layer); `auto` follows the device. */
+  liteChoice: LiteChoice;
+  setLiteChoice: (choice: LiteChoice) => void;
+  /** The device looked too weak for 3D at startup. */
+  liteDetected: boolean;
+  /** 3D ran too slowly during this visit. */
+  watchdogTripped: boolean;
+  tripWatchdog: () => void;
   /** True while the Three.js layer is on the map. */
   scene3dActive: boolean;
   setScene3dActive: (active: boolean) => void;
   /** Live bus positions could not be fetched. */
   busesUnavailable: boolean;
   setBusesUnavailable: (unavailable: boolean) => void;
+
+  toast: Toast | null;
+  showToast: (toast: Toast) => void;
+  dismissToast: () => void;
 };
 
-const prefersReducedMotion = () =>
-  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+export type Toast = { message: string; actionLabel?: string; action?: () => void };
+
+/** Lite mode is on: no trees, flat buses, and the 3D code is not even downloaded. */
+export const selectLite = (state: AppState) => resolveLite(state.liteChoice, state.liteDetected, state.watchdogTripped);
 
 export const useAppStore = create<AppState>((set) => ({
   mapStatus: 'loading',
@@ -62,9 +82,20 @@ export const useAppStore = create<AppState>((set) => ({
       hiddenAccessKinds: hidden.includes(kind) ? hidden.filter((other) => other !== kind) : [...hidden, kind],
     })),
 
-  lite: prefersReducedMotion(),
+  liteChoice: readLiteChoice(),
+  setLiteChoice: (liteChoice) => {
+    storeLiteChoice(liteChoice);
+    set({ liteChoice });
+  },
+  liteDetected: shouldStartLite(readDeviceHints()),
+  watchdogTripped: false,
+  tripWatchdog: () => set({ watchdogTripped: true }),
   scene3dActive: false,
   setScene3dActive: (scene3dActive) => set({ scene3dActive }),
   busesUnavailable: false,
   setBusesUnavailable: (busesUnavailable) => set({ busesUnavailable }),
+
+  toast: null,
+  showToast: (toast) => set({ toast }),
+  dismissToast: () => set({ toast: null }),
 }));

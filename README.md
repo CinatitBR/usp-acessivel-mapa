@@ -97,6 +97,10 @@ In dev the app reaches the Worker through Vite's `/api` proxy, so nothing else n
 
 With the token in place, run `npm run data:transit` once more: it also looks up each line's Olho Vivo code, needed for live bus positions.
 
+## 3D and lite mode
+
+Trees and 3D buses are drawn by one Three.js layer, loaded after the map. Lite mode leaves that layer (and its download) out: no trees, and buses as flat markers. It starts automatically when the device asks for reduced motion, has no WebGL 2, reports 2 GB of memory or less, or is a phone with 4 cores or fewer; it also switches on by itself, with an "undo", if the 3D map stays below about 25 fps for three seconds while you move it. The round **3D** button overrides all of that, and the choice is remembered on the device.
+
 ## Basemap style
 
 `public/styles/campus.json` is the single source of truth for the basemap. Edit it by hand or in [Maputnik](https://maplibre.org/maputnik/). It currently is OpenFreeMap "liberty" with three changes: the `building-3d` layer is removed, a `light` block is added, and four empty anchor layers are inserted.

@@ -399,7 +399,8 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 
 ### M6: Instanced trees and lite mode
 - **Goal:** trees across the campus, and a safe path for weak devices.
-- **Files:** `scripts/lib/trees.ts` (+ test), update `build-campus.ts`, `public/data/trees.json`, `src/render3d/TreesActor.ts`, `treeGeometry.ts`, `src/features/litemode/detect.ts` (+ test), `fpsWatchdog.ts`, toggle in `src/ui/LayerMenu.tsx`.
+- **Files:** `scripts/lib/trees.ts` (+ test), `src/domain/trees.ts` (+ test, file encoding), update `build-campus.ts`, `public/data/trees.json`, `src/render3d/TreesActor.ts`, `treeGeometry.ts`, `src/features/litemode/detect.ts` (+ test), `fpsWatchdog.ts` (+ test), `LiteMode.tsx` (watchdog hook and the round "3D" button), `src/ui/Toast.tsx`.
+- **As built:** 287 mapped trees and 2,842 trees along mapped tree rows (one every 9 m) are all kept; the 3,848 generated in the 17 wood polygons are thinned evenly to fill the 4,000 budget. One tree shape, varied per instance in height, width, rotation and tint, so the whole campus is a single draw call (no second crown shape, no shadows). `trees.json` is a flat integer array, 71 KB. The 3D switch is its own button for now; M7's layer menu can absorb it.
 - **Notes:** build-time generation: mapped `natural=tree` nodes first, then a seeded jittered grid inside wood polygons (spacing about 12 m), skipping points inside buildings, capped at 4,000 with deterministic priority. Runtime: two crown shapes chosen by seed, per-instance color jitter, matrices written once.
 - **Acceptance:** trees render in one draw call (two with shadows); lite mode removes trees and switches buses to 2D with no reload; with `prefers-reduced-motion` the `render3d` chunk is never fetched; the manual toggle persists.
 - **Verify:** `npm test`; emulate reduced motion in DevTools and check the Network panel; on a mid-range Android, confirm 30+ fps while panning with 3D on.

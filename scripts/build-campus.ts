@@ -8,10 +8,12 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import osmtogeojson from 'osmtogeojson';
 import { type Bbox, bboxContains, geometryBbox, geometryCenter, pointInGeometry } from '../src/domain/geo';
+import { encodeTrees, type Tree } from '../src/domain/trees';
 import type { Institute, LngLat } from '../src/domain/types';
 import { poiCategory } from '../src/features/pois/categories';
 import { classifyAccessFeature } from './lib/accessibility';
 import { type CampusRecord, mergeOverlay, type OverlayFeature } from './lib/mergeOverlay';
+import { alongLine, scatterInPolygon, selectTrees, treeAt } from './lib/trees';
 import {
   accessFeatureProperties,
   buildingProperties,
@@ -28,6 +30,13 @@ const OUT_DIR = 'public/data';
 /** The university itself: an area, but not an institute within the campus. */
 const USP_RELATION = 'relation/20199272';
 const INSTITUTE_AMENITIES = new Set(['college', 'research_institute', 'hospital']);
+
+/** Same point as the app's CAMPUS_CENTER; tree positions are stored relative to it. */
+const TREE_ORIGIN: LngLat = [-46.7283, -23.5611];
+/** Instance budget of the 3D tree layer. */
+const MAX_TREES = 4000;
+const WOOD_SPACING_METERS = 12;
+const ROW_SPACING_METERS = 9;
 
 type RawElement = { type: string; id: number; tags?: OsmTags; nodes?: number[] };
 type Area = { id: string; geometry: Geometry; bbox: Bbox; size: number };
@@ -193,6 +202,24 @@ for (const record of records) {
 }
 if (unused.length > 0) fail(`${OVERLAY} adds features that would not appear anywhere:`, unused);
 
+// --- Trees -------------------------------------------------------------------
+
+const insideBuilding = (point: LngLat) => containingArea(point, buildingAreas) !== undefined;
+const mappedTrees: Tree[] = [];
+const rowTrees: Tree[] = [];
+const woodTrees: Tree[] = [];
+for (const { tags, geometry } of records) {
+  if (tags.natural === 'tree' && geometry.type === 'Point') {
+    mappedTrees.push(treeAt(geometry.coordinates as LngLat, 7, 13));
+  } else if (tags.natural === 'tree_row' && geometry.type === 'LineString') {
+    for (const point of alongLine(geometry.coordinates as LngLat[], ROW_SPACING_METERS)) rowTrees.push(treeAt(point, 7, 12));
+  } else if ((tags.natural === 'wood' || tags.landuse === 'forest') && isArea(geometry)) {
+    for (const point of scatterInPolygon(geometry, WOOD_SPACING_METERS, insideBuilding)) woodTrees.push(treeAt(point, 9, 17));
+  }
+}
+// Individually mapped trees and rows are kept whole; only the woods are thinned to fit the budget.
+const trees = selectTrees([...mappedTrees, ...rowTrees], woodTrees, MAX_TREES);
+
 // --- Write and report ------------------------------------------------------
 
 mkdirSync(OUT_DIR, { recursive: true });
@@ -200,6 +227,7 @@ writeFeatures('buildings.geojson', buildings);
 writeFeatures('pois.geojson', pois);
 writeFeatures('accessibility.geojson', accessFeatures);
 writeJson('institutes.json', institutes, institutes.length);
+writeJson('trees.json', encodeTrees(trees, TREE_ORIGIN), trees.length);
 
 const count = (features: Feature[], test: (properties: Record<string, unknown>) => unknown) =>
   features.filter((feature) => test(feature.properties!)).length;
@@ -214,4 +242,5 @@ console.log(`  buildings with a name:            ${percent(count(buildings, (p) 
 console.log(`  buildings with an institute:      ${percent(count(buildings, (p) => p.inst), buildings.length)}`);
 console.log(`  buildings with known access:      ${percent(count(buildings, (p) => p.acc !== 'u'), buildings.length)}`);
 console.log(`  objects changed by the overlay:   ${records.filter((record) => record.curated).length}`);
+console.log(`  trees:                            ${mappedTrees.length} mapped, ${rowTrees.length} in rows, ${woodTrees.length} in woods, ${trees.length} kept (max ${MAX_TREES})`);
 console.log(`  accessibility features:           ${[...byKind].map(([kind, n]) => `${kind} ${n}`).join(', ') || 'none'}`);

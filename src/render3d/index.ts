@@ -4,11 +4,26 @@
  * only when lite mode is off.
  */
 import { CAMPUS_CENTER } from '../config';
+import { decodeTrees, type TreesFile } from '../domain/trees';
+import { dataUrl } from '../map/staticData';
 import { BusesActor } from './BusesActor';
-import { CampusScene } from './CampusScene';
+import { CampusScene, type SceneActor } from './CampusScene';
+import { TreesActor } from './TreesActor';
 
 export { SCENE_LAYER_ID } from './CampusScene';
 
-export function createCampusScene(): CampusScene {
-  return new CampusScene([CAMPUS_CENTER.longitude, CAMPUS_CENTER.latitude], [new BusesActor()]);
+/** Trees are decoration: if the file cannot be loaded the scene simply has none. */
+async function loadTrees(): Promise<SceneActor[]> {
+  try {
+    const response = await fetch(dataUrl('trees.json'));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return [new TreesActor(decodeTrees((await response.json()) as TreesFile))];
+  } catch (error) {
+    console.warn('Trees unavailable', error);
+    return [];
+  }
+}
+
+export async function createCampusScene(): Promise<CampusScene> {
+  return new CampusScene([CAMPUS_CENTER.longitude, CAMPUS_CENTER.latitude], [...(await loadTrees()), new BusesActor()]);
 }

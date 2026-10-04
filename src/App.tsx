@@ -1,9 +1,11 @@
 import { AccessControl } from './features/accessibility/AccessControl';
+import { LiteToggle } from './features/litemode/LiteMode';
 import { SearchBox } from './features/search/SearchBox';
 import { CampusMap } from './map/CampusMap';
 import { useAppStore } from './state/store';
 import { strings } from './strings/pt-BR';
 import { SelectionSheet } from './ui/SelectionSheet';
+import { Toast } from './ui/Toast';
 
 export function App() {
   const mapStatus = useAppStore((state) => state.mapStatus);
@@ -15,6 +17,8 @@ export function App() {
         <CampusMap />
         <SearchBox />
         <AccessControl />
+        <LiteToggle />
+        <Toast />
         {mapStatus !== 'ready' && (
           <p className="map-status" role="status">
             {mapStatus === 'error' ? strings.map.error : strings.map.loading}

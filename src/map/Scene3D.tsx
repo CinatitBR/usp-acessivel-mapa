@@ -1,6 +1,6 @@
 import { useMap } from '@vis.gl/react-maplibre';
 import { useEffect } from 'react';
-import { useAppStore } from '../state/store';
+import { selectLite, useAppStore } from '../state/store';
 import { ANCHORS } from './anchors';
 
 /**
@@ -11,7 +11,7 @@ import { ANCHORS } from './anchors';
 export function Scene3D() {
   const { current: map } = useMap();
   const ready = useAppStore((state) => state.mapStatus === 'ready');
-  const lite = useAppStore((state) => state.lite);
+  const lite = useAppStore(selectLite);
   const setScene3dActive = useAppStore((state) => state.setScene3dActive);
 
   useEffect(() => {
@@ -19,10 +19,9 @@ export function Scene3D() {
     let cancelled = false;
     let layerId: string | undefined;
 
-    import('../render3d').then(
-      ({ createCampusScene }) => {
+    import('../render3d').then(({ createCampusScene }) => createCampusScene()).then(
+      (layer) => {
         if (cancelled) return;
-        const layer = createCampusScene();
         // MapRef hides style-mutating methods; the layer is ours to manage, so use the map itself.
         map.getMap().addLayer(layer, ANCHORS.scene3d);
         layerId = layer.id;

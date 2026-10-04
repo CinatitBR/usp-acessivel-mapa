@@ -22,6 +22,9 @@ export const API_BASE =
 /** From this zoom on, buses are 3D models; below it (and always in lite mode) they are flat markers. */
 export const BUS_3D_MIN_ZOOM = 15.5;
 
+/** Trees are only drawn from this zoom on. */
+export const TREE_MIN_ZOOM = 15;
+
 export const INITIAL_ZOOM = 15.5;
 /** Tilted by default so building extrusions read as 3D. */
 export const INITIAL_PITCH = 50;

@@ -83,6 +83,13 @@ export const strings = {
     busGone: 'Este ônibus não está mais no mapa.',
     busesUnavailable: 'Ônibus ao vivo indisponíveis',
   },
+  lite: {
+    label: 'Visualização 3D',
+    enable3d: 'Ativar 3D (árvores e ônibus em 3D)',
+    disable3d: 'Desativar 3D (modo leve)',
+    autoEnabled: 'Modo leve ativado para o mapa ficar mais fluido.',
+    undo: 'Desfazer',
+  },
   place: {
     offCampus: 'Local fora do campus',
   },

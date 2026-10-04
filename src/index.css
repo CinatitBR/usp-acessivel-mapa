@@ -374,6 +374,66 @@ input {
   font-size: 0.875rem;
 }
 
+/* Round map button, same size as MapLibre's own controls column */
+.map-button {
+  position: absolute;
+  right: calc(env(safe-area-inset-right) + 10px);
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.map-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.map-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.lite-toggle {
+  top: calc(env(safe-area-inset-top) + 118px);
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 56px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #1f2933;
+  color: #ffffff;
+  box-shadow: var(--shadow);
+  font-size: 0.875rem;
+}
+
+.toast button {
+  flex: none;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgb(255 255 255 / 50%);
+  border-radius: 8px;
+  background: transparent;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* Bus arrivals */
 .arrivals {
   margin: 0;
