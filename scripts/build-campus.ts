@@ -8,12 +8,15 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import osmtogeojson from 'osmtogeojson';
 import { type Bbox, bboxContains, geometryBbox, geometryCenter, pointInGeometry } from '../src/domain/geo';
+import { ROOF_UNIT_METERS, type RoofEntry } from '../src/domain/roofs';
 import { encodeTrees, type Tree } from '../src/domain/trees';
 import type { Institute, LngLat } from '../src/domain/types';
 import { poiCategory } from '../src/features/pois/categories';
 import { classifyAccessFeature } from './lib/accessibility';
 import { formatAddress, type NamedRoad, nearestRoad, type NominatimAddress, website, wikiRef } from './lib/address';
 import { type CampusRecord, mergeOverlay, type OverlayFeature } from './lib/mergeOverlay';
+import { buildLandmark, type Landmark } from './lib/landmarks';
+import { buildRoof, LANTERN_METERS, type RoofOverlay, roofSpec, roofTop, standsOnTop, type Xy } from './lib/roofs';
 import {
   areaSquareMeters,
   circlePolygon,
@@ -62,6 +65,10 @@ const OPEN_GROUND_WEIGHT = 15;
 const MAPPED_TREE_WEIGHT = 34;
 /** Hand-picked grounds to plant, beyond what OSM maps as green. */
 const TREE_AREAS = 'data/overlay/tree-areas.json';
+/** Roofs of landmark buildings, by building id. OSM roof tags are read too; this file wins. */
+const ROOFS = 'data/overlay/roofs.json';
+/** Monuments drawn in 3D on a POI, as stacked blocks. */
+const LANDMARKS = 'data/overlay/landmarks.json';
 /** A mapped row within this distance of a street is a street row; of those, one tree in five is kept. */
 const STREET_ROW_METERS = 15;
 const STREET_TREE_METERS = 12;
@@ -219,6 +226,43 @@ const buildings = buildingRecords.map((record): Feature => ({
 if (unknownInstitutes.length > 0) {
   fail(`${OVERLAY} names institutes that do not exist (use a sigla or an id from institutes.json):`, unknownInstitutes);
 }
+
+// --- Roofs -----------------------------------------------------------------
+
+const DEFAULT_ROOF_COLOUR = '#b4b9bd';
+/** A roof never takes more than this share of its building's height; a taller roof stands above it. */
+const ROOF_MAX_SHARE = 0.6;
+
+const roofOverlay = JSON.parse(readFileSync(ROOFS, 'utf8')) as Record<string, RoofOverlay>;
+const unknownRoofs = Object.keys(roofOverlay).filter((id) => !buildingRecords.some((record) => record.id === id));
+if (unknownRoofs.length > 0) fail(`${ROOFS} names buildings that do not exist:`, unknownRoofs);
+
+const roofs: RoofEntry[] = [];
+buildingRecords.forEach((record, index) => {
+  const spec = roofSpec(record.tags, roofOverlay[record.id]);
+  const { geometry } = record;
+  if (!spec || (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')) return;
+  const at = geometryCenter(geometry)!;
+  const toMeters = projector(at);
+  const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+  const triangles = polygons.flatMap((rings) => buildRoof(rings.map((ring) => ring.map((point): Xy => toMeters(point))), spec));
+  if (triangles.length === 0) return;
+
+  const properties = buildings[index]!.properties as { h: number; mh: number; acc: RoofEntry['acc']; eh?: number };
+  const walls = properties.h - properties.mh;
+  // A lantern rises above the building's height; the rest of the roof is taken out of the walls.
+  const onTop = standsOnTop(spec);
+  const base = onTop ? properties.h : Math.round((properties.h - Math.min(roofTop(triangles) - (spec.lantern ? LANTERN_METERS : 0), walls * ROOF_MAX_SHARE)) * 10) / 10;
+  if (!onTop) properties.eh = base;
+  roofs.push({
+    id: record.id,
+    at: [Number(at[0].toFixed(6)), Number(at[1].toFixed(6))],
+    base,
+    c: spec.colour ?? DEFAULT_ROOF_COLOUR,
+    acc: properties.acc,
+    p: triangles.map((value) => Math.round(value / ROOF_UNIT_METERS)),
+  });
+});
 
 // An entrance is a node on its building's outline, where point-in-polygon is unreliable.
 const buildingOfNode = new Map<string, string>();
@@ -450,6 +494,18 @@ writeFeatures('pois.geojson', pois);
 writeFeatures('accessibility.geojson', accessFeatures);
 writeJson('institutes.json', institutes, institutes.length);
 writeJson('trees.json', encodeTrees(trees, TREE_ORIGIN), trees.length);
+// Monuments ride in the same file as the roofs: both are coloured triangles at a position.
+const landmarks = JSON.parse(readFileSync(LANDMARKS, 'utf8')) as Landmark[];
+const unknownLandmarks = landmarks.filter(({ id }) => !pois.some((poi) => poi.properties!.id === id)).map(({ id }) => id);
+if (unknownLandmarks.length > 0) fail(`${LANDMARKS} names places that are not on the map:`, unknownLandmarks);
+for (const landmark of landmarks) {
+  const poi = pois.find((candidate) => candidate.properties!.id === landmark.id)!;
+  const at = geometryCenter(poi.geometry)!;
+  for (const [colour, triangles] of buildLandmark(landmark)) {
+    roofs.push({ id: landmark.id, at, base: 0, c: colour, acc: poi.properties!.acc as RoofEntry['acc'], p: triangles.map((value) => Math.round(value / ROOF_UNIT_METERS)) });
+  }
+}
+writeJson('roofs.json', { roofs }, roofs.length);
 
 const count = (features: Feature[], test: (properties: Record<string, unknown>) => unknown) =>
   features.filter((feature) => test(feature.properties!)).length;
@@ -472,4 +528,5 @@ console.log(`    rows:                           ${keptOf(rowTrees)} of ${rowCan
 console.log(`    named grounds:                  ${keptOf(groundTrees)} of ${groundTrees.length} (before thinning: ${groundCounts.join(', ')})`);
 console.log(`    parks, gardens and grass:       ${keptOf(lawnTrees)} of ${lawnTrees.length} in ${lawns.length} areas (before thinning: ${lawnCounts.join(', ')})`);
 console.log(`    woods:                          ${keptOf(woodTrees)} of ${woodTrees.length} (${keptOf(priorityWoodTrees)} of ${priorityWoodTrees.size} in priority woods)`);
+console.log(`  roofs:                            ${roofs.length} entries (${Object.keys(roofOverlay).length} roofs from the overlay, ${landmarks.length} monuments)`);
 console.log(`  accessibility features:           ${[...byKind].map(([kind, n]) => `${kind} ${n}`).join(', ') || 'none'}`);

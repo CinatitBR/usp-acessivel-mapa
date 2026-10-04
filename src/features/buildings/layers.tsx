@@ -1,15 +1,16 @@
 import { Layer, Source } from '@vis.gl/react-maplibre';
 import type { ExpressionSpecification, FillExtrusionLayerSpecification } from 'maplibre-gl';
+import { useMemo } from 'react';
 import { ACCESS_COLORS } from '../../domain/access';
 import { ANCHORS } from '../../map/anchors';
 import { dataUrl } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
+import { SELECTED_COLOR, UNKNOWN_ACCESS_COLOR } from './colors';
 
 export const BUILDINGS_SOURCE = 'buildings';
 export const BUILDINGS_LAYER = 'buildings-3d';
 
 const BUILDINGS_URL = dataUrl('buildings.geojson');
-const SELECTED_COLOR = '#f59e0b';
 
 const COLOR_BY_KIND: ExpressionSpecification = [
   'match',
@@ -22,29 +23,30 @@ const COLOR_BY_KIND: ExpressionSpecification = [
   '#d9d0c3',
 ];
 
-/** Unknown stays pale so the buildings somebody surveyed stand out. */
 const COLOR_BY_ACCESS: ExpressionSpecification = [
   'match',
   ['get', 'acc'],
   'y', ACCESS_COLORS.yes,
   'p', ACCESS_COLORS.partial,
   'n', ACCESS_COLORS.no,
-  '#cfd4d9',
+  UNKNOWN_ACCESS_COLOR,
 ];
 
-const paintFor = (color: ExpressionSpecification): FillExtrusionLayerSpecification['paint'] => ({
+/** With the 3D scene on, a building with a shaped roof is extruded only up to its eave; the roof is a mesh on top. */
+const HEIGHT_UNDER_ROOF: ExpressionSpecification = ['coalesce', ['get', 'eh'], ['get', 'h']];
+
+const paintFor = (color: ExpressionSpecification, roofs: boolean): FillExtrusionLayerSpecification['paint'] => ({
   'fill-extrusion-color': ['case', ['boolean', ['feature-state', 'selected'], false], SELECTED_COLOR, color],
-  'fill-extrusion-height': ['get', 'h'],
+  'fill-extrusion-height': roofs ? HEIGHT_UNDER_ROOF : ['get', 'h'],
   'fill-extrusion-base': ['get', 'mh'],
   'fill-extrusion-opacity': 0.92,
   'fill-extrusion-vertical-gradient': true,
 });
-const PAINT_BY_KIND = paintFor(COLOR_BY_KIND);
-const PAINT_BY_ACCESS = paintFor(COLOR_BY_ACCESS);
 
 export function BuildingLayers() {
   const accessMode = useAppStore((state) => state.accessMode);
-  const paint = accessMode ? PAINT_BY_ACCESS : PAINT_BY_KIND;
+  const roofs = useAppStore((state) => state.roofsActive);
+  const paint = useMemo(() => paintFor(accessMode ? COLOR_BY_ACCESS : COLOR_BY_KIND, roofs), [accessMode, roofs]);
   return (
     <Source id={BUILDINGS_SOURCE} type="geojson" data={BUILDINGS_URL} promoteId="id">
       <Layer id={BUILDINGS_LAYER} type="fill-extrusion" beforeId={ANCHORS.scene3d} paint={paint} />

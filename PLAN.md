@@ -509,6 +509,23 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
   - The pin is now only for selections without a symbol: an institute, an off-campus place, and an accessibility point while the accessibility view is off.
   - Checked in headless Chrome at desktop and phone width: stop, POI and accessibility point selected, tapped again and deselected.
 
+### M14: Roof shapes on landmark buildings
+- **Goal:** landmark buildings get a shaped roof instead of a flat top.
+- **Finding (2026-10-04):** OSM has no roof data for the campus: `roof:shape` on 4 of 898 buildings, all `flat`, and no roof colour, height or direction. So roofs come from a curated overlay, and OSM roof tags are read too, for when they exist.
+- **As built (2026-10-04):**
+  - `data/overlay/roofs.json` by building id (shape, height, ridge `direction`, `rise`, colour). `scripts/lib/roofs.ts` (+ test) builds the triangles at build time: gabled, skillion, round and sawtooth as a height profile across the ridge, on any footprint including L-shapes and courtyards (the footprint is triangulated with `earcut`, a new dev dependency, and each triangle is cut into the profile's bands); pyramidal and dome as rings shrinking to the middle. Hipped is drawn gabled.
+  - `public/data/roofs.json` (11 roofs): per roof an anchor, eave height, colour, the building's accessibility code and triangles in decimetres. `buildings.geojson` gains `eh` (eave height) on those buildings.
+  - `src/render3d/RoofsActor.ts`: one merged mesh with vertex colours, one draw call. It reads the selection and the accessibility view from the store, so a roof turns the selection colour or the status colour together with its walls.
+  - The building layer extrudes to `eh` only while the roofs are actually drawn (`roofsActive` in the store); in lite mode, or if `roofs.json` fails to load, buildings keep their full flat-topped height.
+  - `roofs.json` is not precached; like `trees.json` it is cached on first use.
+  - First overlay: 4 greenhouses at IB (gabled), the covered courts and a sports hall at CEPEUSP (round), a storage tank (dome), the Tanque de Provas Numérico (gabled). All guessed from building type and name, to be corrected by someone who knows the buildings. The Observatório do Campus is a box with a dome on top (the user's description), so the overlay has a `diameter` field: a round dome of that size standing in the middle of the flat top, instead of a roof over the whole footprint.
+  - FAU (Edifício Vilanova Artigas) has a `coffered` roof, from a model the user sent: a 2.5 m rim and a grid of low pyramids standing on the flat top. The real roof has about 12 × 20 skylights; at the user's request the grid is coarser, 6 × 10 cells of 11 m (`cell` in the overlay), a quarter of the triangles. The towers and pillars of the model are not drawn.
+  - The "Cirquinho" (Poli, `relation/6275389`) has a shallow cone with a lantern, from an aerial photo the user sent: `pyramidal` on the round footprint, 2.5 m high, plus the new `lantern` field (the cone stops at 9 m across and a six-sided turret stands there). The eight dormers and the ribbing of the metal sheets are not drawn.
+  - Monuments: the unnamed artwork in Praça Ramos de Azevedo (`node/11805525378`) is named "Monumento a Ramos de Azevedo" through the overlay, with its Wikipedia article, and is drawn in 3D from stacked blocks (`data/overlay/landmarks.json`, `scripts/lib/landmarks.ts` + test): stepped base, four columns, a block and the bronze group as a leaning pyramid, about 23 m tall, facing north-east down Av. Prof. Almeida Prado (told by the user). Its triangles are extra entries in `roofs.json`, drawn by `RoofsActor`.
+  - From an aerial image the user sent: the three sheds behind the IPT building are gabled (the two grey ones with two bays side by side, new `bays` field; the third single and pale green), and Engenharia Civil has a `coffered` roof without a rim (new `rim: false`), drawn with 26.4 m cells, twice the real 13.2 m module, at the user's request to cut triangles (72 instead of 288). The coffered grid now also works on a stepped outline: each cell is kept when it lies inside it.
+  - Colour: the sheds and Engenharia Civil first used the dark greys and the green of the photo, which the user found too dark for the map style; the two grey sheds and Engenharia Civil now use the FAU roof colour, `#cfcdc6`; the third shed keeps its pale green.
+  - Checked in headless Chrome: every roof with 3D on, a selected roofed building, the accessibility view and lite mode.
+
 ## 10. Later phases
 
 | Item | What the MVP already provides |

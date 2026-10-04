@@ -1,1 +1,4 @@
-{ "type": "FeatureCollection", "features": [] }
+{ "type": "FeatureCollection", "features": [
+  { "type": "Feature", "geometry": null,
+    "properties": { "osm": "node/11805525378", "name": "Monumento a Ramos de Azevedo", "wikipedia": "pt:Monumento a Ramos de Azevedo" } }
+] }

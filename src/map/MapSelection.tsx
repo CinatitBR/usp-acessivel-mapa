@@ -1,6 +1,7 @@
 import { Marker, useMap } from '@vis.gl/react-maplibre';
 import type { MapMouseEvent } from 'maplibre-gl';
 import { useEffect } from 'react';
+import type { LngLat } from '../domain/types';
 import { ACCESS_LAYER, ACCESS_SELECTED_LAYER } from '../features/accessibility/layers';
 import { BUILDINGS_LAYER, BUILDINGS_SOURCE } from '../features/buildings/layers';
 import { POIS_LAYER, POIS_SELECTED_LAYER } from '../features/pois/layers';
@@ -10,6 +11,10 @@ import { useAppStore } from '../state/store';
 import { strings } from '../strings/pt-BR';
 
 const FLY_MIN_ZOOM = 17;
+/** How long the camera takes to centre on a tapped symbol. */
+const CENTER_MS = 600;
+/** How long after a tap the camera still follows the sheet's changes of size. */
+const SETTLE_MS = 2500;
 
 /** Point layers that can be tapped, and the selection each one produces. A selected symbol lives in its own layer. */
 const POINT_KINDS: Record<string, 'access' | 'stop' | 'poi'> = {
@@ -48,7 +53,12 @@ export function MapSelection() {
       const kind = feature && POINT_KINDS[feature.layer.id];
       if (typeof id !== 'string') clearSelection();
       else if (feature?.layer.id === BUSES_LAYER) select({ kind: 'bus', id });
-      else if (kind) select({ kind, id, position: event.lngLat.toArray() });
+      else if (kind) {
+        // The symbol's own position, not where the finger landed on it; the camera then centres on it.
+        const { geometry } = feature;
+        const position = geometry.type === 'Point' ? (geometry.coordinates as LngLat) : event.lngLat.toArray();
+        select({ kind, id, position }, position, true);
+      }
       else select({ kind: 'building', id });
     };
     map.on('click', onClick);
@@ -72,7 +82,21 @@ export function MapSelection() {
     if (!map || !flyTarget) return;
     // The sheet opening has just changed the map's size; without this the target lands off-centre.
     map.resize();
-    map.flyTo({ center: flyTarget.position, zoom: Math.max(map.getZoom(), FLY_MIN_ZOOM) });
+    if (!flyTarget.keepZoom) {
+      map.flyTo({ center: flyTarget.position, zoom: Math.max(map.getZoom(), FLY_MIN_ZOOM) });
+      return;
+    }
+    const center = () => map.easeTo({ center: flyTarget.position, duration: CENTER_MS });
+    center();
+    // On a phone the sheet keeps growing as its content loads, which shifts the map under the symbol: centre again.
+    const until = Date.now() + SETTLE_MS;
+    const onResize = () => {
+      if (Date.now() < until) center();
+    };
+    map.on('resize', onResize);
+    return () => {
+      map.off('resize', onResize);
+    };
   }, [map, flyTarget]);
 
   // Stops, POIs and accessibility points mark themselves with a larger symbol; the pin is for what has none.

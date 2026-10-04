@@ -16,6 +16,8 @@ export type BuildingProperties = {
   h: number;
   /** Base height in metres (above 0 for roofs and raised parts). */
   mh: number;
+  /** Height of the walls in metres, when the building has a shaped roof (see roofs.json). */
+  eh?: number;
   acc: AccessCode;
   /** Accessible toilet inside. */
   wc?: AccessCode;

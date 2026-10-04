@@ -13,6 +13,7 @@ export function Scene3D() {
   const ready = useAppStore((state) => state.mapStatus === 'ready');
   const lite = useAppStore(selectLite);
   const setScene3dActive = useAppStore((state) => state.setScene3dActive);
+  const setRoofsActive = useAppStore((state) => state.setRoofsActive);
 
   useEffect(() => {
     if (!map || !ready || lite) return;
@@ -20,12 +21,13 @@ export function Scene3D() {
     let layerId: string | undefined;
 
     import('../render3d').then(({ createCampusScene }) => createCampusScene()).then(
-      (layer) => {
+      ({ layer, hasRoofs }) => {
         if (cancelled) return;
         // MapRef hides style-mutating methods; the layer is ours to manage, so use the map itself.
         map.getMap().addLayer(layer, ANCHORS.scene3d);
         layerId = layer.id;
         setScene3dActive(true);
+        setRoofsActive(hasRoofs);
       },
       // Without the chunk (offline, old cache) the flat markers simply stay on.
       (error: unknown) => console.warn('3D layer unavailable', error),
@@ -34,9 +36,10 @@ export function Scene3D() {
     return () => {
       cancelled = true;
       setScene3dActive(false);
+      setRoofsActive(false);
       if (layerId && map.getLayer(layerId)) map.getMap().removeLayer(layerId);
     };
-  }, [map, ready, lite, setScene3dActive]);
+  }, [map, ready, lite, setScene3dActive, setRoofsActive]);
 
   return null;
 }

@@ -28,8 +28,8 @@ export default defineConfig({
       workbox: {
         // App shell, basemap style and campus data are downloaded on the first visit.
         globPatterns: ['**/*.{js,css,html,json,geojson,png,svg}'],
-        // The 3D code and its trees are only fetched when 3D is on; they are cached on first use below.
-        globIgnores: ['**/render3d-*.js', 'data/trees.json'],
+        // The 3D code, its trees and its roofs are only fetched when 3D is on; they are cached on first use below.
+        globIgnores: ['**/render3d-*.js', 'data/trees.json', 'data/roofs.json'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         // The first install takes over the open page at once, so tiles start being cached on the first visit.
@@ -41,9 +41,9 @@ export default defineConfig({
             options: { cacheName: 'render3d', expiration: { maxEntries: 4 } },
           },
           {
-            urlPattern: /\/data\/trees\.json$/,
+            urlPattern: /\/data\/(trees|roofs)\.json$/,
             handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'render3d-data', expiration: { maxEntries: 2 } },
+            options: { cacheName: 'render3d-data', expiration: { maxEntries: 4 } },
           },
           {
             // The tile index names the current tile set, so it must be refreshed.

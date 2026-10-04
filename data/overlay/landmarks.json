@@ -1,0 +1,17 @@
+[
+  {
+    "id": "node/11805525378",
+    "note": "Monumento a Ramos de Azevedo, simplified: stepped base, four columns, a block and the bronze group as a wedge. The front faces north-east down Av. Prof. Almeida Prado.",
+    "rotation": 28,
+    "parts": [
+      { "box": [13, 9, 1.5], "z": 0, "colour": "#d8d5cb" },
+      { "box": [9, 6.5, 2.5], "z": 1.5, "colour": "#d8d5cb" },
+      { "box": [1.1, 1.1, 9], "z": 4, "at": [-2.4, -1.5], "colour": "#d8d5cb" },
+      { "box": [1.1, 1.1, 9], "z": 4, "at": [2.4, -1.5], "colour": "#d8d5cb" },
+      { "box": [1.1, 1.1, 9], "z": 4, "at": [-2.4, 1.5], "colour": "#d8d5cb" },
+      { "box": [1.1, 1.1, 9], "z": 4, "at": [2.4, 1.5], "colour": "#d8d5cb" },
+      { "box": [6, 4.2, 2.5], "z": 13, "colour": "#d8d5cb" },
+      { "pyramid": [2.5, 4.5, 7], "lean": 0.25, "z": 15.5, "colour": "#55604f" }
+    ]
+  }
+]

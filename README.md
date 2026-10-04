@@ -118,7 +118,7 @@ Stairs on a route are drawn dashed in orange and flagged in the step list. openr
 
 ## 3D and lite mode
 
-Trees and 3D buses are drawn by one Three.js layer, loaded after the map. Lite mode leaves that layer (and its download) out: no trees, and buses as flat markers. It starts automatically when the device asks for reduced motion, has no WebGL 2, reports 2 GB of memory or less, or is a phone with 4 cores or fewer; it also switches on by itself, with an "undo", if the 3D map stays below about 25 fps for three seconds while you move it. The **Visualização 3D** switch in the layer menu overrides all of that, and the choice is remembered on the device.
+Trees, shaped roofs and 3D buses are drawn by one Three.js layer, loaded after the map. Lite mode leaves that layer (and its download) out: no trees, flat-topped buildings, and buses as flat markers. It starts automatically when the device asks for reduced motion, has no WebGL 2, reports 2 GB of memory or less, or is a phone with 4 cores or fewer; it also switches on by itself, with an "undo", if the 3D map stays below about 25 fps for three seconds while you move it. The **Visualização 3D** switch in the layer menu overrides all of that, and the choice is remembered on the device.
 
 ## Trees
 
@@ -131,6 +131,31 @@ Trees and 3D buses are drawn by one Three.js layer, loaded after the map. Lite m
 Every kind of tree is thinned evenly to fit the total: individually mapped trees least, then rows, lawns and named grounds, and ordinary woods most (`MAX_TREES` and the weights at the top of `scripts/build-campus.ts`).
 
 No generated tree stands on a building, road, path, parking lot, sports ground or water. The build report lists how many trees each source and each named area got. Positions are derived from a hash of the coordinates, so two builds give the same file.
+
+## Roofs
+
+Buildings have flat tops unless they have a roof. A roof comes from the OSM tags `roof:shape`, `roof:height`, `roof:direction`, `roof:orientation` and `roof:colour`, or from `data/overlay/roofs.json`, which wins field by field. Almost no campus building has roof tags in OSM yet, so today every roof comes from the overlay:
+
+```json
+{ "way/298015386": { "shape": "round", "height": 4, "direction": 30, "colour": "#b4b9bd", "note": "Quadras cobertas" } }
+```
+
+- `shape`: `gabled`, `skillion` (one slope), `round` (barrel vault), `sawtooth` (shed roof, one tooth about every 7 m), `pyramidal`, `dome` or `coffered` (a rim around a grid of low skylight pyramids, standing on the flat top: the FAU building). `hipped` is drawn as `gabled`; `flat` and anything else give no roof.
+- `height`: metres from eave to top. Optional; the default depends on the shape and the building's width.
+- `direction`: compass bearing of the ridge line. Optional; the default is the long side of the building.
+- `rise`: compass bearing towards the high side, for `skillion` and `sawtooth`.
+- `diameter`: for `dome` and `pyramidal` only. The roof becomes a round one of this many metres across, standing in the middle of the building's flat top (the Observatório do Campus is a box with a dome on it). Without it the roof covers the whole building.
+- `lantern`: for `dome` and `pyramidal` only. The roof stops where it has narrowed to this many metres across, and a small six-sided raised skylight stands there, 2 m above it (the "Cirquinho" at Poli: a shallow cone with a lantern).
+- `cell`: for `coffered` only, the size of one skylight in metres (default 11). Smaller cells look closer to the real roof and cost four times the triangles each time the size halves.
+- `rim`: for `coffered` only; `false` leaves out the rim, for a roof of square modules without a parapet (Engenharia Civil).
+- `bays`: for `gabled` only, how many pitched roofs stand side by side; `2` is the M profile of a double shed.
+- `colour`: `#rrggbb`. `note` is for you; the build ignores it.
+
+The key is the building's OSM id (`way/…` or `relation/…`), the `id` property in `public/data/buildings.geojson`. `npm run data:build` writes `public/data/roofs.json` and stops with a list if an id is not a campus building. The roof takes its height from the top of the building, so the total height does not change; in lite mode the same building is simply flat. The roofs in the overlay today were guessed from building types and names, not surveyed.
+
+### Monuments
+
+A monument is drawn in 3D from stacked blocks listed in `data/overlay/landmarks.json`: the id of the POI it stands on, `rotation` (the compass bearing its front faces) and `parts`. Each part is a `box` or a `pyramid` of `[width, depth, height]` metres, with `z` (height of its foot above the ground), `at` (its centre, as metres to the right and to the front), `colour` and, for a pyramid, `lean` (how far the tip moves to the front, as a share of the depth). The Monumento a Ramos de Azevedo is the only one so far. Monuments are written into `roofs.json` with the roofs, so they cost no extra download, and like the roofs they are not drawn in lite mode.
 
 ## Places on the map
 

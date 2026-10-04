@@ -40,9 +40,12 @@ type AppState = {
 
   selection: Selection | null;
   /** A new object on every request, so flying twice to the same spot still triggers. */
-  flyTarget: { position: LngLat } | null;
-  /** Pass `flyTo` when the selection did not come from a tap on the map. */
-  select: (selection: Selection, flyTo?: LngLat) => void;
+  flyTarget: { position: LngLat; keepZoom?: boolean } | null;
+  /**
+   * Pass `flyTo` to move the camera to the selection. A selection from search zooms in if needed;
+   * a symbol tapped on the map is only centred (`keepZoom`).
+   */
+  select: (selection: Selection, flyTo?: LngLat, keepZoom?: boolean) => void;
   clearSelection: () => void;
   /** Moves the camera without changing the selection. Following a bus pauses, or it would pull the camera back. */
   flyTo: (position: LngLat) => void;
@@ -80,6 +83,9 @@ type AppState = {
   tripWatchdog: () => void;
   /** True while the Three.js layer is on the map. */
   scene3dActive: boolean;
+  /** The 3D scene is drawing shaped roofs, so the building layer stops its walls at the eaves. */
+  roofsActive: boolean;
+  setRoofsActive: (active: boolean) => void;
   setScene3dActive: (active: boolean) => void;
   /** Live bus positions could not be fetched. */
   busesUnavailable: boolean;
@@ -105,9 +111,9 @@ export const useAppStore = create<AppState>((set) => ({
 
   selection: null,
   flyTarget: null,
-  select: (selection, flyTo) => {
+  select: (selection, flyTo, keepZoom) => {
     const followBus = selection.kind === 'bus' && selection.fromStop !== undefined;
-    set(flyTo ? { selection, followBus, flyTarget: { position: flyTo } } : { selection, followBus });
+    set(flyTo ? { selection, followBus, flyTarget: { position: flyTo, keepZoom } } : { selection, followBus });
   },
   clearSelection: () => set({ selection: null, followBus: false }),
   flyTo: (position) => set({ flyTarget: { position }, followBus: false }),
@@ -160,6 +166,8 @@ export const useAppStore = create<AppState>((set) => ({
   tripWatchdog: () => set({ watchdogTripped: true }),
   scene3dActive: false,
   setScene3dActive: (scene3dActive) => set({ scene3dActive }),
+  roofsActive: false,
+  setRoofsActive: (roofsActive) => set({ roofsActive }),
   busesUnavailable: false,
   setBusesUnavailable: (busesUnavailable) => set({ busesUnavailable }),
 

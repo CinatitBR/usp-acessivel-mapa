@@ -1,0 +1,17 @@
+{
+  "way/401314617": { "shape": "gabled", "colour": "#cfe6dc", "note": "greenhouse; shape guessed" },
+  "way/401314622": { "shape": "gabled", "colour": "#cfe6dc", "note": "greenhouse; shape guessed" },
+  "way/401314624": { "shape": "gabled", "colour": "#cfe6dc", "note": "greenhouse; shape guessed" },
+  "way/401314625": { "shape": "gabled", "colour": "#cfe6dc", "note": "greenhouse; shape guessed" },
+  "way/298015386": { "shape": "round", "height": 4, "note": "Quadras cobertas; shape guessed" },
+  "way/422955860": { "shape": "round", "height": 5, "note": "sports hall; shape guessed" },
+  "relation/6275389": { "shape": "pyramidal", "height": 2.5, "lantern": 9, "colour": "#c9cdd0", "note": "Cirquinho (Poli): shallow cone with a central lantern; dormers not drawn" },
+  "way/251742452": { "shape": "gabled", "bays": 2, "height": 3, "colour": "#cfcdc6", "note": "shed behind IPT, north; from aerial image" },
+  "way/251742462": { "shape": "gabled", "bays": 2, "height": 3, "colour": "#cfcdc6", "note": "shed behind IPT, middle; from aerial image" },
+  "way/251742465": { "shape": "gabled", "height": 3, "colour": "#bfe3d3", "note": "shed behind IPT, south, green roof; from aerial image" },
+  "way/158960183": { "shape": "coffered", "cell": 26.4, "rim": false, "colour": "#cfcdc6", "note": "Engenharia Civil: grid of square roof modules, drawn at twice the real 13.2 m module to save triangles; from aerial image" },
+  "way/158966879": { "shape": "coffered", "colour": "#cfcdc6", "note": "FAU, Edifício Vilanova Artigas: grid of skylights inside a concrete rim" },
+  "way/34291482": { "shape": "dome", "diameter": 5.5, "colour": "#e8eaec", "note": "Observatório do Campus: a box with a dome on top" },
+  "way/395588407": { "shape": "dome", "height": 2.5, "note": "storage tank; shape guessed" },
+  "way/152579768": { "shape": "gabled", "height": 2.5, "note": "Tanque de Provas Numérico; shape guessed" }
+}
