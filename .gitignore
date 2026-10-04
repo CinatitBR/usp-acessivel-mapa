@@ -6,3 +6,4 @@ data/raw/
 worker/.dev.vars
 .wrangler/
 *.log
+worker/worker-configuration.d.ts

@@ -1,8 +1,9 @@
 import type { FeatureCollection } from 'geojson';
-import type { AccessibilityFeature, Building, Institute, Poi } from '../domain/types';
+import type { AccessibilityFeature, Building, BusStop, Institute, Poi } from '../domain/types';
 import { parseAccessFeature } from '../features/accessibility/parse';
 import { parseBuilding } from '../features/buildings/parse';
 import { parsePoi } from '../features/pois/parse';
+import { parseStop } from '../features/transit/parse';
 
 export const dataUrl = (file: string) => `${import.meta.env.BASE_URL}data/${file}`;
 
@@ -44,6 +45,11 @@ export const loadAccessFeatures = () =>
   loadOnce('accessibility.geojson', (json) =>
     (json as FeatureCollection).features.map(parseAccessFeature).filter(defined),
   ) satisfies Promise<AccessibilityFeature[]>;
+
+export const loadStops = () =>
+  loadOnce('stops.geojson', (json) =>
+    (json as FeatureCollection).features.map(parseStop).filter(defined),
+  ) satisfies Promise<BusStop[]>;
 
 /** institutes.json is already in domain shape. */
 export const loadInstitutes = () => loadOnce('institutes.json', (json) => json as Institute[]);

@@ -12,6 +12,7 @@ import {
 } from '../config';
 import { AccessibilityLayers } from '../features/accessibility/layers';
 import { BuildingLayers } from '../features/buildings/layers';
+import { TransitLayers } from '../features/transit/layers';
 import { useAppStore } from '../state/store';
 import { missingAnchors } from './anchors';
 import { mapLib } from './maplibre';
@@ -49,6 +50,7 @@ export function CampusMap() {
       <AttributionControl compact customAttribution={MAPLIBRE_ATTRIBUTION} position="bottom-right" />
       <NavigationControl position="top-right" visualizePitch />
       <BuildingLayers />
+      <TransitLayers />
       <AccessibilityLayers />
       <MapSelection />
     </Map>

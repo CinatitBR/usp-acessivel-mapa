@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Building, Institute, Poi } from '../../domain/types';
+import type { Building, BusStop, Institute, Poi } from '../../domain/types';
 import { buildDocs, createSearch, fold } from './engine';
 
 const access = { status: 'unknown', source: 'osm' } as const;
@@ -24,7 +24,11 @@ const pois: Poi[] = [
   { id: 'way/2', name: 'Biblioteca do Instituto de Física', category: 'library', position: [-46.73, -23.56], access, buildingId: 'way/2' },
 ];
 
-const search = createSearch(buildDocs({ buildings, pois, institutes }));
+const stops: BusStop[] = [
+  { id: '120010342', name: 'Biomédicas I E II', position: [-46.7317, -23.5686], lineIds: ['8082-10', '8085-10'], access: 'unknown' },
+];
+
+const search = createSearch(buildDocs({ buildings, pois, institutes, stops }));
 const labels = (query: string) => search(query).map((result) => result.label);
 
 describe('fold', () => {
@@ -73,6 +77,11 @@ describe('search', () => {
 
   it('tolerates a typo in longer words', () => {
     expect(labels('restaurnte')).toContain('Restaurante Central');
+  });
+
+  it('finds bus stops by name and by line', () => {
+    expect(search('biomedicas')[0]).toMatchObject({ label: 'Biomédicas I E II', ref: { type: 'stop', id: '120010342' } });
+    expect(labels('8085')).toContain('Biomédicas I E II');
   });
 
   it('returns typed references for selection', () => {

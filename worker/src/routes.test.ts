@@ -1,0 +1,63 @@
+import { describe, expect, it } from 'vitest';
+import { checkOrigin, matchRoute } from './routes';
+
+const route = (path: string, method = 'GET') => matchRoute(method, new URL(`https://worker.example${path}`));
+
+describe('matchRoute', () => {
+  it('forwards the whitelisted Olho Vivo calls with a rebuilt query', () => {
+    expect(route('/olhovivo/Previsao/Parada?codigoParada=120010342&extra=1')).toEqual({
+      kind: 'olhovivo',
+      upstream: '/Previsao/Parada?codigoParada=120010342',
+    });
+    expect(route('/olhovivo/Posicao/Linha?codigoLinha=2506')).toEqual({
+      kind: 'olhovivo',
+      upstream: '/Posicao/Linha?codigoLinha=2506',
+    });
+  });
+
+  it('accepts a de-duplicated list of line codes', () => {
+    expect(route('/olhovivo/Posicao/Linhas?codigos=2506,35274,2506')).toEqual({ kind: 'positions', codes: [2506, 35274] });
+  });
+
+  it('rejects malformed parameters', () => {
+    for (const path of [
+      '/olhovivo/Previsao/Parada',
+      '/olhovivo/Previsao/Parada?codigoParada=abc',
+      '/olhovivo/Previsao/Parada?codigoParada=1%26token%3Dx',
+      '/olhovivo/Posicao/Linha?codigoLinha=-1',
+      '/olhovivo/Posicao/Linhas?codigos=',
+      '/olhovivo/Posicao/Linhas?codigos=1,,2',
+      `/olhovivo/Posicao/Linhas?codigos=${Array.from({ length: 21 }, (_, index) => index + 1).join(',')}`,
+    ]) {
+      expect(route(path).kind, path).toBe('bad-request');
+    }
+  });
+
+  it('exposes nothing else', () => {
+    expect(route('/olhovivo/Login/Autenticar').kind).toBe('not-found');
+    expect(route('/olhovivo/Posicao').kind).toBe('not-found');
+    expect(route('/').kind).toBe('not-found');
+    expect(route('/olhovivo/Previsao/Parada?codigoParada=1', 'POST').kind).toBe('not-found');
+    expect(route('/health')).toEqual({ kind: 'health' });
+  });
+});
+
+describe('checkOrigin', () => {
+  const allowed = 'https://usp-map.pages.dev, http://localhost:5173';
+
+  it('echoes an allowed origin', () => {
+    const result = checkOrigin('http://localhost:5173', allowed);
+    expect(result.ok).toBe(true);
+    expect(result.headers['Access-Control-Allow-Origin']).toBe('http://localhost:5173');
+    expect(result.headers.Vary).toBe('Origin');
+  });
+
+  it('refuses other origins', () => {
+    expect(checkOrigin('https://evil.example', allowed)).toEqual({ ok: false, headers: {} });
+    expect(checkOrigin('https://usp-map.pages.dev.evil.example', allowed).ok).toBe(false);
+  });
+
+  it('lets requests without an Origin through, with no CORS headers', () => {
+    expect(checkOrigin(null, allowed)).toEqual({ ok: true, headers: {} });
+  });
+});

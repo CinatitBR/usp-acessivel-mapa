@@ -9,6 +9,7 @@ export type Selection =
   | { kind: 'poi'; id: string; position: LngLat }
   | { kind: 'institute'; id: string; position: LngLat }
   | { kind: 'access'; id: string; position: LngLat }
+  | { kind: 'stop'; id: string; position: LngLat }
   | { kind: 'place'; label: string; detail?: string; position: LngLat };
 
 type AppState = {

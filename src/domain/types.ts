@@ -88,6 +88,32 @@ export interface Poi {
   openingHours?: string;
 }
 
+export interface BusStop {
+  /** GTFS stop_id, which is also the Olho Vivo stop code. */
+  id: string;
+  name: string;
+  /** Address and reference point, as SPTrans describes the stop. */
+  description?: string;
+  position: LngLat;
+  /** Lines that call here, e.g. `['8082-10', '701U-10']`. */
+  lineIds: string[];
+  shelter?: boolean;
+  access: AccessStatus;
+}
+
+export interface Arrival {
+  lineId: string;
+  /** Destination shown on the bus. */
+  headsign: string;
+  /** Epoch milliseconds. */
+  time: number;
+  /** `live` is a prediction from a tracked bus; `scheduled` is the timetable. */
+  source: 'live' | 'scheduled';
+  vehicleId?: string;
+  /** The bus itself is wheelchair accessible. */
+  accessible?: boolean;
+}
+
 export interface GeocodeResult {
   id: string;
   label: string;
@@ -95,5 +121,5 @@ export interface GeocodeResult {
   position: LngLat;
   source: 'local' | 'photon';
   /** Present for local results: the campus object the result points to. */
-  ref?: { type: 'building' | 'poi' | 'institute'; id: string };
+  ref?: { type: 'building' | 'poi' | 'institute' | 'stop'; id: string };
 }

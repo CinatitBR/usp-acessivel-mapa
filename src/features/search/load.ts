@@ -1,4 +1,4 @@
-import { loadBuildings, loadInstitutes, loadPois } from '../../map/staticData';
+import { loadBuildings, loadInstitutes, loadPois, loadStops } from '../../map/staticData';
 import { buildDocs, createSearch, type SearchFn } from './engine';
 
 let engine: Promise<SearchFn> | undefined;
@@ -8,8 +8,8 @@ let engine: Promise<SearchFn> | undefined;
  * is loaded with a dynamic import when the search box is first focused.
  */
 export function loadSearch(): Promise<SearchFn> {
-  engine ??= Promise.all([loadBuildings(), loadPois(), loadInstitutes()])
-    .then(([buildings, pois, institutes]) => createSearch(buildDocs({ buildings, pois, institutes })));
+  engine ??= Promise.all([loadBuildings(), loadPois(), loadInstitutes(), loadStops()])
+    .then(([buildings, pois, institutes, stops]) => createSearch(buildDocs({ buildings, pois, institutes, stops })));
   engine.catch(() => {
     engine = undefined;
   });

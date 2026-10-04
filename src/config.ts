@@ -11,6 +11,14 @@ export const MAP_MAX_BOUNDS: [west: number, south: number, east: number, north: 
   -46.775, -23.592, -46.688, -23.532,
 ];
 
+/**
+ * Base URL of the Cloudflare Worker, without a trailing slash. In dev it
+ * defaults to `/api`, which Vite proxies to the local Worker (vite.config.ts).
+ * A production build needs VITE_API_BASE; without it live data is skipped.
+ */
+export const API_BASE =
+  (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') || (import.meta.env.DEV ? '/api' : '');
+
 export const INITIAL_ZOOM = 15.5;
 /** Tilted by default so building extrusions read as 3D. */
 export const INITIAL_PITCH = 50;

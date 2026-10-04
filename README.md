@@ -74,6 +74,29 @@ To find an object's id, open it on [openstreetmap.org](https://www.openstreetmap
 
 Institute siglas missing from OSM go in `data/overlay/institutes.json`, keyed by the institute's OSM id.
 
+## Bus data and live arrivals
+
+Stops and line routes come from the SPTrans GTFS and are committed in `public/data/`:
+
+```sh
+npm run data:transit              # reuses data/raw/gtfs.zip if present
+npm run data:transit -- --refresh # downloads the GTFS again
+```
+
+The lines drawn on the map (and tracked live) are listed in `FULL_LINES` at the top of `scripts/build-transit.ts`. Every other line that stops inside the campus still shows up in the arrivals of its stops.
+
+Live arrivals come from SPTrans Olho Vivo through the Cloudflare Worker in `worker/`, which keeps the token secret. When the Worker or Olho Vivo is unavailable, the app shows timetable times from Transitous, labelled "Horário programado".
+
+```sh
+cp worker/.dev.vars.example worker/.dev.vars   # then put your Olho Vivo token in it
+npm run worker:dev                             # Worker on http://localhost:8787
+npm run dev -- --host                          # in another terminal
+```
+
+In dev the app reaches the Worker through Vite's `/api` proxy, so nothing else needs configuring and it also works from a phone on the same Wi-Fi. A production build needs `VITE_API_BASE` set to the deployed Worker's URL (see `.env.example`); without it the app skips live data and shows timetable times.
+
+With the token in place, run `npm run data:transit` once more: it also looks up each line's Olho Vivo code, needed for live bus positions.
+
 ## Basemap style
 
 `public/styles/campus.json` is the single source of truth for the basemap. Edit it by hand or in [Maputnik](https://maplibre.org/maputnik/). It currently is OpenFreeMap "liberty" with three changes: the `building-3d` layer is removed, a `light` block is added, and four empty anchor layers are inserted.

@@ -5,21 +5,7 @@
  * Usage: npm run data:osm
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
-
-/**
- * OSM areas that together make up the map's extent. The USP relation alone
- * leaves out the institutes that sit inside or next to the campus but are not
- * part of the university: they are holes in, or carved out of, its boundary.
- */
-const CAMPUS_RELATIONS = [
-  20199272, // Universidade de São Paulo - Cidade Universitária Armando de Salles Oliveira
-  3375375, // Instituto de Pesquisas Energéticas e Nucleares (IPEN)
-  20199273, // Instituto de Pesquisas Tecnológicas (IPT)
-  3375374, // Centro Tecnológico da Marinha (CTMSP)
-];
-const CAMPUS_WAYS = [
-  74924310, // Instituto Butantan
-];
+import { CAMPUS_RELATIONS, CAMPUS_WAYS } from './lib/campus';
 
 const BOUNDARIES = `relation(id:${CAMPUS_RELATIONS.join(',')});way(id:${CAMPUS_WAYS.join(',')});`;
 

@@ -32,9 +32,9 @@ A static Vite + React + TypeScript PWA on Cloudflare Pages. MapLibre renders an 
 
 | Topic | Decision | Rationale |
 |---|---|---|
-| Bus lines | **Full treatment** (shape, live arrivals, 3D buses): 8082-10, 8083-10, 8084-10, 8085-10, 8086-10, 8012-10, 8022-10. **Arrivals list only**: 177H-10, 701U-10, 702U-10, 702C-10, 7181-10, 7411-10, 7725-10, 809U-10, 847J-10 | Circulars were restructured in Sept 2024; 8032-10 does not exist in any source. The final list is regenerated from GTFS, not hard-coded |
+| Bus lines | **Full treatment** (shape, live arrivals, 3D buses): 8082-10, 8083-10, 8084-10, 8085-10, 8012-10, 8022-10 (`FULL_LINES` in `scripts/build-transit.ts`). **Arrivals list only**: every other line with a stop inside the campus, found automatically from the GTFS (25 lines, including 8086-10, which turned out to be Jaguaré–Pinheiros, not a circular) | Circulars were restructured in Sept 2024; 8032-10 does not exist in any source. The final list is regenerated from GTFS, not hard-coded |
 | API keys | You have both the Olho Vivo token and the ORS key | M4 and M8 are verified against the real APIs |
-| GTFS source | Mobility Database feed `mdb-8`, with `data/raw/gtfs.zip` as manual fallback | No login; same feed Transitous uses. Direct download URL **to verify** in M4 |
+| GTFS source | Mobility Database feed `mdb-8` at `https://files.mobilitydatabase.org/mdb-8/latest.zip` (verified in M4, dated 2026-10-03), with `data/raw/gtfs.zip` as manual fallback | No login; same feed Transitous uses |
 | Extent | Buildings, POIs, accessibility taken from everything inside the campus perimeter: the USP relation `20199272` plus the institutes it excludes (IPEN `3375375`, IPT `20199273`, CTMSP `3375374`) and the adjacent Instituto Butantan (way `74924310`); the list lives in `scripts/fetch-osm.ts`. Stops and shapes of the full-treatment lines run to Metrô Butantã | Every circular ends there |
 | Lite mode | Turns off Three.js only (no trees, buses as 2D icons). Extrusions stay | Extrusions are cheap and carry the tap interaction |
 | Unknown accessibility | Four states: `yes`, `partial`, `no`, `unknown` ("sem informação", gray) | Never implies "inaccessible" from missing data |
@@ -320,13 +320,13 @@ interface GeocodingProvider  { id: string; search(query: string, signal: AbortSi
 | `GET /olhovivo/Previsao/Parada?codigoParada=` | same path on `https://api.olhovivo.sptrans.com.br/v2.1` | integer | 15 s |
 | `GET /olhovivo/Posicao/Linha?codigoLinha=` | same | integer | 15 s |
 | `GET /olhovivo/Posicao/Linhas?codigos=a,b,…` | fan-out of `/Posicao/Linha`, returns `[{ codigo, body }]` | ≤ 20 integers | per code, 15 s |
-| `GET /olhovivo/Linha/Buscar?termosBusca=` | same (used by `build-transit.ts` only) | ≤ 20 chars | 1 day |
 | `POST /ors/v2/directions/{wheelchair\|foot-walking}/geojson` | `https://api.openrouteservice.org` | body ≤ 2 KB, exactly 2 coordinates, both inside the São Paulo bbox | 5 min, key = SHA-256 of body |
 | `GET /health` | none | n/a | none |
 
 Anything else returns 404. The fan-out route is the one addition beyond pure forwarding: without it a phone would make 14 requests per poll (7 lines × 2 directions).
 
-- **Olho Vivo auth:** `POST /Login/Autenticar?token=…`; keep the returned `Set-Cookie` in a module-level variable with a 15-minute expiry (documented reuse limit is 20 minutes). On 401, or on the "Authorization has been denied" body, re-authenticate once and retry.
+- **Olho Vivo auth:** `POST /Login/Autenticar?token=…`; the returned cookie is kept for 15 minutes under a synthetic key in the Cache API (documented reuse limit is 20 minutes), not in module-level state. On 401 it signs in once more and retries. A refused sign-in is remembered for 60 s so a bad token does not hammer the login endpoint.
+- **As built (M4):** `build-transit.ts` looks up line codes by calling Olho Vivo directly from Node with the token from `worker/.dev.vars`, so the Worker exposes no `/Linha/Buscar` route. A browser `Origin` that is not in `ALLOWED_ORIGINS` gets 403. The ORS route is added in M8.
 - **Caching:** `caches.default` with a synthetic GET cache key; `Cache-Control: public, max-age=15` back to the browser so repeated polls from many phones collapse into one upstream call per 15 s.
 - **Rate limiting:** Workers Rate Limiting binding keyed on `CF-Connecting-IP`: 60/min for `/olhovivo/*`, 10/min for `/ors/*`. Returns 429 with `Retry-After`.
 - **CORS:** `ALLOWED_ORIGINS` variable (`https://<project>.pages.dev`, `http://localhost:5173`); echo the origin only if listed; answer `OPTIONS`.
@@ -382,7 +382,9 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 
 ### M4: Stops, routes, Worker, live arrivals, scheduled fallback
 - **Goal:** tap a stop and see live arrivals, or scheduled ones if live data is down.
-- **Files:** `scripts/build-transit.ts`, `scripts/lib/gtfs.ts` (+ test), `public/data/stops.geojson`, `public/data/lines.geojson`, `worker/wrangler.jsonc`, `worker/src/*`, `src/features/transit/layers.tsx`, `StopPanel.tsx`, `useArrivals.ts`, `providers/olhovivo.ts` (+ test, fixtures), `providers/transitous.ts` (+ test, fixtures).
+- **Files:** `scripts/build-transit.ts`, `scripts/lib/gtfs.ts` (+ test), `olhovivoCodes.ts`, `campus.ts`, `public/data/stops.geojson`, `public/data/lines.geojson`, `worker/wrangler.jsonc`, `worker/src/index.ts`, `routes.ts` (+ test), `olhovivo.ts`, `src/lib/fallback.ts` (+ test), `src/features/transit/layers.tsx`, `StopPanel.tsx`, `useArrivals.ts`, `time.ts` (+ test), `parse.ts`, `providers/olhovivo.ts` (+ test), `providers/transitous.ts` (+ test, recorded fixture).
+- **Wording:** scheduled times say whether Olho Vivo answered with no buses ("sem ônibus previstos agora") or could not be reached ("dados ao vivo indisponíveis").
+- **Verified with the real token (2026-10-04):** GTFS `stop_id` is the Olho Vivo `cp`; GTFS direction 0 is Olho Vivo `sl` 1 (checked on 8022-10 against GTFS stop order); the destination sign is `lt0` for `sl` 1 and `lt1` for `sl` 2; all 10 line codes resolved; the parser is tested against a recorded response.
 - **Notes:** `build-transit.ts` reads the GTFS zip with `fflate`, keeps trips of the configured lines, picks the most frequent shape per direction, keeps stops within the campus boundary plus all stops of full-tier lines, and resolves Olho Vivo `cl` codes through the Worker's `/Linha/Buscar`. **To verify first:** the `mdb-8` download URL; that GTFS `stop_id` equals Olho Vivo `cp`; whether 8086-10, 8012-10 and 8022-10 are all still in service. Line layers go before `anchor-features`, stop symbols before `anchor-labels`. `QueryClientProvider` is added here. Record real responses as test fixtures.
 - **Acceptance:** stops and seven line shapes render; a stop panel shows arrivals refreshing every 20 s; stopping the Worker switches the list to "horário programado" within one cycle; blocking Transitous too shows a calm empty state; polling stops when the tab is hidden; no token appears in the bundle (`grep` on `dist/`).
 - **Verify:** `npx wrangler dev` + `npm run dev`; `curl` each Worker route, including a non-whitelisted one (404) and a disallowed origin; `npm test`; on the phone at a real stop, compare with the official Olho Vivo app.

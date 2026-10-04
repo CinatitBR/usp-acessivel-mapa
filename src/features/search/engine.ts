@@ -1,5 +1,5 @@
 import MiniSearch from 'minisearch';
-import type { Building, GeocodeResult, Institute, LngLat, Poi } from '../../domain/types';
+import type { Building, BusStop, GeocodeResult, Institute, LngLat, Poi } from '../../domain/types';
 import { buildingKindLabel, strings } from '../../strings/pt-BR';
 import { SEARCHABLE_UNNAMED } from '../pois/categories';
 
@@ -20,14 +20,14 @@ export type SearchDoc = {
   weight: number;
 };
 
-export type CampusData = { buildings: Building[]; pois: Poi[]; institutes: Institute[] };
+export type CampusData = { buildings: Building[]; pois: Poi[]; institutes: Institute[]; stops?: BusStop[] };
 
 /** Lower-cases and strips accents, so "fisica" finds "Física". */
 export const fold = (text: string) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 const joined = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(' · ') || undefined;
 
-export function buildDocs({ buildings, pois, institutes }: CampusData): SearchDoc[] {
+export function buildDocs({ buildings, pois, institutes, stops = [] }: CampusData): SearchDoc[] {
   const instituteById = new Map(institutes.map((institute) => [institute.id, institute]));
   const buildingById = new Map(buildings.map((building) => [building.id, building]));
 
@@ -78,7 +78,19 @@ export function buildDocs({ buildings, pois, institutes }: CampusData): SearchDo
     }];
   });
 
-  return [...instituteDocs, ...buildingDocs, ...poiDocs];
+  const stopDocs = stops.map((stop): SearchDoc => ({
+    id: `stop:${stop.id}`,
+    title: stop.name,
+    alt: '',
+    keywords: `${strings.transit.stop} ${stop.lineIds.join(' ')}`,
+    detail: strings.transit.stop,
+    position: stop.position,
+    refType: 'stop',
+    refId: stop.id,
+    weight: 1.1,
+  }));
+
+  return [...instituteDocs, ...buildingDocs, ...stopDocs, ...poiDocs];
 }
 
 export type SearchFn = (query: string, limit?: number) => GeocodeResult[];

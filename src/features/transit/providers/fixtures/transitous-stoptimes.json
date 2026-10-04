@@ -1,0 +1,64 @@
+{
+  "stopTimes": [
+    {
+      "place": {
+        "name": "Biomédicas I E II",
+        "stopId": "br-sao-paulo_120010342",
+        "departure": "2026-10-05T03:01:00Z",
+        "scheduledDeparture": "2026-10-05T03:01:00Z",
+        "arrival": "2026-10-05T03:01:00Z",
+        "scheduledArrival": "2026-10-05T03:01:00Z"
+      },
+      "mode": "BUS",
+      "realTime": false,
+      "headsign": "Metrô Butantã",
+      "routeShortName": "8082-10",
+      "tripId": "20261005_00:00_br-sao-paulo_8082-10-0"
+    },
+    {
+      "place": {
+        "name": "Biomédicas I E II",
+        "stopId": "br-sao-paulo_120010342",
+        "departure": "2026-10-05T03:01:00Z",
+        "scheduledDeparture": "2026-10-05T03:01:00Z",
+        "arrival": "2026-10-05T03:01:00Z",
+        "scheduledArrival": "2026-10-05T03:01:00Z"
+      },
+      "mode": "BUS",
+      "realTime": false,
+      "headsign": "Circular Usp",
+      "routeShortName": "8085-10",
+      "tripId": "20261005_00:00_br-sao-paulo_8085-10-0"
+    },
+    {
+      "place": {
+        "name": "Biomédicas I E II",
+        "stopId": "br-sao-paulo_120010342",
+        "departure": "2026-10-05T03:13:00Z",
+        "scheduledDeparture": "2026-10-05T03:13:00Z",
+        "arrival": "2026-10-05T03:13:00Z",
+        "scheduledArrival": "2026-10-05T03:13:00Z"
+      },
+      "mode": "BUS",
+      "realTime": false,
+      "headsign": "Metrô Butantã",
+      "routeShortName": "8083-10",
+      "tripId": "20261005_00:00_br-sao-paulo_8083-10-0"
+    },
+    {
+      "place": {
+        "name": "Biomédicas I E II",
+        "stopId": "br-sao-paulo_120010342",
+        "departure": "2026-10-05T03:21:00Z",
+        "scheduledDeparture": "2026-10-05T03:21:00Z",
+        "arrival": "2026-10-05T03:21:00Z",
+        "scheduledArrival": "2026-10-05T03:21:00Z"
+      },
+      "mode": "BUS",
+      "realTime": false,
+      "headsign": "Metrô Butantã",
+      "routeShortName": "8082-10",
+      "tripId": "20261005_00:20_br-sao-paulo_8082-10-0"
+    }
+  ]
+}

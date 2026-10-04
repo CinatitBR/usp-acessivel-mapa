@@ -1,0 +1,2 @@
+# Copy to worker/.dev.vars (gitignored) and fill in. Never commit real values.
+OLHOVIVO_TOKEN=
