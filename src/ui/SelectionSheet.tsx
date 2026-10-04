@@ -38,7 +38,7 @@ function panelFor(selection: Selection, onClose: () => void) {
     case 'stop':
       return <StopPanel id={selection.id} />;
     case 'bus':
-      return <BusPanel id={selection.id} />;
+      return <BusPanel id={selection.id} {...(selection.fromStop !== undefined && { fromStop: selection.fromStop })} />;
     case 'place':
       return (
         <BottomSheet

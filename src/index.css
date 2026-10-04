@@ -591,6 +591,214 @@ input {
   color: #8a5a00;
 }
 
+/* A live arrival that can be followed on the map */
+.arrival-follow {
+  grid-template-columns: auto 1fr auto auto;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.arrival-chevron {
+  color: var(--accent);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.sheet-back {
+  display: block;
+  min-height: 32px;
+  margin: -4px 0 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.arrival-follow:focus-visible,
+.sheet-back:focus-visible,
+.timeline-name:focus-visible,
+.timeline-toggle:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Followed bus */
+.bus-follow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.bus-live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #1a7f37;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
+/* Stop timeline: a rail in the line's colour with one dot per stop */
+.timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-stop,
+.timeline-bus,
+.timeline-more {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding-left: 26px;
+}
+
+.timeline-stop::before,
+.timeline-bus::before,
+.timeline-more::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 6px;
+  width: 3px;
+  background: var(--line-color);
+}
+
+.timeline > .timeline-stop:first-child::before {
+  top: 50%;
+}
+
+/* Stops are folded away here, so the rail is dashed. */
+.timeline-more::before {
+  background: repeating-linear-gradient(var(--line-color) 0 4px, transparent 4px 8px);
+}
+
+.timeline > :last-child::before {
+  bottom: 50%;
+}
+
+.timeline-stop::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 15px;
+  height: 15px;
+  border: 3px solid var(--line-color);
+  border-radius: 50%;
+  background: var(--surface);
+  transform: translateY(-50%);
+}
+
+.timeline-stop.passed::after {
+  background: var(--line-color);
+}
+
+.timeline-stop.target::after {
+  left: -3px;
+  width: 21px;
+  height: 21px;
+  background: var(--line-color);
+  box-shadow: 0 0 0 3px var(--surface) inset;
+}
+
+.timeline-stop.passed .timeline-name {
+  color: var(--muted);
+}
+
+.timeline-stop.target .timeline-name {
+  font-weight: 700;
+}
+
+.timeline-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.timeline-toggle {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.timeline-note,
+.timeline-time {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.timeline-time {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-stop.ahead .timeline-time,
+.timeline-stop.target .timeline-time {
+  color: var(--accent);
+  font-size: 0.8125rem;
+}
+
+.timeline-bus {
+  justify-content: flex-start;
+  min-height: 30px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* The bus sits on the rail between two stops. */
+.timeline-bus::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  background: currentColor;
+  box-shadow: 0 0 0 3px var(--surface);
+  transform: translateY(-50%);
+}
+
 @media (min-width: 760px) {
   .app {
     flex-direction: row-reverse;

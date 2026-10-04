@@ -8,6 +8,8 @@ type Props = {
   onClose: () => void;
   /** When given, the sheet offers a route to this place. */
   routeTo?: RoutePoint;
+  /** When given, a link above the title that leads back to where this sheet was opened from. */
+  back?: { label: string; onClick: () => void };
   children?: ReactNode;
 };
 
@@ -16,7 +18,7 @@ type Props = {
  * screens). It takes its own space instead of covering the map, so the
  * attribution and controls stay visible.
  */
-export function BottomSheet({ title, subtitle, onClose, routeTo, children }: Props) {
+export function BottomSheet({ title, subtitle, onClose, routeTo, back, children }: Props) {
   const startRoute = useAppStore((state) => state.startRoute);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -30,6 +32,12 @@ export function BottomSheet({ title, subtitle, onClose, routeTo, children }: Pro
     <section className="sheet" aria-label={title}>
       <header className="sheet-header">
         <div>
+          {back && (
+            <button type="button" className="sheet-back" onClick={back.onClick}>
+              <span aria-hidden="true">← </span>
+              {back.label}
+            </button>
+          )}
           <h2 className="sheet-title">{title}</h2>
           {subtitle && <p className="sheet-subtitle">{subtitle}</p>}
         </div>

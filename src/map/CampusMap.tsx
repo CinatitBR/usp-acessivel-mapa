@@ -15,6 +15,8 @@ import { BuildingLayers } from '../features/buildings/layers';
 import { FpsWatchdog } from '../features/litemode/LiteMode';
 import { PoiLayers } from '../features/pois/layers';
 import { RouteLayers } from '../features/routing/layers';
+import { FollowCamera } from '../features/transit/FollowCamera';
+import { FollowedLine } from '../features/transit/FollowedLine';
 import { TransitLayers } from '../features/transit/layers';
 import { LiveBuses } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
@@ -60,7 +62,9 @@ export function CampusMap() {
       <RouteLayers />
       <PoiLayers />
       <TransitLayers />
+      <FollowedLine />
       <LiveBuses />
+      <FollowCamera />
       <Scene3D />
       <FpsWatchdog />
       <AccessibilityLayers />

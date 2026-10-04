@@ -5,6 +5,7 @@ import { loadStops } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
+import { busTracker } from './busTracker';
 import { arrivalLabels } from './time';
 import { useArrivals } from './useArrivals';
 
@@ -18,10 +19,11 @@ function useNow(): number {
   return now;
 }
 
-function ArrivalRow({ arrival, now }: { arrival: Arrival; now: number }) {
+function ArrivalRow({ arrival, now, stopId }: { arrival: Arrival; now: number; stopId: string }) {
+  const select = useAppStore((state) => state.select);
   const { primary, secondary } = arrivalLabels(arrival.time, now);
-  return (
-    <li className="arrival">
+  const content = (
+    <>
       <span className="arrival-line">{arrival.lineId}</span>
       <span className="arrival-head">
         {arrival.headsign}
@@ -31,6 +33,23 @@ function ArrivalRow({ arrival, now }: { arrival: Arrival; now: number }) {
         <strong>{primary}</strong>
         <span>{secondary}</span>
       </span>
+    </>
+  );
+
+  // Only a bus that is on the map can be followed: a live prediction of one of the tracked lines.
+  const busId = arrival.source === 'live' && arrival.vehicleId && busTracker.has(arrival.vehicleId) ? arrival.vehicleId : undefined;
+  if (!busId) return <li className="arrival">{content}</li>;
+  return (
+    <li>
+      <button
+        type="button"
+        className="arrival arrival-follow"
+        title={strings.transit.followArrival(arrival.lineId)}
+        onClick={() => select({ kind: 'bus', id: busId, fromStop: stopId })}
+      >
+        {content}
+        <span className="arrival-chevron" aria-hidden="true">›</span>
+      </button>
     </li>
   );
 }
@@ -60,7 +79,7 @@ function Arrivals({ stop }: { stop: BusStop }) {
       </p>
       <ul className="arrivals">
         {data.arrivals.map((arrival, index) => (
-          <ArrivalRow key={`${arrival.lineId}-${arrival.time}-${index}`} arrival={arrival} now={now} />
+          <ArrivalRow key={`${arrival.lineId}-${arrival.time}-${index}`} arrival={arrival} now={now} stopId={stop.id} />
         ))}
       </ul>
     </>

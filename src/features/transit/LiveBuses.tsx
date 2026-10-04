@@ -42,6 +42,7 @@ export function LiveBuses() {
   const [features, setFeatures] = useState<FeatureCollection>(EMPTY);
   const scene3dActive = useAppStore((state) => state.scene3dActive);
   const setBusesUnavailable = useAppStore((state) => state.setBusesUnavailable);
+  const selectedBus = useAppStore((state) => (state.selection?.kind === 'bus' ? state.selection.id : ''));
 
   useEffect(() => {
     loadLines().then(
@@ -79,6 +80,13 @@ export function LiveBuses() {
     'circle-opacity': opacity,
     'circle-stroke-opacity': opacity,
   };
+  // Shown at every zoom, so the selected bus stands out as a marker and as a 3D model.
+  const ringPaint: CircleLayerSpecification['paint'] = {
+    'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 10, 18, 22],
+    'circle-color': 'rgba(0, 0, 0, 0)',
+    'circle-stroke-color': ['get', 'color'],
+    'circle-stroke-width': 3,
+  };
   const labelLayout: SymbolLayerSpecification['layout'] = {
     'text-field': ['get', 'line'],
     'text-font': ['Noto Sans Bold'],
@@ -96,6 +104,7 @@ export function LiveBuses() {
   return (
     <Source id={BUSES_SOURCE} type="geojson" data={features}>
       <Layer id={BUSES_LAYER} type="circle" beforeId={ANCHORS.labels} paint={HIT_PAINT} />
+      <Layer id="buses-ring" type="circle" beforeId={ANCHORS.labels} filter={['==', ['get', 'id'], selectedBus]} paint={ringPaint} />
       <Layer id="buses" type="circle" beforeId={ANCHORS.labels} paint={circlePaint} />
       <Layer id="buses-label" type="symbol" beforeId={ANCHORS.labels} minzoom={14} layout={labelLayout} paint={labelPaint} />
     </Source>

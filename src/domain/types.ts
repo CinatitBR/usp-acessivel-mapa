@@ -113,6 +113,8 @@ export interface LineDirection {
   color: string;
   /** Olho Vivo line code for this direction; without it the direction has no live positions. */
   code?: number;
+  /** Ids of the stops the line calls at, in order. A loop line may list a stop twice. */
+  stopIds: string[];
   shape: LngLat[];
 }
 

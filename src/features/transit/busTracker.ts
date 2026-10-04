@@ -1,5 +1,5 @@
 import type { BusVehicle, LineDirection, LngLat } from '../../domain/types';
-import { advance, buildShape, poseOf, type Shape, type Track } from './interpolate';
+import { advance, buildShape, poseOf, type Shape, shownDistance, type Track } from './interpolate';
 
 /** A fix this much older than the newest one in the same response is a parked or lost bus. */
 const STALE_MS = 3 * 60_000;
@@ -9,6 +9,7 @@ export const MAX_BUSES = 64;
 export type BusPose = {
   id: string;
   lineId: string;
+  direction: 0 | 1;
   headsign: string;
   color: string;
   accessible: boolean;
@@ -16,7 +17,13 @@ export type BusPose = {
   position: LngLat;
   /** Radians clockwise from north. */
   heading: number;
+  /** Metres along the route of its line direction. */
+  along: number;
+  /** False when the bus is too far from the route for `along` to mean much. */
+  onRoute: boolean;
 };
+
+export type BusRoute = { line: LineDirection; shape: Shape };
 
 const routeKey = (lineId: string, direction: number) => `${lineId}:${direction}`;
 
@@ -26,7 +33,7 @@ const routeKey = (lineId: string, direction: number) => `${lineId}:${direction}`
  * outside React because the 3D layer reads it every frame.
  */
 class BusTracker {
-  private routes = new Map<string, { line: LineDirection; shape: Shape }>();
+  private routes = new Map<string, BusRoute>();
   private tracks = new Map<string, Track>();
 
   setLines(lines: LineDirection[]) {
@@ -63,11 +70,14 @@ class BusTracker {
     return {
       id: vehicle.id,
       lineId: vehicle.lineId,
+      direction: vehicle.direction,
       headsign: route.line.headsign,
       color: route.line.color,
       accessible: vehicle.accessible,
       recordedAt: vehicle.recordedAt,
       ...poseOf(track, route.shape, now),
+      along: track.onRoute ? shownDistance(track, now) : track.to,
+      onRoute: track.onRoute,
     };
   }
 
@@ -78,6 +88,16 @@ class BusTracker {
       if (pose) poses.push(pose);
     }
     return poses;
+  }
+
+  /** The line direction a bus runs on, with its shape prepared for projection. */
+  route(lineId: string, direction: number): BusRoute | undefined {
+    return this.routes.get(routeKey(lineId, direction));
+  }
+
+  /** True while the bus is in the live feed. Cheaper than `get` when the pose is not needed. */
+  has(id: string): boolean {
+    return this.tracks.has(id);
   }
 
   get(id: string, now: number): BusPose | undefined {

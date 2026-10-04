@@ -50,14 +50,17 @@ function toXy(shape: Shape, [lng, lat]: LngLat): Xy {
   return [(lng - lng0) * RADIANS * Math.cos(lat0 * RADIANS) * EARTH_RADIUS, (lat - lat0) * RADIANS * EARTH_RADIUS];
 }
 
-/**
- * Nearest place on the route to `position`: its distance along the route and
- * how far off the route the position is. Where the route passes the same spot
- * more than once, `near` (the previous distance along) picks the pass to use.
- */
-export function project(shape: Shape, position: LngLat, near?: number): { distance: number; offset: number } {
+export type Projection = {
+  /** Metres along the route. */
+  distance: number;
+  /** Metres between the position and the route. */
+  offset: number;
+};
+
+/** The closest point of every segment of the route to `position`. */
+export function projections(shape: Shape, position: LngLat): Projection[] {
   const [px, py] = toXy(shape, position);
-  const candidates: { distance: number; offset: number }[] = [];
+  const candidates: Projection[] = [];
   for (let index = 0; index < shape.xy.length - 1; index += 1) {
     const [ax, ay] = shape.xy[index]!;
     const [bx, by] = shape.xy[index + 1]!;
@@ -70,6 +73,16 @@ export function project(shape: Shape, position: LngLat, near?: number): { distan
       offset: Math.hypot(px - (ax + t * dx), py - (ay + t * dy)),
     });
   }
+  return candidates;
+}
+
+/**
+ * Nearest place on the route to `position`: its distance along the route and
+ * how far off the route the position is. Where the route passes the same spot
+ * more than once, `near` (the previous distance along) picks the pass to use.
+ */
+export function project(shape: Shape, position: LngLat, near?: number): Projection {
+  const candidates = projections(shape, position);
   if (candidates.length === 0) return { distance: 0, offset: Infinity };
 
   const best = candidates.reduce((a, b) => (b.offset < a.offset ? b : a));

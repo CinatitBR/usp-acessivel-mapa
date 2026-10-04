@@ -95,7 +95,7 @@ describe('parseOlhoVivoArrivals', () => {
 
 describe('parseOlhoVivoVehicles', () => {
   const line = (lineId: string, direction: 0 | 1, code: number): LineDirection => ({
-    lineId, direction, code, headsign: '', name: '', color: '#000000', shape: [],
+    lineId, direction, code, headsign: '', name: '', color: '#000000', stopIds: [], shape: [],
   });
   // Codes as resolved for these lines on 2026-10-04.
   const lines = [line('8012-10', 0, 2023), line('8012-10', 1, 34791), line('8022-10', 0, 2085)];

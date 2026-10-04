@@ -19,8 +19,8 @@ export type Selection =
   | { kind: 'institute'; id: string; position: LngLat }
   | { kind: 'access'; id: string; position: LngLat }
   | { kind: 'stop'; id: string; position: LngLat }
-  /** A moving bus: no fixed position, so no marker. */
-  | { kind: 'bus'; id: string }
+  /** A moving bus: no fixed position, so no marker. `fromStop` is the stop whose arrivals it was opened from. */
+  | { kind: 'bus'; id: string; fromStop?: string }
   | { kind: 'place'; label: string; detail?: string; position: LngLat };
 
 export type RouteEnd = 'from' | 'to';
@@ -44,6 +44,11 @@ type AppState = {
   /** Pass `flyTo` when the selection did not come from a tap on the map. */
   select: (selection: Selection, flyTo?: LngLat) => void;
   clearSelection: () => void;
+  /** Moves the camera without changing the selection. Following a bus pauses, or it would pull the camera back. */
+  flyTo: (position: LngLat) => void;
+  /** The camera keeps the selected bus centred. Starts on when the bus was opened from a stop's arrivals. */
+  followBus: boolean;
+  setFollowBus: (follow: boolean) => void;
 
   routePlan: RoutePlan | null;
   /** Opens the route panel, optionally with a destination. Starts step-free when the accessibility view is on. */
@@ -100,13 +105,20 @@ export const useAppStore = create<AppState>((set) => ({
 
   selection: null,
   flyTarget: null,
-  select: (selection, flyTo) => set(flyTo ? { selection, flyTarget: { position: flyTo } } : { selection }),
-  clearSelection: () => set({ selection: null }),
+  select: (selection, flyTo) => {
+    const followBus = selection.kind === 'bus' && selection.fromStop !== undefined;
+    set(flyTo ? { selection, followBus, flyTarget: { position: flyTo } } : { selection, followBus });
+  },
+  clearSelection: () => set({ selection: null, followBus: false }),
+  flyTo: (position) => set({ flyTarget: { position }, followBus: false }),
+  followBus: false,
+  setFollowBus: (followBus) => set({ followBus }),
 
   routePlan: null,
   startRoute: (to) =>
     set((state) => ({
       selection: null,
+      followBus: false,
       routePlan: withNextPick({
         from: state.routePlan?.from ?? null,
         to: to ?? state.routePlan?.to ?? null,

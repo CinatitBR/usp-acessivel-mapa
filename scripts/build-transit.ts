@@ -17,6 +17,8 @@ import osmtogeojson from 'osmtogeojson';
 import { deriveAccessStatus, encodeAccess } from '../src/domain/access';
 import { type Bbox, bboxContains, geometryBbox, pointInGeometry } from '../src/domain/geo';
 import type { LngLat } from '../src/domain/types';
+import { buildShape } from '../src/features/transit/interpolate';
+import { locateStops } from '../src/features/transit/lineStops';
 import type { BusLineProperties, BusStopProperties } from '../src/features/transit/parse';
 import { CAMPUS_AREA_IDS } from './lib/campus';
 import { distanceMeters, parseCsv, simplifyLine } from './lib/gtfs';
@@ -92,10 +94,17 @@ if (missing.length > 0) throw new Error(`Lines not in the GTFS any more: ${missi
 
 const linesAtStop = new Map<string, Set<string>>();
 const fullLineStops = new Set<string>();
+/** Stops of each trip of a full line, to be put in calling order. */
+const tripStops = new Map<string, { sequence: number; stopId: string }[]>();
 for (const stopTime of parseCsv(gtfs['stop_times.txt']!)) {
   const route = routeOfTrip.get(stopTime.trip_id!);
   if (!route) continue;
   const stopId = stopTime.stop_id!;
+  if (route in FULL_LINES) {
+    const calls = tripStops.get(stopTime.trip_id!) ?? [];
+    calls.push({ sequence: Number(stopTime.stop_sequence), stopId });
+    tripStops.set(stopTime.trip_id!, calls);
+  }
   let lines = linesAtStop.get(stopId);
   if (!lines) linesAtStop.set(stopId, (lines = new Set()));
   lines.add(route);
@@ -154,12 +163,22 @@ function previousCodes(): Map<string, number> {
 }
 const codes = (await resolveLineCodes(Object.keys(FULL_LINES))) ?? previousCodes();
 
+const stopPositions = new Map(
+  stops.flatMap((stop) => (stop.geometry.type === 'Point' ? [[String(stop.properties!.id), stop.geometry.coordinates as LngLat] as const] : [])),
+);
+/** Stops that sit further than this from their line's shape are reported: the timeline would place them badly. */
+const STOP_OFFSET_WARN_METERS = 40;
+const farStops: string[] = [];
+
 const lines = fullTrips.map((trip): Feature => {
   const id = trip.route_id!;
   const dir = Number(trip.direction_id) === 1 ? 1 : 0;
   const points = (shapePoints.get(trip.shape_id!) ?? []).sort((a, b) => a.sequence - b.sequence).map((entry) => entry.point);
   if (points.length < 2) throw new Error(`No shape for ${trip.trip_id}`);
   const code = codes.get(`${id}:${dir}`);
+  const stopIds = (tripStops.get(trip.trip_id!) ?? []).sort((a, b) => a.sequence - b.sequence).map((call) => call.stopId);
+  const unknown = stopIds.filter((stopId) => !stopPositions.has(stopId));
+  if (stopIds.length < 2 || unknown.length > 0) throw new Error(`Stops of ${trip.trip_id} missing from stops.geojson: ${unknown.join(', ') || 'none listed'}`);
   const properties: BusLineProperties = {
     id,
     dir,
@@ -167,15 +186,13 @@ const lines = fullTrips.map((trip): Feature => {
     name: routes.get(id)!.route_long_name!.trim(),
     color: FULL_LINES[id]!,
     ...(code !== undefined && { code }),
+    stops: stopIds.join(','),
   };
-  return {
-    type: 'Feature',
-    properties,
-    geometry: {
-      type: 'LineString',
-      coordinates: simplifyLine(points, SHAPE_TOLERANCE_METERS).map(([lng, lat]) => [round6(lng), round6(lat)]),
-    },
-  };
+  const coordinates = simplifyLine(points, SHAPE_TOLERANCE_METERS).map(([lng, lat]): LngLat => [round6(lng), round6(lat)]);
+  locateStops(buildShape(coordinates), stopIds.map((stopId) => stopPositions.get(stopId)!)).forEach((located, index) => {
+    if (located.offset > STOP_OFFSET_WARN_METERS) farStops.push(`${id}:${dir} ${stopIds[index]} (${Math.round(located.offset)} m)`);
+  });
+  return { type: 'Feature', properties, geometry: { type: 'LineString', coordinates } };
 });
 lines.sort((a, b) => `${a.properties!.id}:${a.properties!.dir}`.localeCompare(`${b.properties!.id}:${b.properties!.dir}`));
 
@@ -193,3 +210,4 @@ console.log(`  directions with a live code: ${withCode}/${lines.length}${withCod
 console.log(`  stops inside the campus:    ${stops.filter((stop) => stop.geometry.type === 'Point' && inCampus(stop.geometry.coordinates as LngLat)).length}`);
 console.log(`  stops matched to OSM:       ${stops.filter((stop) => stop.properties!.shelter !== undefined || stop.properties!.acc !== 'u').length}`);
 console.log(`  other lines at these stops: ${otherLines.size}`);
+console.log(`  stops far from their shape: ${farStops.length === 0 ? 'none' : farStops.join(', ')}`);
