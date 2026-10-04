@@ -1,0 +1,8 @@
+node_modules/
+dist/
+data/raw/
+.env.local
+.env.*.local
+worker/.dev.vars
+.wrangler/
+*.log

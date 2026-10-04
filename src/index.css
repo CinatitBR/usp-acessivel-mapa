@@ -1,0 +1,48 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #f8f4f0;
+  color: #1f2933;
+  overscroll-behavior: none;
+}
+
+.app {
+  position: relative;
+  height: 100dvh;
+}
+
+.map-status {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
+  font-size: 0.875rem;
+}
+
+/* Keep map controls clear of notches and the home indicator. */
+.maplibregl-ctrl-top-right {
+  top: env(safe-area-inset-top);
+  right: env(safe-area-inset-right);
+}
+
+.maplibregl-ctrl-bottom-right {
+  bottom: env(safe-area-inset-bottom);
+  right: env(safe-area-inset-right);
+}
