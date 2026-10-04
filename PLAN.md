@@ -35,7 +35,7 @@ A static Vite + React + TypeScript PWA on Cloudflare Pages. MapLibre renders an 
 | Bus lines | **Full treatment** (shape, live arrivals, 3D buses): 8082-10, 8083-10, 8084-10, 8085-10, 8086-10, 8012-10, 8022-10. **Arrivals list only**: 177H-10, 701U-10, 702U-10, 702C-10, 7181-10, 7411-10, 7725-10, 809U-10, 847J-10 | Circulars were restructured in Sept 2024; 8032-10 does not exist in any source. The final list is regenerated from GTFS, not hard-coded |
 | API keys | You have both the Olho Vivo token and the ORS key | M4 and M8 are verified against the real APIs |
 | GTFS source | Mobility Database feed `mdb-8`, with `data/raw/gtfs.zip` as manual fallback | No login; same feed Transitous uses. Direct download URL **to verify** in M4 |
-| Extent | Buildings, POIs, accessibility clipped to OSM relation `20199272`. Stops and shapes of the full-treatment lines run to Metrô Butantã | Every circular ends there |
+| Extent | Buildings, POIs, accessibility taken from everything inside the campus perimeter: the USP relation `20199272` plus the institutes it excludes (IPEN `3375375`, IPT `20199273`, CTMSP `3375374`) and the adjacent Instituto Butantan (way `74924310`); the list lives in `scripts/fetch-osm.ts`. Stops and shapes of the full-treatment lines run to Metrô Butantã | Every circular ends there |
 | Lite mode | Turns off Three.js only (no trees, buses as 2D icons). Extrusions stay | Extrusions are cheap and carry the tap interaction |
 | Unknown accessibility | Four states: `yes`, `partial`, `no`, `unknown` ("sem informação", gray) | Never implies "inaccessible" from missing data |
 | Overlay | One GeoJSON file: features with an `osm` id patch OSM objects, features without one are new | One file to edit in geojson.io |
@@ -46,7 +46,7 @@ A static Vite + React + TypeScript PWA on Cloudflare Pages. MapLibre renders an 
 
 ### Versions (latest on npm, 2026-10-04; pin exactly in M0)
 
-`react` 19.3 · `vite` 8.3 · `typescript` 7.0 · `maplibre-gl` 6.12 · `@vis.gl/react-maplibre` 8.1.3 (peer `maplibre-gl >= 4`) · `three` 0.186 · `zustand` 5.0 · `@tanstack/react-query` 5.104 · `minisearch` 7.2 · `vite-plugin-pwa` 2.0 · `vitest` 5.0 · `wrangler` 4.147. Build scripts only: `tsx`, `osmtogeojson`, `fflate`, `csv-parse`, `@turf/simplify`, `@turf/boolean-point-in-polygon`.
+`react` 19.3 · `vite` 8.3 · `typescript` 7.0 · `maplibre-gl` 6.12 · `@vis.gl/react-maplibre` 8.1.3 (peer `maplibre-gl >= 4`) · `three` 0.186 · `zustand` 5.0 · `@tanstack/react-query` 5.104 · `minisearch` 7.2 · `vite-plugin-pwa` 2.0 · `vitest` 5.0 · `wrangler` 4.147. Build scripts only: `tsx`, `osmtogeojson` (3.0.0-beta.5, the `latest` tag; flattens tags into feature properties), `fflate`, `csv-parse`, `@turf/boolean-point-in-polygon`.
 
 ### What Katu-Maps teaches
 
@@ -261,7 +261,7 @@ export interface GeocodeResult {
 | `lines.geojson` | LineString per direction | `id, dir, code` (Olho Vivo `cl`), `head, color, tier` |
 | `trees.json` | n/a | `{ origin, trees: [dx_cm, dy_cm, height_dm, seed][] }` (integers relative to the origin) |
 
-Coordinates are rounded to 6 decimals; building rings simplified with `@turf/simplify` at 0.2 m tolerance. `acc` uses `y | p | n | u`. `promoteId: 'id'` on every source so `feature-state` (selection, hover) works.
+Coordinates are rounded to 6 decimals. No geometry simplification: `buildings.geojson` is 254 KB without it (measured in M1). `acc` uses `y | p | n | u`. `promoteId: 'id'` on every source so `feature-state` (selection, hover) works.
 
 ### Curated overlay (`data/overlay/campus-overlay.geojson`)
 
@@ -357,14 +357,14 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 
 ### M1: OSM build script and extruded buildings
 - **Goal:** campus buildings in 3D from committed data.
-- **Files:** `scripts/fetch-osm.ts`, `scripts/build-campus.ts`, `scripts/check-data.ts`, `scripts/lib/normalize.ts` (+ test), `public/data/buildings.geojson`, `src/domain/types.ts`, `src/domain/access.ts` (+ test), `src/map/useStaticGeoJSON.ts`, `src/features/buildings/layers.tsx`, `src/features/buildings/parse.ts` (+ test).
-- **Notes:** Overpass query over `area(3620199272)` with `out geom`, covering buildings, amenities, entrances, `wheelchair`, steps, kerbs, elevators, parking, trees, wood areas; mirror fallback list and a `User-Agent`. Height: `height` tag, else `building:levels × 3.2`, else 6 m (75% of buildings have one of the first two). `building=roof` gets `mh` so it floats. Layer: `fill-extrusion` before `anchor-3d`, color by `kind`, `feature-state` for hover/selected.
-- **Acceptance:** about 558 buildings render extruded; `buildings.geojson` is under 400 KB; no network call to Overpass at runtime.
+- **Files:** `scripts/fetch-osm.ts`, `scripts/build-campus.ts`, `scripts/check-data.ts`, `scripts/lib/normalize.ts` (+ test), `public/data/buildings.geojson`, `src/domain/types.ts`, `src/domain/access.ts` (+ test), `src/features/buildings/layers.tsx`, `src/features/buildings/parse.ts` (+ test).
+- **Notes:** Overpass query over the union of the campus areas (USP + IPEN + IPT + CTMSP + Instituto Butantan) with `out geom`, covering buildings, amenities, entrances, `wheelchair`, steps, kerbs, elevators, parking, trees, wood areas; mirror fallback list and a `User-Agent`. Height: `height` tag, else `building:levels × 3.2`, else 6 m (75% of buildings have one of the first two). `building=roof` gets `mh` so it floats. Layer: `fill-extrusion` before `anchor-3d`, color by `kind`, `feature-state` for hover/selected.
+- **Acceptance:** about 897 buildings render extruded; `buildings.geojson` is under 450 KB; no network call to Overpass at runtime.
 - **Verify:** `npm run data:osm && npm run data:build && npm run check:data && npm test`; on the phone, pitch the map and compare a few known buildings (Biênio, CRUSP blocks).
 
 ### M2: Search and building detail panel
 - **Goal:** find any building, institute or POI offline; tap a building to see its details.
-- **Files:** `src/ui/BottomSheet.tsx`, `src/features/buildings/BuildingPanel.tsx`, `src/features/search/index.ts` (+ test), `SearchBox.tsx`, `photon.ts` (+ test), `public/data/pois.geojson`, `public/data/institutes.json`, `data/overlay/institutes.json`, `src/lib/http.ts`, `src/lib/fallback.ts` (+ test).
+- **Files:** `src/map/useStaticGeoJSON.ts` (search needs the data on the main thread; the M1 layer just gives MapLibre the URL), `src/ui/BottomSheet.tsx`, `src/features/buildings/BuildingPanel.tsx`, `src/features/search/index.ts` (+ test), `SearchBox.tsx`, `photon.ts` (+ test), `public/data/pois.geojson`, `public/data/institutes.json`, `data/overlay/institutes.json`, `src/lib/http.ts`, `src/lib/fallback.ts` (+ test).
 - **Notes:** MiniSearch fields `name, shortName, institute name, sigla, category label`; accent folding via `normalize('NFD')`; prefix + fuzzy 0.2; boost institutes and named buildings. The index is built in a lazy chunk on first focus of the search box. Photon section "Fora do campus" appears below local results only when online and the query has ≥ 3 characters. Selecting a result flies the camera and opens the panel. Panel shows name, institute, kind, and the four-state accessibility block (mostly "sem informação" at this stage).
 - **Acceptance:** "fisica" finds Instituto de Física with no network; airplane mode still searches; Photon failure hides only its section.
 - **Verify:** `npm test`; on the phone, search with and without accents, with Wi-Fi off, and tap three buildings.

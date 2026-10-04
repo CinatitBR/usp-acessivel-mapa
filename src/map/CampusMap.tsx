@@ -3,19 +3,21 @@ import type { MapLibreEvent } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {
   CAMPUS_CENTER,
+  INITIAL_PITCH,
   INITIAL_ZOOM,
   MAP_MAX_BOUNDS,
   MAX_PITCH,
   MIN_ZOOM,
   STYLE_URL,
 } from '../config';
+import { BuildingLayers } from '../features/buildings/layers';
 import { useAppStore } from '../state/store';
 import { missingAnchors } from './anchors';
 import { mapLib } from './maplibre';
 
 const MAPLIBRE_ATTRIBUTION = '<a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre</a>';
 
-/** Composition only: mounts the map and, from M1 on, each feature's layers. */
+/** Composition only: mounts the map and each feature's layers. */
 export function CampusMap() {
   const setMapStatus = useAppStore((state) => state.setMapStatus);
 
@@ -30,7 +32,7 @@ export function CampusMap() {
   return (
     <Map
       mapLib={mapLib}
-      initialViewState={{ ...CAMPUS_CENTER, zoom: INITIAL_ZOOM }}
+      initialViewState={{ ...CAMPUS_CENTER, zoom: INITIAL_ZOOM, pitch: INITIAL_PITCH }}
       mapStyle={STYLE_URL}
       maxBounds={MAP_MAX_BOUNDS}
       minZoom={MIN_ZOOM}
@@ -44,6 +46,7 @@ export function CampusMap() {
     >
       <AttributionControl compact customAttribution={MAPLIBRE_ATTRIBUTION} position="bottom-right" />
       <NavigationControl position="top-right" visualizePitch />
+      <BuildingLayers />
     </Map>
   );
 }

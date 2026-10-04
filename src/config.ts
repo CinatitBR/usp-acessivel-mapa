@@ -11,6 +11,8 @@ export const MAP_MAX_BOUNDS: [west: number, south: number, east: number, north: 
   -46.775, -23.592, -46.688, -23.532,
 ];
 
-export const INITIAL_ZOOM = 15;
+export const INITIAL_ZOOM = 15.5;
+/** Tilted by default so building extrusions read as 3D. */
+export const INITIAL_PITCH = 50;
 export const MIN_ZOOM = 13;
 export const MAX_PITCH = 70;
