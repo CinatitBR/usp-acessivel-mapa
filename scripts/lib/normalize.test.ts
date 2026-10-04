@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildingHeights, buildingProperties, parseMeters, roundGeometry } from './normalize';
+import { buildingHeights, buildingProperties, parseMeters, poiProperties, roundGeometry } from './normalize';
 
 describe('parseMeters', () => {
   it('reads plain and suffixed metric values', () => {
@@ -54,6 +54,23 @@ describe('buildingProperties', () => {
     const properties = buildingProperties('way/2', { building: 'yes', name: 'CEPE', short_name: 'CEPE' });
     expect(properties).not.toHaveProperty('sn');
     expect(buildingProperties('way/3', { building: 'yes' })).not.toHaveProperty('name');
+  });
+
+  it('records the containing institute', () => {
+    expect(buildingProperties('way/4', { building: 'yes' }, 'way/9').inst).toBe('way/9');
+    expect(buildingProperties('way/4', { building: 'yes' })).not.toHaveProperty('inst');
+  });
+});
+
+describe('poiProperties', () => {
+  it('keeps name, category, access, building and opening hours', () => {
+    expect(
+      poiProperties('node/5', { amenity: 'restaurant', name: 'Bandejão Central', wheelchair: 'yes', opening_hours: 'Mo-Fr 11:00-14:00' }, 'food', 'way/1'),
+    ).toEqual({ id: 'node/5', name: 'Bandejão Central', cat: 'food', acc: 'y', bld: 'way/1', oh: 'Mo-Fr 11:00-14:00', src: 'osm' });
+  });
+
+  it('omits what is missing', () => {
+    expect(poiProperties('node/6', { amenity: 'toilets' }, 'toilets')).toEqual({ id: 'node/6', cat: 'toilets', acc: 'u', src: 'osm' });
   });
 });
 

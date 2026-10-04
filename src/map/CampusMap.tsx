@@ -14,6 +14,7 @@ import { BuildingLayers } from '../features/buildings/layers';
 import { useAppStore } from '../state/store';
 import { missingAnchors } from './anchors';
 import { mapLib } from './maplibre';
+import { MapSelection } from './MapSelection';
 
 const MAPLIBRE_ATTRIBUTION = '<a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre</a>';
 
@@ -47,6 +48,7 @@ export function CampusMap() {
       <AttributionControl compact customAttribution={MAPLIBRE_ATTRIBUTION} position="bottom-right" />
       <NavigationControl position="top-right" visualizePitch />
       <BuildingLayers />
+      <MapSelection />
     </Map>
   );
 }

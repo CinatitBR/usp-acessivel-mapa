@@ -1,0 +1,40 @@
+import { use } from 'react';
+import { loadBuildings, loadInstitutes } from '../../map/staticData';
+import { useAppStore } from '../../state/store';
+import { strings } from '../../strings/pt-BR';
+import { BottomSheet } from '../../ui/BottomSheet';
+
+export function InstitutePanel({ id }: { id: string }) {
+  const institute = use(loadInstitutes()).find((candidate) => candidate.id === id);
+  const buildings = use(loadBuildings());
+  const select = useAppStore((state) => state.select);
+  const clearSelection = useAppStore((state) => state.clearSelection);
+  if (!institute) return null;
+
+  const named = buildings
+    .filter((building) => building.institute === id && building.name)
+    .sort((a, b) => a.name!.localeCompare(b.name!, 'pt-BR', { numeric: true }));
+
+  return (
+    <BottomSheet title={institute.name} subtitle={institute.sigla} onClose={clearSelection}>
+      <h3 className="list-title">{strings.institute.buildings}</h3>
+      {named.length === 0 ? (
+        <p className="muted">{strings.institute.noNamedBuildings}</p>
+      ) : (
+        <ul className="link-list">
+          {named.map((building) => (
+            <li key={building.id}>
+              <button
+                type="button"
+                className="link-row"
+                onClick={() => select({ kind: 'building', id: building.id }, building.center)}
+              >
+                {building.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </BottomSheet>
+  );
+}

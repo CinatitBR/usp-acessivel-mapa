@@ -1,6 +1,8 @@
 import type { Geometry, Position } from 'geojson';
 import { deriveAccessStatus, encodeAccess } from '../../src/domain/access';
+import type { PoiCategory } from '../../src/domain/types';
 import type { BuildingProperties } from '../../src/features/buildings/parse';
+import type { PoiProperties } from '../../src/features/pois/parse';
 
 export type OsmTags = Record<string, string>;
 
@@ -50,17 +52,32 @@ export function buildingHeights(tags: OsmTags): { h: number; mh: number } {
 
 const clean = (value: string | undefined) => value?.trim() || undefined;
 
-/** `id` is the OSM-style id, e.g. `way/123`. */
-export function buildingProperties(id: string, tags: OsmTags): BuildingProperties {
+/** `id` is the OSM-style id, e.g. `way/123`; `institute` is the id of the institute area containing the building. */
+export function buildingProperties(id: string, tags: OsmTags, institute?: string): BuildingProperties {
   const name = clean(tags.name);
   const shortName = clean(tags.short_name);
   return {
     id,
     ...(name && { name }),
     ...(shortName && shortName !== name && { sn: shortName }),
+    ...(institute && { inst: institute }),
     kind: clean(tags.building) ?? 'yes',
     ...buildingHeights(tags),
     acc: encodeAccess(deriveAccessStatus(tags.wheelchair)),
+    src: 'osm',
+  };
+}
+
+export function poiProperties(id: string, tags: OsmTags, category: PoiCategory, building?: string): PoiProperties {
+  const name = clean(tags.name);
+  const openingHours = clean(tags.opening_hours);
+  return {
+    id,
+    ...(name && { name }),
+    cat: category,
+    acc: encodeAccess(deriveAccessStatus(tags.wheelchair)),
+    ...(building && { bld: building }),
+    ...(openingHours && { oh: openingHours }),
     src: 'osm',
   };
 }
