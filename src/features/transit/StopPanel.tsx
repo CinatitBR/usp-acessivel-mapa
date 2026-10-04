@@ -73,7 +73,12 @@ export function StopPanel({ id }: { id: string }) {
   if (!stop) return null;
 
   return (
-    <BottomSheet title={stop.name} subtitle={strings.transit.stop} onClose={clearSelection}>
+    <BottomSheet
+      title={stop.name}
+      subtitle={strings.transit.stop}
+      onClose={clearSelection}
+      routeTo={{ label: stop.name, position: stop.position }}
+    >
       {stop.description && <p className="muted">{stop.description}</p>}
       <div aria-live="polite">
         <h3 className="list-title">{strings.transit.arrivals}</h3>

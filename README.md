@@ -97,6 +97,17 @@ In dev the app reaches the Worker through Vite's `/api` proxy, so nothing else n
 
 With the token in place, run `npm run data:transit` once more: it also looks up each line's Olho Vivo code, needed for live bus positions.
 
+## Walking routes
+
+The round arrow button (or "Rota até aqui" in any detail panel) opens the route panel. Each end is chosen by tapping the map, picking a search result, or "Usar minha localização". There are two kinds of route:
+
+| Kind | First choice | Fallback |
+|---|---|---|
+| A pé | Valhalla (public FOSSGIS server, called directly) | openrouteservice `foot-walking` |
+| Sem degraus | openrouteservice `wheelchair`, which excludes stairs | Valhalla's wheelchair mode, which only avoids them: the panel then says "pode conter degraus" |
+
+Stairs on a route are drawn dashed in orange and flagged in the step list. openrouteservice is reached through the Worker (`GET /ors/route?profile=&from=&to=`), which holds the key, builds the request itself, caches each answer for 5 minutes and allows 10 requests a minute per client. Put the key in `worker/.dev.vars` as `ORS_API_KEY=...` for local use and upload it with `npx wrangler secret put ORS_API_KEY -c worker/wrangler.jsonc` before the next `npm run deploy:worker`. Without a key the app still routes, through Valhalla alone.
+
 ## 3D and lite mode
 
 Trees and 3D buses are drawn by one Three.js layer, loaded after the map. Lite mode leaves that layer (and its download) out: no trees, and buses as flat markers. It starts automatically when the device asks for reduced motion, has no WebGL 2, reports 2 GB of memory or less, or is a phone with 4 cores or fewer; it also switches on by itself, with an "undo", if the 3D map stays below about 25 fps for three seconds while you move it. The **Visualização 3D** switch in the layer menu overrides all of that, and the choice is remembered on the device.

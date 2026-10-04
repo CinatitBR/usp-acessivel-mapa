@@ -19,6 +19,7 @@ export function BuildingPanel({ id }: { id: string }) {
       title={building.name ?? strings.building.unnamed}
       subtitle={buildingKindLabel(building.kind)}
       onClose={clearSelection}
+      routeTo={{ label: building.name ?? strings.building.unnamed, position: building.center }}
     >
       {institute && (
         <button

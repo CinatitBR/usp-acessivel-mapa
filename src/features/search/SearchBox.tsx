@@ -54,8 +54,15 @@ export function SearchBox() {
   };
 
   const choose = (result: GeocodeResult) => {
-    select(toSelection(result), result.position);
-    setText(result.label);
+    const { routePlan, setRouteEnd } = useAppStore.getState();
+    if (routePlan?.picking) {
+      // While an end of the route is being chosen, a result sets it instead of selecting.
+      setRouteEnd(routePlan.picking, { label: result.label, position: result.position });
+      setText('');
+    } else {
+      select(toSelection(result), result.position);
+      setText(result.label);
+    }
     setOpen(false);
     inputRef.current?.blur();
   };

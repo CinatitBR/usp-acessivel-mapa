@@ -151,3 +151,32 @@ export interface GeocodeResult {
   /** Present for local results: the campus object the result points to. */
   ref?: { type: 'building' | 'poi' | 'institute' | 'stop'; id: string };
 }
+
+export type RouteProfile = 'walk' | 'wheelchair';
+
+export interface RouteStep {
+  instruction: string;
+  /** Metres. */
+  distance: number;
+  /** The step goes up or down stairs. */
+  hasSteps?: boolean;
+  /** Where the step runs: indexes into `Route.geometry`. */
+  from: number;
+  to: number;
+}
+
+export interface Route {
+  provider: 'valhalla' | 'ors';
+  profile: RouteProfile;
+  /**
+   * `guaranteed`: the provider excluded stairs. `best-effort`: it was asked to
+   * avoid them but cannot promise. `no`: an ordinary walking route.
+   */
+  stepFree: 'guaranteed' | 'best-effort' | 'no';
+  geometry: LngLat[];
+  /** Metres. */
+  distance: number;
+  /** Seconds. */
+  duration: number;
+  steps: RouteStep[];
+}

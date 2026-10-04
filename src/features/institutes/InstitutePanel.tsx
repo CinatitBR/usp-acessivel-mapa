@@ -16,7 +16,12 @@ export function InstitutePanel({ id }: { id: string }) {
     .sort((a, b) => a.name!.localeCompare(b.name!, 'pt-BR', { numeric: true }));
 
   return (
-    <BottomSheet title={institute.name} subtitle={institute.sigla} onClose={clearSelection}>
+    <BottomSheet
+      title={institute.name}
+      subtitle={institute.sigla}
+      onClose={clearSelection}
+      routeTo={{ label: institute.sigla ?? institute.name, position: institute.center }}
+    >
       <h3 className="list-title">{strings.institute.buildings}</h3>
       {named.length === 0 ? (
         <p className="muted">{strings.institute.noNamedBuildings}</p>

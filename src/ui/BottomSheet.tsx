@@ -1,10 +1,13 @@
 import { type ReactNode, useEffect } from 'react';
+import { type RoutePoint, useAppStore } from '../state/store';
 import { strings } from '../strings/pt-BR';
 
 type Props = {
   title: string;
   subtitle?: string;
   onClose: () => void;
+  /** When given, the sheet offers a route to this place. */
+  routeTo?: RoutePoint;
   children?: ReactNode;
 };
 
@@ -13,7 +16,8 @@ type Props = {
  * screens). It takes its own space instead of covering the map, so the
  * attribution and controls stay visible.
  */
-export function BottomSheet({ title, subtitle, onClose, children }: Props) {
+export function BottomSheet({ title, subtitle, onClose, routeTo, children }: Props) {
+  const startRoute = useAppStore((state) => state.startRoute);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -33,7 +37,16 @@ export function BottomSheet({ title, subtitle, onClose, children }: Props) {
           ×
         </button>
       </header>
-      {children && <div className="sheet-body">{children}</div>}
+      {(children || routeTo) && (
+        <div className="sheet-body">
+          {routeTo && (
+            <button type="button" className="route-button" onClick={() => startRoute(routeTo)}>
+              {strings.route.toHere}
+            </button>
+          )}
+          {children}
+        </div>
+      )}
     </section>
   );
 }

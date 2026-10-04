@@ -7,6 +7,7 @@ import { POIS_LAYER } from '../features/pois/layers';
 import { STOPS_LAYER } from '../features/transit/layers';
 import { BUSES_LAYER } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
+import { strings } from '../strings/pt-BR';
 
 const FLY_MIN_ZOOM = 17;
 
@@ -26,10 +27,19 @@ export function MapSelection() {
   useEffect(() => {
     if (!map) return;
     const onClick = (event: MapMouseEvent) => {
-      const { select, clearSelection } = useAppStore.getState();
+      const { select, clearSelection, routePlan, setRouteEnd } = useAppStore.getState();
       // Small symbols win over the building underneath them.
       const layers = [BUSES_LAYER, ACCESS_LAYER, STOPS_LAYER, POIS_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
       const feature = layers.length > 0 ? map.queryRenderedFeatures(event.point, { layers })[0] : undefined;
+      if (routePlan?.picking) {
+        // While an end of the route is being chosen, a tap sets it instead of selecting.
+        const name: unknown = feature?.properties.name;
+        setRouteEnd(routePlan.picking, {
+          label: typeof name === 'string' && name ? name : strings.route.mapPoint,
+          position: event.lngLat.toArray(),
+        });
+        return;
+      }
       const id: unknown = feature?.properties.id;
       const kind = feature && POINT_KINDS[feature.layer.id];
       if (typeof id !== 'string') clearSelection();

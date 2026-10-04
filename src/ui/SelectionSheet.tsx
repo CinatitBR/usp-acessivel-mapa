@@ -3,6 +3,7 @@ import { AccessFeaturePanel } from '../features/accessibility/AccessFeaturePanel
 import { BuildingPanel } from '../features/buildings/BuildingPanel';
 import { InstitutePanel } from '../features/institutes/InstitutePanel';
 import { PoiPanel } from '../features/pois/PoiPanel';
+import { RoutePanel } from '../features/routing/RoutePanel';
 import { BusPanel } from '../features/transit/BusPanel';
 import { StopPanel } from '../features/transit/StopPanel';
 import { type Selection, useAppStore } from '../state/store';
@@ -40,7 +41,12 @@ function panelFor(selection: Selection, onClose: () => void) {
       return <BusPanel id={selection.id} />;
     case 'place':
       return (
-        <BottomSheet title={selection.label} subtitle={strings.place.offCampus} onClose={onClose}>
+        <BottomSheet
+          title={selection.label}
+          subtitle={strings.place.offCampus}
+          onClose={onClose}
+          routeTo={{ label: selection.label, position: selection.position }}
+        >
           {selection.detail && <p className="muted">{selection.detail}</p>}
         </BottomSheet>
       );
@@ -50,7 +56,9 @@ function panelFor(selection: Selection, onClose: () => void) {
 export function SelectionSheet() {
   const selection = useAppStore((state) => state.selection);
   const clearSelection = useAppStore((state) => state.clearSelection);
-  if (!selection) return null;
+  const routePlan = useAppStore((state) => state.routePlan);
+  // A selection made while planning a route covers the route panel until it is closed.
+  if (!selection) return routePlan ? <RoutePanel plan={routePlan} /> : null;
 
   // Keyed so a failed load is retried on the next selection.
   const key = selection.kind === 'place' ? selection.label : selection.id;

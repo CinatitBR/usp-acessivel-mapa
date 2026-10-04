@@ -17,7 +17,7 @@ const dataKey = (path: string) => `https://olhovivo.internal/data${path}`;
 
 export class UpstreamError extends Error {
   constructor(
-    readonly code: 'auth' | 'upstream' | 'timeout',
+    readonly code: 'auth' | 'upstream' | 'timeout' | 'rate_limited',
     readonly status: number,
   ) {
     super(code);

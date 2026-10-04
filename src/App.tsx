@@ -1,4 +1,5 @@
 import { AccessControl } from './features/accessibility/AccessControl';
+import { RouteButton } from './features/routing/RouteButton';
 import { SearchBox } from './features/search/SearchBox';
 import { CampusMap } from './map/CampusMap';
 import { strings } from './strings/pt-BR';
@@ -15,6 +16,7 @@ export function App() {
         <SearchBox />
         <AccessControl />
         <LayerMenu />
+        <RouteButton />
         <Toast />
         <MapStatus />
       </div>

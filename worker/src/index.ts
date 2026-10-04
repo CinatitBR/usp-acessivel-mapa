@@ -1,10 +1,11 @@
 /**
- * The app's only backend. It holds the Olho Vivo token, signs in to Olho Vivo,
- * forwards a fixed set of read-only calls, adds CORS headers and caches for a
- * few seconds. Responses are the upstream payloads, untouched: all parsing
+ * The app's only backend. It holds the Olho Vivo token and the openrouteservice
+ * key, signs in to Olho Vivo, forwards a fixed set of read-only calls, adds
+ * CORS headers and caches briefly. Responses are the upstream payloads, untouched: all parsing
  * happens in the app's adapters.
  */
 import { DATA_TTL_SECONDS, olhoVivo, UpstreamError } from './olhovivo';
+import { ORS_ROUTE_TTL_SECONDS, orsRoute } from './ors';
 import { checkOrigin, matchRoute, type Route } from './routes';
 
 type ErrorCode = 'bad_request' | 'not_found' | 'forbidden' | 'rate_limited' | 'auth' | 'upstream' | 'timeout';
@@ -32,6 +33,11 @@ async function respond(route: Route, env: Env, ctx: ExecutionContext, cors: Reco
       );
       return json(`[${route.codes.map((code, index) => `{"codigo":${code},"body":${bodies[index]}}`).join(',')}]`, 200, cached);
     }
+    case 'ors':
+      return json(await orsRoute(route.profile, route.from, route.to, env, ctx), 200, {
+        'Cache-Control': `public, max-age=${ORS_ROUTE_TTL_SECONDS}`,
+        ...cors,
+      });
     case 'bad-request':
       return failure('bad_request', 400, cors, route.message);
     case 'not-found':
@@ -51,9 +57,10 @@ export default {
       response = failure('forbidden', 403, {});
     } else if (request.method === 'OPTIONS') {
       response = new Response(null, { status: 204, headers: origin.headers });
-    } else if (route.kind === 'olhovivo' || route.kind === 'positions') {
+    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors') {
       const client = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-      const { success } = await env.OLHOVIVO_LIMITER.limit({ key: client });
+      const limiter = route.kind === 'ors' ? env.ORS_LIMITER : env.OLHOVIVO_LIMITER;
+      const { success } = await limiter.limit({ key: client });
       if (!success) {
         response = failure('rate_limited', 429, { 'Retry-After': '60', ...origin.headers });
       } else {

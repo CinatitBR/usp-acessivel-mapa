@@ -15,7 +15,12 @@ export function PoiPanel({ id }: { id: string }) {
   const category = strings.poi.categories[poi.category];
   const building = poi.buildingId ? buildings.find((candidate) => candidate.id === poi.buildingId) : undefined;
   return (
-    <BottomSheet title={poi.name ?? category} subtitle={poi.name ? category : undefined} onClose={clearSelection}>
+    <BottomSheet
+      title={poi.name ?? category}
+      subtitle={poi.name ? category : undefined}
+      onClose={clearSelection}
+      routeTo={{ label: poi.name ?? category, position: poi.position }}
+    >
       {building?.name && (
         <button
           type="button"

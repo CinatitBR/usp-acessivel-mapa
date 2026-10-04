@@ -33,6 +33,28 @@ describe('matchRoute', () => {
     }
   });
 
+  it('accepts a route request and rounds its points', () => {
+    expect(route('/ors/route?profile=wheelchair&from=-46.7273836,-23.560624&to=-46.72752,-23.56085')).toEqual({
+      kind: 'ors',
+      profile: 'wheelchair',
+      from: '-46.72738,-23.56062',
+      to: '-46.72752,-23.56085',
+    });
+  });
+
+  it('rejects route requests with another profile, bad points or points outside São Paulo', () => {
+    for (const path of [
+      '/ors/route?profile=driving-car&from=-46.72,-23.56&to=-46.73,-23.55',
+      '/ors/route?profile=wheelchair&from=-46.72,-23.56',
+      '/ors/route?profile=wheelchair&from=-46.72,-23.56&to=-43.2,-22.9',
+      '/ors/route?profile=wheelchair&from=-46.72,-23.56,7&to=-46.73,-23.55',
+      '/ors/route?profile=wheelchair&from=-46.72,-23.56&to=-46.720001,-23.560001',
+      '/ors/route?profile=wheelchair&from=a,b&to=-46.73,-23.55',
+    ]) {
+      expect(route(path).kind, path).toBe('bad-request');
+    }
+  });
+
   it('exposes nothing else', () => {
     expect(route('/olhovivo/Login/Autenticar').kind).toBe('not-found');
     expect(route('/olhovivo/Posicao').kind).toBe('not-found');

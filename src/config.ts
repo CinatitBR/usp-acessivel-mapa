@@ -19,6 +19,9 @@ export const MAP_MAX_BOUNDS: [west: number, south: number, east: number, north: 
 export const API_BASE =
   (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') || (import.meta.env.DEV ? '/api' : '');
 
+/** Sent as `X-Client-Id` to public services, so their operators can identify the app. */
+export const CLIENT_ID = (import.meta.env.VITE_CLIENT_ID as string | undefined) || 'usp-campus-map';
+
 /** From this zoom on, buses are 3D models; below it (and always in lite mode) they are flat markers. */
 export const BUS_3D_MIN_ZOOM = 15.5;
 

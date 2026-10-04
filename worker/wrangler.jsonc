@@ -6,7 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
 
   // Set with `wrangler secret put <NAME>`; for local dev put them in worker/.dev.vars (gitignored).
-  "secrets": { "required": ["OLHOVIVO_TOKEN"] },
+  "secrets": { "required": ["OLHOVIVO_TOKEN", "ORS_API_KEY"] },
 
   "vars": {
     // Comma-separated origins allowed to call this Worker from a browser.
@@ -14,9 +14,10 @@
     "ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:4173,https://usp-campus-map.pages.dev"
   },
 
-  // Per-client limit on the Olho Vivo routes: 60 requests per minute.
+  // Per-client limits: 60 requests per minute on the Olho Vivo routes, 10 on routing.
   "ratelimits": [
-    { "name": "OLHOVIVO_LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } }
+    { "name": "OLHOVIVO_LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
+    { "name": "ORS_LIMITER", "namespace_id": "1002", "simple": { "limit": 10, "period": 60 } }
   ],
 
   "observability": {

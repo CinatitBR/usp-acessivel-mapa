@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AccessFeatureKind, LngLat, PoiCategory } from '../domain/types';
+import type { AccessFeatureKind, LngLat, PoiCategory, RouteProfile } from '../domain/types';
 import {
   type LiteChoice,
   readDeviceHints,
@@ -23,6 +23,17 @@ export type Selection =
   | { kind: 'bus'; id: string }
   | { kind: 'place'; label: string; detail?: string; position: LngLat };
 
+export type RouteEnd = 'from' | 'to';
+export type RoutePoint = { label: string; position: LngLat };
+/** The route being planned. A route is requested once both ends are set. */
+export type RoutePlan = {
+  from: RoutePoint | null;
+  to: RoutePoint | null;
+  profile: RouteProfile;
+  /** The end that the next map tap or search result fills in. */
+  picking: RouteEnd | null;
+};
+
 type AppState = {
   mapStatus: MapStatus;
   setMapStatus: (status: MapStatus) => void;
@@ -33,6 +44,15 @@ type AppState = {
   /** Pass `flyTo` when the selection did not come from a tap on the map. */
   select: (selection: Selection, flyTo?: LngLat) => void;
   clearSelection: () => void;
+
+  routePlan: RoutePlan | null;
+  /** Opens the route panel, optionally with a destination. Starts step-free when the accessibility view is on. */
+  startRoute: (to?: RoutePoint) => void;
+  setRouteEnd: (end: RouteEnd, point: RoutePoint) => void;
+  pickRouteEnd: (end: RouteEnd | null) => void;
+  setRouteProfile: (profile: RouteProfile) => void;
+  swapRouteEnds: () => void;
+  closeRoute: () => void;
 
   /** Accessibility view: buildings coloured by status, plus ramps, elevators and the like. */
   accessMode: boolean;
@@ -71,6 +91,9 @@ export type Toast = { message: string; actionLabel?: string; action?: () => void
 /** Lite mode is on: no trees, flat buses, and the 3D code is not even downloaded. */
 export const selectLite = (state: AppState) => resolveLite(state.liteChoice, state.liteDetected, state.watchdogTripped);
 
+/** Points the plan at the end that is still missing, destination first. */
+const withNextPick = (plan: RoutePlan): RoutePlan => ({ ...plan, picking: !plan.to ? 'to' : !plan.from ? 'from' : null });
+
 export const useAppStore = create<AppState>((set) => ({
   mapStatus: 'loading',
   setMapStatus: (mapStatus) => set({ mapStatus }),
@@ -79,6 +102,25 @@ export const useAppStore = create<AppState>((set) => ({
   flyTarget: null,
   select: (selection, flyTo) => set(flyTo ? { selection, flyTarget: { position: flyTo } } : { selection }),
   clearSelection: () => set({ selection: null }),
+
+  routePlan: null,
+  startRoute: (to) =>
+    set((state) => ({
+      selection: null,
+      routePlan: withNextPick({
+        from: state.routePlan?.from ?? null,
+        to: to ?? state.routePlan?.to ?? null,
+        profile: state.routePlan?.profile ?? (state.accessMode ? 'wheelchair' : 'walk'),
+        picking: null,
+      }),
+    })),
+  setRouteEnd: (end, point) =>
+    set(({ routePlan }) => (routePlan ? { routePlan: withNextPick({ ...routePlan, [end]: point }) } : {})),
+  pickRouteEnd: (picking) => set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, picking } } : {})),
+  setRouteProfile: (profile) => set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, profile } } : {})),
+  swapRouteEnds: () =>
+    set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, from: routePlan.to, to: routePlan.from } } : {})),
+  closeRoute: () => set({ routePlan: null }),
 
   accessMode: false,
   toggleAccessMode: () => set((state) => ({ accessMode: !state.accessMode })),
