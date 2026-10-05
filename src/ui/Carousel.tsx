@@ -1,4 +1,5 @@
 import { type ReactNode, useRef, useState } from 'react';
+import { Icon } from './Icon';
 import { strings } from '../strings/pt-BR';
 
 export type CarouselImage = {
@@ -62,7 +63,7 @@ export function Carousel({ images, label }: { images: CarouselImage[]; label: st
               disabled={current === 0}
               onClick={() => go(current - 1)}
             >
-              ‹
+              <Icon name="chevronLeft" />
             </button>
             <button
               type="button"
@@ -71,7 +72,7 @@ export function Carousel({ images, label }: { images: CarouselImage[]; label: st
               disabled={current === shown.length - 1}
               onClick={() => go(current + 1)}
             >
-              ›
+              <Icon name="chevronRight" />
             </button>
             <span className="carousel-count" aria-live="polite">
               {strings.carousel.position(current + 1, shown.length)}

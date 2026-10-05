@@ -1,4 +1,5 @@
 import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { Icon } from '../../ui/Icon';
 import type { GeocodeResult } from '../../domain/types';
 import { type Selection, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
@@ -128,6 +129,23 @@ export function SearchBox() {
           onBlur={() => setOpen(false)}
           onKeyDown={onKeyDown}
         />
+        {text !== '' && (
+          <button
+            type="button"
+            className="search-clear"
+            aria-label={strings.search.clear}
+            title={strings.search.clear}
+            // Keeps the focus in the field, so the list does not close and reopen.
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => {
+              setText('');
+              setActive(0);
+              inputRef.current?.focus();
+            }}
+          >
+            <Icon name="close" />
+          </button>
+        )}
       </div>
       {showList && (
         <ul id={listId} role="listbox" aria-label={strings.search.results} className="search-results">

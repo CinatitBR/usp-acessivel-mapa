@@ -167,3 +167,15 @@ Each one ends working and is shown to the user before the next; commits only whe
 - The ten font sizes became five (Label, Body small, Body, Subtitle, Title), each with its line height. The sheet title is already Title 24/32. `theme-color` and the manifest colours are neutral 50.
 - Layout, radii and the look of buttons are unchanged; that is U2 onwards. The "×" and arrow glyphs look small in Manrope until U2 replaces them with icons. Colours drawn on the map (route line, markers) are still the old blue until U5.
 - Checked with before and after screenshots of eight screens at 390 × 844 and 1280 × 800 in headless Chrome, no console errors.
+
+### U2: icons and shared pieces (2026-10-04)
+
+- `src/ui/Icon.tsx`: 19 Material Symbols (rounded, weight 400) as inline paths, 10 KB of source. Every text glyph used as an icon (×, ←, ‹ ›, ⇅) and the two hand-drawn SVGs are replaced by it. Font and icons are credited in the README.
+- Shared classes in `index.css`: `.button` and `.button-tonal` (pills), `.icon-button`, `.card`, `.icon`, and one focus ring for every control (3 px accent, 2 px offset).
+- Search box: a 56 px pill with the wide shadow and no border, with the app's own clear button (new string "Limpar busca") instead of the browser's. Results are a 16 px card.
+- Map buttons and MapLibre's zoom and compass: no borders, the wide shadow, icons in primary 700; a pressed button fills with the accent, an open one with the tonal blue.
+- Accessibility switch: a white pill with the wheelchair icon that fills with the accent when on. Chips are pills without a border: tonal blue when on, light grey and struck through when off. Legend and layer menu are 16 px cards.
+- Toast: a dark pill, its action in primary 300. Status line: a white pill.
+- "Rota até aqui" already has the route icon and the pill shape; the swap button in the route panel is a tonal round button. The rest of the sheet is U3 and U4.
+- Three tokens added: `--on-inverse-accent`, `--chip-off`, `--on-chip-off`; their pairs are in the contrast test.
+- Checked with screenshots of the eight screens at both sizes, no console errors. **Not done:** the keyboard pass over the map's controls listed in the plan; the ring is one global rule, but I did not tab through the page.

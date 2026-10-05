@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect } from 'react';
 import { type RoutePoint, useAppStore } from '../state/store';
 import { strings } from '../strings/pt-BR';
+import { Icon } from './Icon';
 
 type Props = {
   title: string;
@@ -34,7 +35,7 @@ export function BottomSheet({ title, subtitle, onClose, routeTo, back, children 
         <div>
           {back && (
             <button type="button" className="sheet-back" onClick={back.onClick}>
-              <span aria-hidden="true">← </span>
+              <Icon name="back" size={18} />
               {back.label}
             </button>
           )}
@@ -42,13 +43,14 @@ export function BottomSheet({ title, subtitle, onClose, routeTo, back, children 
           {subtitle && <p className="sheet-subtitle">{subtitle}</p>}
         </div>
         <button type="button" className="sheet-close" aria-label={strings.close} onClick={onClose}>
-          ×
+          <Icon name="close" />
         </button>
       </header>
       {(children || routeTo) && (
         <div className="sheet-body">
           {routeTo && (
             <button type="button" className="route-button" onClick={() => startRoute(routeTo)}>
+              <Icon name="route" size={20} />
               {strings.route.toHere}
             </button>
           )}

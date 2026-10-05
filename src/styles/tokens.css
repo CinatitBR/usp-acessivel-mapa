@@ -59,12 +59,16 @@
   --accent: var(--primary-600);
   --on-accent: var(--neutral-0);
   --on-inverse: var(--neutral-0);
-  --on-inverse-border: rgb(255 255 255 / 50%);
+  /* An action on the dark surface: the toast's button. */
+  --on-inverse-accent: var(--primary-300);
   --accent-tonal: var(--primary-100);
   --on-accent-tonal: var(--primary-700);
   --accent-soft: var(--primary-50);
   --chip: var(--neutral-200);
   --on-chip: var(--neutral-700);
+  /* A chip that is switched off. */
+  --chip-off: var(--neutral-100);
+  --on-chip-off: var(--neutral-600);
   --border: var(--neutral-200);
   --control-off: var(--neutral-400);
   --skeleton: var(--neutral-100);

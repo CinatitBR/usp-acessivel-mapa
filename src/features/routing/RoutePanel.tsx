@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../../ui/Icon';
 import type { RouteProfile } from '../../domain/types';
 import { useOnline } from '../../lib/useOnline';
 import { type RouteEnd, type RoutePlan, useAppStore } from '../../state/store';
@@ -82,7 +83,7 @@ export function RoutePanel({ plan }: { plan: RoutePlan }) {
           </button>
         ))}
         <button type="button" className="route-swap" aria-label={strings.route.swap} title={strings.route.swap} onClick={swapRouteEnds}>
-          ⇅
+          <Icon name="swap" />
         </button>
       </div>
       {plan.picking && (

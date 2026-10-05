@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react';
+import { Icon } from './Icon';
 import { POI_CATEGORIES } from '../features/pois/style';
 import { selectLite, useAppStore } from '../state/store';
 import { strings } from '../strings/pt-BR';
@@ -36,16 +37,7 @@ export function LayerMenu() {
         title={strings.layers.button}
         onClick={() => setOpen(!open)}
       >
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path
-            d="M12 4l9 5-9 5-9-5z M3.5 13.5l8.5 4.7 8.5-4.7"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-        </svg>
+        <Icon name="layers" />
       </button>
       {open && (
         <section id={panelId} className="layer-menu" aria-label={strings.layers.title}>

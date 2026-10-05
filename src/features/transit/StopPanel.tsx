@@ -1,4 +1,5 @@
 import { use, useEffect, useState } from 'react';
+import { Icon } from '../../ui/Icon';
 import type { Arrival, BusStop } from '../../domain/types';
 import { useOnline } from '../../lib/useOnline';
 import { loadStops } from '../../map/staticData';
@@ -48,7 +49,7 @@ function ArrivalRow({ arrival, now, stopId }: { arrival: Arrival; now: number; s
         onClick={() => select({ kind: 'bus', id: busId, fromStop: stopId })}
       >
         {content}
-        <span className="arrival-chevron" aria-hidden="true">›</span>
+        <span className="arrival-chevron"><Icon name="chevronRight" /></span>
       </button>
     </li>
   );

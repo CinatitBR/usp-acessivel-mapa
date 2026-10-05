@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { ACCESS_COLORS, ACCESS_STATUSES } from '../../domain/access';
 import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
+import { Icon } from '../../ui/Icon';
 import { ACCESS_KINDS } from './parse';
 
 /** Toggle for the accessibility view, with its legend and per-kind filters while it is on. */
@@ -14,6 +15,7 @@ export function AccessControl() {
   return (
     <div className="access-control">
       <button type="button" className="access-toggle" aria-pressed={accessMode} onClick={toggleAccessMode}>
+        <Icon name="accessible" size={20} />
         {strings.access.toggle}
       </button>
       {accessMode && (

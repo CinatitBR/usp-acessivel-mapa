@@ -1,5 +1,6 @@
 import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
+import { Icon } from '../../ui/Icon';
 import { useOpenPlan } from './usePlan';
 
 /** A true minus sign, so "−1" is as wide as "+1" would be. */
@@ -21,7 +22,7 @@ export function LevelSwitcher() {
       </p>
       <div className="level-buttons" role="group" aria-label={strings.indoor.levels}>
         <button type="button" className="level-button level-close" aria-label={strings.indoor.close} title={strings.indoor.close} onClick={closeIndoor}>
-          ×
+          <Icon name="close" size={20} />
         </button>
         {[...plan.levels].reverse().map((level) => (
           <button

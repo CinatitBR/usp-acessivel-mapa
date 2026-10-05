@@ -14,6 +14,7 @@ export const strings = {
   search: {
     placeholder: 'Buscar prédio, instituto ou local',
     label: 'Buscar no campus',
+    clear: 'Limpar busca',
     results: 'Resultados da busca',
     noLocalResults: 'Nenhum resultado no campus',
     offCampus: 'Fora do campus',
