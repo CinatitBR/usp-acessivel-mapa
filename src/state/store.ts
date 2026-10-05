@@ -21,6 +21,8 @@ export type Selection =
   | { kind: 'stop'; id: string; position: LngLat }
   /** A moving bus: no fixed position, so no marker. `fromStop` is the stop whose arrivals it was opened from. */
   | { kind: 'bus'; id: string; fromStop?: string }
+  /** A room of the open floor plan; it is highlighted in place. */
+  | { kind: 'room'; id: string; buildingId: string }
   | { kind: 'place'; label: string; detail?: string; position: LngLat };
 
 export type RouteEnd = 'from' | 'to';
@@ -137,8 +139,10 @@ export const useAppStore = create<AppState>((set) => ({
 
   indoor: null,
   openIndoor: (buildingId, plan) => set({ indoor: { buildingId, plan, level: null } }),
-  setIndoorLevel: (level) => set(({ indoor }) => (indoor ? { indoor: { ...indoor, level } } : {})),
-  closeIndoor: () => set({ indoor: null }),
+  // A selected room belongs to the floor that was showing, so it goes with it.
+  setIndoorLevel: (level) =>
+    set(({ indoor, selection }) => (indoor ? { indoor: { ...indoor, level }, ...(selection?.kind === 'room' && { selection: null }) } : {})),
+  closeIndoor: () => set(({ selection }) => ({ indoor: null, ...(selection?.kind === 'room' && { selection: null }) })),
 
   routePlan: null,
   startRoute: (to) =>

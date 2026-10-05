@@ -1,6 +1,7 @@
 import { Component, type ReactNode, Suspense } from 'react';
 import { AccessFeaturePanel } from '../features/accessibility/AccessFeaturePanel';
 import { BuildingPanel } from '../features/buildings/BuildingPanel';
+import { RoomPanel } from '../features/indoor/RoomPanel';
 import { InstitutePanel } from '../features/institutes/InstitutePanel';
 import { PoiPanel } from '../features/pois/PoiPanel';
 import { RoutePanel } from '../features/routing/RoutePanel';
@@ -37,6 +38,8 @@ function panelFor(selection: Selection, onClose: () => void) {
       return <AccessFeaturePanel id={selection.id} />;
     case 'stop':
       return <StopPanel id={selection.id} />;
+    case 'room':
+      return <RoomPanel id={selection.id} buildingId={selection.buildingId} />;
     case 'bus':
       return <BusPanel id={selection.id} {...(selection.fromStop !== undefined && { fromStop: selection.fromStop })} />;
     case 'place':

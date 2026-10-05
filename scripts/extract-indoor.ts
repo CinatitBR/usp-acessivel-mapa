@@ -14,7 +14,7 @@ import { buildingToMap, type BuildingFrame } from './lib/indoor/frame';
 import { fitHelmert } from './lib/indoor/helmert';
 import { parseSheetLabels } from './lib/indoor/labels';
 import { parseSheetPaths, type Point } from './lib/indoor/svgPaths';
-import { extractWalls } from './lib/indoor/walls';
+import { extractWalls, type Flight, redrawFlights } from './lib/indoor/walls';
 
 /** `extent` limits a sheet to part of the building's box, in metres on its axes, when the page has other things inside the box (a scale bar, say). */
 type Sheet = {
@@ -23,6 +23,8 @@ type Sheet = {
   name: string;
   controls: { page: Point; building: Point }[];
   extent?: [x1: number, y1: number, x2: number, y2: number];
+  /** Flights of stairs the sheet draws cut or turned, to be redrawn whole. */
+  stairs?: Flight[];
 };
 type Source = BuildingFrame & { sheets: Sheet[] };
 
@@ -62,10 +64,11 @@ for (const sheet of source.sheets) {
   if (worst > MAX_SHEET_RESIDUAL) throw new Error(`Sheet ${sheet.page}: a control point is ${worst.toFixed(2)} m off`);
 
   const [x1, y1, x2, y2] = sheet.extent ?? [-margin, -margin, width + margin, depth + margin];
-  const segments = extractWalls(parseSheetPaths(poppler('pdftocairo', sheet.page, '-svg')), fit.apply, {
+  const drawn = extractWalls(parseSheetPaths(poppler('pdftocairo', sheet.page, '-svg')), fit.apply, {
     extent: [x1, y1, x2, y2],
     minLength: WALL_MIN_LENGTH_METERS,
   });
+  const segments = redrawFlights(drawn, sheet.stairs ?? []);
   walls[sheet.level] = segments.flat().map((value) => Math.round(value * CENTIMETERS));
 
   let kept = 0;

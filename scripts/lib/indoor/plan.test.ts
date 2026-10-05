@@ -57,6 +57,34 @@ describe('buildIndoorPlan', () => {
     expect(turned.bearing).toBe(90);
   });
 
+  it('places rooms, boxes and rings alike, and measures them', () => {
+    const { rooms } = buildIndoorPlan(source, walls, {
+      unit: 'm',
+      rooms: [
+        { level: 0, name: 'Sala', cat: 'classroom', box: [10, 10, 20, 30] },
+        { level: 1, name: 'Canto', cat: 'hall', ring: [[0, 0], [10, 0], [0, 10]] },
+      ],
+    });
+    const [box, ring] = rooms.features;
+    expect(box!.properties).toEqual({ id: 'room/1', level: 0, name: 'Sala', cat: 'classroom', area: 200 });
+    expect(box!.geometry.coordinates[0]).toHaveLength(5);
+    expect(box!.geometry.coordinates[0]![2]![0]).toBeCloseTo(20 * DEGREE, 6);
+    expect(box!.geometry.coordinates[0]![2]![1]).toBeCloseTo(-30 * DEGREE, 6);
+    expect(ring!.properties.area).toBe(50);
+    expect(ring!.geometry.coordinates[0]).toHaveLength(4);
+    expect(buildIndoorPlan(source, walls).rooms.features).toEqual([]);
+  });
+
+  it('refuses a room that is misplaced or badly described', () => {
+    const withRoom = (room: object) => () => buildIndoorPlan(source, walls, { unit: 'm', rooms: [{ level: 0, name: 'Sala', cat: 'classroom', ...room }] });
+    expect(withRoom({ box: [10, 10, 20, 30], level: 7 })).toThrow(/floor/);
+    expect(withRoom({ box: [10, 10, 20, 30], cat: 'garage' })).toThrow(/category/);
+    expect(withRoom({ box: [90, 10, 101, 30] })).toThrow(/outside/);
+    expect(withRoom({ box: [10, 10, 10, 30] })).toThrow(/polygon/);
+    expect(withRoom({})).toThrow(/box or a ring/);
+    expect(withRoom({ box: [10, 10, 20, 30], name: ' ' })).toThrow(/no name/);
+  });
+
   it('refuses a missing floor and an unknown default', () => {
     expect(() => buildIndoorPlan(source, { unit: 'cm', levels: { '0': [0, 0, 1, 1] } })).toThrow(/level 1/);
     expect(() => buildIndoorPlan({ ...source, defaultLevel: 5 }, walls)).toThrow(/Default level/);

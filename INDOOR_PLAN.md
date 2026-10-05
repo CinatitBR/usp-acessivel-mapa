@@ -1,6 +1,6 @@
 # Indoor map plan: Edifício Vilanova Artigas (FAU)
 
-This is a plan of its own, separate from `PLAN.md` (the general plan of the campus map). Approved by the user on 2026-10-04. I1 and I2 are built; I3 and I4 are not.
+This is a plan of its own, separate from `PLAN.md` (the general plan of the campus map). Approved by the user on 2026-10-04. I1, I2 and I3 are built (I3 is a first pass, waiting for the user's review); I4 is not.
 
 ## Context
 
@@ -102,3 +102,20 @@ Each one ends working and is shown to the user before the next; commits only whe
 - A tap on the plan keeps the current selection. Room selection is I3.
 - Checked in headless Chrome at 390 × 844 with 3D on and in lite mode, and at 1280 × 800: each floor, open, close, another building selected; no console errors.
 - Known: on a phone with the building panel open, the floor's name covers the plan's lower left corner, and the status line sits on the plan when it shows.
+
+### I3: rooms (2026-10-04, first pass)
+
+- `data/indoor/fau-artigas/rooms.json`, curated by hand: 140 rooms (55 in the basement, 24 on floor 0, 31 on floor 1, 30 on floor 2). The build checks each one (known floor and category, a name, a real polygon, inside the building's box within 0.5 m) and publishes them in `public/data/indoor/fau-artigas.json`, now 152 KB (static data 806 KB).
+- **Format changed from the plan**: the file is JSON in metres on the building's axes, like `walls.json`, not GeoJSON for QGIS. Every room is a `box` or a `ring` of corners, which is quick to write and to correct against the walls, since the building is all right angles. The first draft came from a script that grew a box from each label to the nearest walls; every box was then checked and most were corrected by hand.
+- **No half-level per room**: the sheets do not mark which rooms are on which of a floor's two heights, so the room sheet shows the floor's pair of heights. Categories `museum` and `hall` were added.
+- In the app: rooms are filled by category under the walls; names appear by size (from zoom 17 for the largest, all from 19.6); a tap selects a room, outlines it and opens a sheet with its name, category, floor, a link back to the building and the plan's credit. Corridors, ramps, stairs, lifts and voids are drawn but cannot be selected. Changing floor or closing the plan clears a selected room.
+- The two-letter prefixes on the sheets are categories, not names (`PROF` research labs, `AUL` teaching, `BLM` library and museum, `APA` support, `COM` shops and student bodies, `OUT` other).
+- Checked in headless Chrome at 1280 × 800 with 3D on and at 390 × 844 in lite mode: the four floors, a tap on a room on two floors, a tap on a void, floor change, close; no console errors.
+- **For the user to confirm** (read from the drawing, not known):
+  - Floor 1: the three departments are drawn as one strip each (AUH, AUP, AUT) with borders guessed from where the labels sit; the professors' offices inside are not separate rooms.
+  - Basement: "Expediente" and "Arquivo Permanente" carry the same area on the sheet (93,34 m²), so one of them is wrong there; the shelved area east of them is unnamed and left blank. The border between the photo lab and the storeroom is worked out from their written areas.
+  - Floor 0: the museum, the copy shop and the stationery kiosk share one open space, so the museum's east edge is an estimate; the rooms along the east side (x 95 to 103, y 23 to 47) are unnamed on the sheet and left blank; the porter's block is one room.
+  - Names kept as the sheet writes them: CESAD, CCInt, LAP, NAPPLAC, CPD, CTA, LCG 1 and 2, COC Design, COC AU.
+  - Toilets on floors 1 and 2 are "Sanitários" without male or female, except the one the sheet names.
+- Known: POIs and the house number from the base map (the canteen, the stationery shop, "876") show over every floor; floor 0 is drawn on a slab the size of the whole building although its walls stop short of it.
+- **Stairs redrawn** (user's review): the sheets draw the flight left of the lift on floor 0 and the one right of it on floor 1 cut by a break line, with some steps slightly turned or hidden under a label, so the extraction lost part of their treads. `source.json` now lists such flights per sheet (`stairs`: a box and a number of treads) and `npm run indoor:extract` redraws them whole, 12 treads each, matching the flight beside them.

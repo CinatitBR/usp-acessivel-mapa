@@ -3,7 +3,7 @@ import { buildingToMap } from './frame';
 import { fitHelmert } from './helmert';
 import { parseSheetLabels } from './labels';
 import { circleOf, parseSheetPaths, type Point, type SheetPath } from './svgPaths';
-import { extractWalls } from './walls';
+import { extractWalls, redrawFlights, type Segment } from './walls';
 
 const STROKE = 'fill:none;stroke-width:1;stroke:rgb(0%,0%,0%);';
 
@@ -124,5 +124,28 @@ describe('parseSheetLabels', () => {
       '<word xMin="10" yMin="20" xMax="14" yMax="22">SALA</word><word xMin="15" yMin="20" xMax="20" yMax="22">A&amp;B</word></line>' +
       '<line xMin="10" yMin="24" xMax="30" yMax="26"><word xMin="10" yMin="24" xMax="30" yMax="26">A.U.=57,77m2</word></line></block>';
     expect(parseSheetLabels(xhtml)).toEqual([{ lines: ['SALA A&B', 'A.U.=57,77m2'], center: [20, 23] }]);
+  });
+});
+
+describe('redrawFlights', () => {
+  it('replaces the lines across a flight by evenly spaced treads and keeps the rest', () => {
+    const walls: Segment[] = [
+      [10, 5, 13, 5], // a tread
+      [10, 5.5, 11.2, 5.5], // a tread cut short by the break line
+      [10, 4, 10, 8], // the side of the stair
+      [8, 5, 13, 5.0], // a wall that only crosses the flight
+      [10, 9, 13, 9], // a line below it
+    ];
+    const redrawn = redrawFlights(walls, [{ box: [10, 4, 13, 7], treads: 4 }]);
+    expect(redrawn).toEqual([
+      [10, 4, 10, 8],
+      [8, 5, 13, 5],
+      [10, 9, 13, 9],
+      [10, 4, 13, 4],
+      [10, 5, 13, 5],
+      [10, 6, 13, 6],
+      [10, 7, 13, 7],
+    ]);
+    expect(redrawFlights(walls, [])).toEqual(walls);
   });
 });

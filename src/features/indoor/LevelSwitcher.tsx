@@ -3,7 +3,7 @@ import { strings } from '../../strings/pt-BR';
 import { useOpenPlan } from './usePlan';
 
 /** A true minus sign, so "−1" is as wide as "+1" would be. */
-const levelLabel = (level: number) => String(level).replace('-', '−');
+export const levelLabel = (level: number) => String(level).replace('-', '−');
 
 /** Floor buttons of the open indoor map, top floor first, with a button that puts the 3D block back. */
 export function LevelSwitcher() {

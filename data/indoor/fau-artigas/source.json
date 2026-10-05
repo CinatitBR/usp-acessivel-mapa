@@ -24,7 +24,8 @@
       "level": 0,
       "name": "Caramelo e Museu",
       "elevations": "+0,80 / +2,70 m",
-      "note": "Controls: the four corner columns. Scale 1:500.",
+      "note": "Controls: the four corner columns. Scale 1:500. The stair left of the lift is drawn cut by a break line, with its upper steps slightly turned.",
+      "stairs": [{ "box": [87.1, 16.85, 90.05, 19.85], "treads": 12 }],
       "controls": [
         { "page": [357.42, 194.9], "building": [11, 11] },
         { "page": [856.38, 194.9], "building": [99, 11] },
@@ -37,8 +38,9 @@
       "level": 1,
       "name": "Biblioteca e Departamentos",
       "elevations": "+4,60 / +6,50 m",
-      "note": "Controls: the four corner columns. The sheet says 1:300 but its scale bar and the column spacing give about 1:368. The extent leaves out the scale bar.",
+      "note": "Controls: the four corner columns. The sheet says 1:300 but its scale bar and the column spacing give about 1:368. The extent leaves out the scale bar. The stair right of the lift is drawn cut by a break line and under a label.",
       "extent": [-1, -1, 111, 59],
+      "stairs": [{ "box": [92.05, 16.85, 94.8, 19.9], "treads": 12 }],
       "controls": [
         { "page": [292.26, 201.38], "building": [11, 11] },
         { "page": [970.98, 201.38], "building": [99, 11] },

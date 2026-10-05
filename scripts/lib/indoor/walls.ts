@@ -79,3 +79,32 @@ export function extractWalls(paths: readonly SheetPath[], toBuilding: (point: Po
   });
   return walls;
 }
+
+/**
+ * A flight of stairs to redraw: `treads` lines across the width of `box` (along x), evenly
+ * spaced from its top edge to its bottom one. For flights the sheet draws cut by a break
+ * line or slightly turned, which come out of `extractWalls` with pieces missing.
+ */
+export type Flight = { box: [x1: number, y1: number, x2: number, y2: number]; treads: number };
+
+/** How far past the box a tread of the drawing may reach and still be replaced, in metres. */
+const FLIGHT_MARGIN = 0.1;
+
+/** Replaces the lines across each flight by evenly spaced treads; everything else is kept. */
+export function redrawFlights(walls: readonly Segment[], flights: readonly Flight[]): Segment[] {
+  const isTreadOf = ([x1, y1, x2, y2]: Segment, { box: [left, top, right, bottom] }: Flight) =>
+    y1 === y2 &&
+    y1 >= top - FLIGHT_MARGIN &&
+    y1 <= bottom + FLIGHT_MARGIN &&
+    Math.min(x1, x2) >= left - FLIGHT_MARGIN &&
+    Math.max(x1, x2) <= right + FLIGHT_MARGIN;
+  const kept = walls.filter((wall) => !flights.some((flight) => isTreadOf(wall, flight)));
+  for (const { box: [left, top, right, bottom], treads } of flights) {
+    if (treads < 2) throw new Error('A flight needs at least 2 treads');
+    for (let index = 0; index < treads; index++) {
+      const y = snap(top + ((bottom - top) * index) / (treads - 1));
+      kept.push([left, y, right, y]);
+    }
+  }
+  return kept;
+}

@@ -12,6 +12,38 @@ export type IndoorLevel = {
 
 export type IndoorLevelProperties = { level: number };
 
+export const ROOM_CATEGORIES = [
+  'classroom',
+  'studio',
+  'laboratory',
+  'library',
+  'museum',
+  'auditorium',
+  'administration',
+  'department',
+  'food',
+  'services',
+  'bathroom',
+  'hall',
+  'circulation',
+  'ramp',
+  'stairs',
+  'elevator',
+  'void',
+  'technical',
+] as const;
+export type RoomCategory = (typeof ROOM_CATEGORIES)[number];
+
+export type IndoorRoomProperties = {
+  /** Unique within the plan. */
+  id: string;
+  level: number;
+  name: string;
+  cat: RoomCategory;
+  /** Square metres, rounded: larger rooms get their name first. */
+  area: number;
+};
+
 /**
  * A file of public/data/indoor/, written by scripts/build-campus.ts: the floor
  * plans of one building. Fetched when its indoor map is opened.
@@ -33,6 +65,8 @@ export type IndoorPlan = {
   slabs: FeatureCollection<Polygon, IndoorLevelProperties>;
   /** All wall lines of a level as one feature. */
   walls: FeatureCollection<MultiLineString, IndoorLevelProperties>;
+  /** Rooms of every level, in drawing order: a later room lies over an earlier one. */
+  rooms: FeatureCollection<Polygon, IndoorRoomProperties>;
 };
 
 export type IndoorSlab = Feature<Polygon, IndoorLevelProperties>;
