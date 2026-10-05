@@ -16,8 +16,8 @@ export default defineConfig({
         description: 'Mapa não oficial do campus Butantã da USP, com acessibilidade e ônibus ao vivo.',
         lang: 'pt-BR',
         display: 'standalone',
-        theme_color: '#f8f4f0',
-        background_color: '#f8f4f0',
+        theme_color: '#fafafa',
+        background_color: '#fafafa',
         categories: ['navigation', 'education'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -27,7 +27,7 @@ export default defineConfig({
       },
       workbox: {
         // App shell, basemap style and campus data are downloaded on the first visit.
-        globPatterns: ['**/*.{js,css,html,json,geojson,png,svg}'],
+        globPatterns: ['**/*.{js,css,html,json,geojson,png,svg,woff2}'],
         // The 3D code, its trees and its roofs are only fetched when 3D is on; they are cached on first use below.
         globIgnores: ['**/render3d-*.js', 'data/trees.json', 'data/roofs.json', 'data/indoor/**'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,

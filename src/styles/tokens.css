@@ -1,0 +1,116 @@
+/*
+ * Design tokens: the app's visual identity in one place (see UI_PLAN.md).
+ * Colour and type literals live only in this file; everything else uses the
+ * role names below, never a step of a scale directly.
+ */
+@font-face {
+  font-family: Manrope;
+  /* Latin subset of the variable font (SIL Open Font License), every weight in one file. */
+  src: url('../assets/fonts/manrope-latin.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Scales, as in the Figma variables. */
+  --primary-50: #ecf3ff;
+  --primary-100: #dce8ff;
+  --primary-200: #c3d9ff;
+  --primary-300: #8cb3ff;
+  --primary-400: #5f8ef4;
+  --primary-500: #1e5ae8;
+  --primary-600: #1b4acd;
+  --primary-700: #133b99;
+  --primary-800: #1f2d73;
+  --primary-900: #0f1b45;
+
+  --neutral-0: #ffffff;
+  --neutral-50: #fafafa;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #eaeaea;
+  --neutral-300: #d6d6d6;
+  --neutral-400: #a3a3a3;
+  --neutral-500: #737373;
+  --neutral-600: #525252;
+  --neutral-700: #404040;
+  --neutral-800: #262626;
+  --neutral-900: #171717;
+
+  --success-500: #22c55e;
+  /* Not in Figma: white text on success-500 is 2.3:1, on this it is 5.0:1. */
+  --success-700: #15803d;
+  --warning-500: #f59e0b;
+  /* Not in Figma: warning as a text colour on white (5.0:1). */
+  --warning-700: #b45309;
+  --error-600: #dc2626;
+  --info-500: #0ea5e9;
+
+  /* Roles. */
+  --page: var(--neutral-50);
+  --surface: var(--neutral-0);
+  --surface-muted: var(--neutral-50);
+  --surface-translucent: rgb(255 255 255 / 92%);
+  --surface-inverse: var(--neutral-800);
+  --text: var(--neutral-900);
+  /* The lightest grey that is still text on white (4.7:1). */
+  --muted: var(--neutral-500);
+  --heading: var(--primary-700);
+  --accent: var(--primary-600);
+  --on-accent: var(--neutral-0);
+  --on-inverse: var(--neutral-0);
+  --on-inverse-border: rgb(255 255 255 / 50%);
+  --accent-tonal: var(--primary-100);
+  --on-accent-tonal: var(--primary-700);
+  --accent-soft: var(--primary-50);
+  --chip: var(--neutral-200);
+  --on-chip: var(--neutral-700);
+  --border: var(--neutral-200);
+  --control-off: var(--neutral-400);
+  --skeleton: var(--neutral-100);
+  --photo-backdrop: var(--neutral-200);
+  --scrim: rgb(23 23 23 / 70%);
+
+  /* Fills, dots and icons. Only dark text goes on warning and info. */
+  --success: var(--success-500);
+  --success-strong: var(--success-700);
+  --warning: var(--warning-500);
+  --warning-strong: var(--warning-700);
+  --error: var(--error-600);
+  --info: var(--info-500);
+
+  /* Text styles: size and line height, in rem so the browser's text size still applies. */
+  --font: Manrope, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --size-display: 2.5rem;
+  --line-display: 3rem;
+  --size-heading: 2rem;
+  --line-heading: 2.5rem;
+  --size-title: 1.5rem;
+  --line-title: 2rem;
+  --size-subtitle: 1.25rem;
+  --line-subtitle: 1.75rem;
+  --size-body: 1rem;
+  --line-body: 1.5rem;
+  --size-body-small: 0.875rem;
+  --line-body-small: 1.25rem;
+  /* The smallest text in the app. */
+  --size-label: 0.75rem;
+  --line-label: 1rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Shape and depth. */
+  --radius-pill: 999px;
+  --radius-sheet: 28px;
+  --radius-card: 16px;
+  --radius-photo: 12px;
+  --radius-small: 8px;
+  /* For what floats over the map: search box, map buttons, menus. */
+  --shadow: 0 2px 12px rgb(15 27 69 / 16%);
+  --shadow-sheet: 0 -2px 12px rgb(15 27 69 / 12%);
+  --shadow-side: 2px 0 12px rgb(15 27 69 / 12%);
+
+  --gap: 12px;
+}
