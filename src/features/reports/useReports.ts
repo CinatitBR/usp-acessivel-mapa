@@ -6,12 +6,12 @@ import { fetchJson } from '../../lib/http';
 import { parseReports } from './parse';
 import { today } from './today';
 
-/** The Worker keeps the list for five minutes, so asking more often brings nothing new. */
-const POLL_MS = 5 * 60_000;
+/** A report shows for everyone within this long of being published. */
+const POLL_MS = 2 * 60_000;
 const NONE: Report[] = [];
 
 /**
- * The published reports that are in force today, refreshed every five minutes. Without the
+ * The published reports that are in force today, refreshed every two minutes. Without the
  * Worker, or when it cannot be reached, there are none: the rest of the map does not depend on them.
  */
 export function useReports(): Report[] {

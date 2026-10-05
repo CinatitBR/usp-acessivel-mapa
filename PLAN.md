@@ -536,6 +536,7 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 | Bandejão menus, events, opening hours | New feature folder with its own adapter; `Poi.openingHours` already exists |
 | English UI | Replace `strings/pt-BR.ts` with a keyed lookup |
 | Custom domain | Change `ALLOWED_ORIGINS`, or route the Worker under `/api` |
+| Reports by users (barriers on the map) | Planned and built separately in `REPORTS_PLAN.md`. It changes two decisions of this plan: reports are live data in a Cloudflare D1 database, not static files, and the Worker stores and serves them, so it is no longer only a holder of secrets |
 | Indoor maps (floor plans inside a building) | Planned separately in `INDOOR_PLAN.md`, starting with FAU's Edifício Vilanova Artigas |
 
 ## 11. Risks and mitigations

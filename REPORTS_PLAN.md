@@ -1,6 +1,6 @@
 # Reports plan: user reports on the campus map
 
-This is a plan of its own, separate from `PLAN.md`, `INDOOR_PLAN.md` and `UI_PLAN.md`. It records a brainstorm with the user on 2026-10-05. The user asked for it to be built on 2026-10-05, one milestone at a time. R1 and R2 are built; R3 to R5 are not.
+This is a plan of its own, separate from `PLAN.md`, `INDOOR_PLAN.md` and `UI_PLAN.md`. It records a brainstorm with the user on 2026-10-05. The user asked for it to be built on 2026-10-05, one milestone at a time. R1 and R2 are built, and on 2026-10-05 the store moved from a Google Sheet to a Cloudflare D1 database (see "Reports on D1" at the end, which replaces what the sections below say about the spreadsheet and the Form). R3 to R5 are not built.
 
 ## Context
 
@@ -134,3 +134,30 @@ R1 comes first so that reviewers can publish known problems before anyone can re
 
 - The Form has every column of the published tab. The Worker makes the `id` (`r-` and eight characters), leaves `ate` empty and answers `{ ok, id }`. A row is then published exactly as it arrived.
 - The app keeps its own report under that id and drops the hollow copy as soon as the same id appears among the published reports. A report sent before this change, or published under another id, still leaves after 14 days.
+
+## Reports on D1 (2026-10-05)
+
+The user asked to keep reports in a Cloudflare D1 database instead of the Google Sheet and Form, which had proved awkward (number formats, a pre-filled link mapping fields to columns, rows copied between tabs, and formulas needed for R3). Decisions taken with the user:
+
+| Topic | Decision |
+|---|---|
+| Store | Cloudflare D1, the only store. The Google Sheet and Form are removed |
+| Review | A review page in the app, protected by a reviewer password kept as a Worker secret |
+| "Mudou" | One more question: "Foi resolvido" or "Está diferente", plus an optional note |
+| "Pode ter mudado" | Stays until someone confirms the report again, a reviewer deals with it, or the report ends |
+
+Milestones from here: **D1** the store swap, **D2** the review page, **R3** "Continua assim" and "Mudou", then R4 and R5 as above.
+
+Not in this plan: the two buttons on the existing accessibility symbols (static data; an answer about them would need its own table), and a notification to reviewers when a report arrives (the Form could e-mail; D1 does not).
+
+### D1: the store swap (2026-10-05)
+
+- `worker/migrations/0001_reports.sql`: the tables `reports` (with the reporter's `note`, never served, and the reviewer's `public_note`, the only one the map shows; `status` pending, published, refused or duplicate) and `report_feedback` (for R3). `0002_first_report.sql` carries over `r12`, the one report that was in the spreadsheet. Binding `DB`; `npm run db:migrate` and `npm run db:migrate:local`.
+- `GET /reports` reads the published rows that have not passed a reviewer's end date; browsers may reuse it for 60 s, and the app now asks every 2 minutes. `POST /reports` checks the report as before and stores it as pending. Queries are written with Drizzle ORM (`worker/src/reportsDb.ts`, tables described in `worker/src/schema.ts`), which binds every value. The migrations stay hand-written SQL applied by Wrangler, so `schema.ts` and the migrations must be kept saying the same thing.
+- Removed: the CSV reading, the Form submission, their settings `REPORTS_CSV_URL` and `REPORTS_FORM_LINK`, and their tests. The app is unchanged apart from the refresh time: same routes, same JSON.
+- Until D2, publishing is a `wrangler d1 execute` command (README).
+- **Checked against a local D1** with real requests to `wrangler dev`: the migrated report is listed; a new report is stored as pending and not listed; a wrong answer for the type, a body that is not JSON, a missing or foreign `Origin` are refused; the limit answers 429; a note written like SQL or a formula is stored as plain text; publishing with an end date in the past keeps it off the list, in the future puts it on, with the public note. 
+- **Drizzle and names (user, 2026-10-05):** the Worker's queries use Drizzle ORM; the feedback table is `report_feedback`; the database is `usp-campus-db`.
+- **Live:** the remote database was created (region ENAM, chosen by Cloudflare), both migrations applied to it, and the Worker deployed. The live `GET /reports` returns `r12` from D1, and a report with a wrong answer is refused with 400. A real report was not sent to the live database, so as not to leave a test row in it. The app on Pages was not redeployed.
+- **Two more reports carried over:** when the Worker was switched, the spreadsheet's published tab held two reports besides `r12` (`r-a6758a97` and `r-19aa2bce`, both a step that cannot be passed, about 10 m apart, sent through the app that day). `0003_spreadsheet_reports.sql` brings them over as published, so the map shows what it showed before. They may be the user's tests; if so they are to be withdrawn.
+- **Migrations from the schema (user, 2026-10-05):** migrations are generated from `worker/src/schema.ts` with `drizzle-kit` (`drizzle.config.ts`, `npm run db:generate`), no longer written by hand. `20261005232644_baseline.sql` is the starting point: its snapshot describes the tables the three hand-written migrations created, and the file itself does nothing. Generated names carry a timestamp, so they sort after `0001` to `0003`. Checked: with the schema unchanged the generator reports nothing to migrate; with a trial column added it wrote only `ALTER TABLE reports ADD trial text` (then removed). The SQL it would write for the whole schema matches `0001_reports.sql`, except that it marks the text primary key `NOT NULL`, which the existing table does not; ids are always given by the Worker, so this makes no difference in use.

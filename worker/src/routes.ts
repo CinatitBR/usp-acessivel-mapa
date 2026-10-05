@@ -7,7 +7,7 @@ export type Route =
   | { kind: 'positions'; codes: number[] }
   /** One walking route from openrouteservice. The points are `lng,lat` strings with 5 decimals. */
   | { kind: 'ors'; profile: OrsProfile; from: string; to: string }
-  /** The reports that reviewers have published in the spreadsheet. */
+  /** The reports that reviewers have published. */
   | { kind: 'reports' }
   /** A new report, in the request's body, to add to the reviewers' queue. */
   | { kind: 'submit-report' }

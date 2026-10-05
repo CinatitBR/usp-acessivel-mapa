@@ -267,34 +267,25 @@ Map rendering by [MapLibre GL JS](https://maplibre.org/). Tiles by [OpenFreeMap]
 
 ## Reports
 
-People's reports of barriers (a blocked passage, a step, a narrow sidewalk, an elevator or an accessible toilet that is out of service or missing) are drawn on the map once a reviewer has published them. The plan and what is built so far are in `REPORTS_PLAN.md`; at this stage reports are entered by hand in a spreadsheet.
+People report barriers from the app ("Relatar"): a blocked passage, a step, a narrow sidewalk, an elevator or an accessible toilet that is out of service or missing. A report is drawn on the map once a reviewer has published it. The plan and what is built so far are in `REPORTS_PLAN.md`.
 
-To connect a spreadsheet:
+Reports are the Worker's own data, in a Cloudflare D1 database (`worker/migrations/`). Nothing about the sender is stored. The Worker checks each report (a known type with one of its own answers, a place on campus, a short note), allows three a minute per network address, and keeps it as `pending`.
 
-1. In a Google Sheet, make a tab that holds **only published reports and only public columns**, with this header row: `id`, `tipo`, `resposta`, `lng`, `lat`, `alvo`, `desde`, `ate`, `nota`. Anyone with the tab's link can read it.
-2. File → Share → Publish to web → that tab → CSV. Copy the link.
-3. Put the link in `REPORTS_CSV_URL` in `worker/wrangler.jsonc` and run `npm run deploy:worker`.
+To change the database, change `worker/src/schema.ts` and run `npm run db:generate`: it writes the migration into `worker/migrations/`. Then apply it with `npm run db:migrate:local` and `npm run db:migrate`. Migrations are not written by hand (the first three were, before this was set up).
 
-| Column | What to write |
-|---|---|
-| `id` | A short name of your own, unique: `r12` |
-| `tipo` | `bloqueio`, `degrau`, `estreita`, `elevador` or `banheiro` |
-| `resposta` | For the first three, can one get through: `sim`, `ajuda` or `nao`. For `elevador`: `quebrado` or `inexistente`. For `banheiro`: `interditado` or `inexistente` |
-| `lng`, `lat` | The position, in degrees |
-| `alvo` | Optional: the id of the building or accessibility point (`way/158966879`) |
-| `desde` | The day it was reported: `2026-10-05` or `05/10/2026` |
-| `ate` | Optional: the last day it shows. Without it, a blocked passage shows for 7 days and an elevator or toilet out of service for 14; the others stay |
-| `nota` | Optional: a public note, up to 280 characters |
+Setting up, once:
 
-A change in the spreadsheet reaches the map within about ten minutes.
+1. `npx wrangler d1 create usp-campus-db`, and put the id it prints as `database_id` in `worker/wrangler.jsonc`.
+2. `npm run db:migrate` creates the tables in that database. `npm run db:migrate:local` does the same for the copy `npm run worker:dev` uses.
+3. `npm run deploy:worker`.
 
-### Receiving reports from the app
+Until the review page exists, a report is published from the command line (add `--local` instead of `--remote` for the local copy):
 
-People send reports from the app ("Relatar"). The Worker passes each one to a Google Form whose answers land in the review spreadsheet; nothing shows on the map until a reviewer copies the row to the published tab.
+```
+npx wrangler d1 execute usp-campus-db --remote -c worker/wrangler.jsonc \
+  --command "SELECT id, type, answer, note, since FROM reports WHERE status = 'pending'"
+npx wrangler d1 execute usp-campus-db --remote -c worker/wrangler.jsonc \
+  --command "UPDATE reports SET status = 'published', public_note = note WHERE id = 'r-xxxxxxxx'"
+```
 
-1. Create a Google Form with nine short-answer questions named after the columns of the published tab: `id`, `tipo`, `resposta`, `lng`, `lat`, `alvo`, `desde`, `ate`, `nota`. None required, no sign-in required, and do not collect e-mail addresses.
-2. In the Form's "Responses", link it to the review spreadsheet. The answers arrive in a new tab with its header row already written, which must **not** be the published one.
-3. In the Form's menu choose "Get pre-filled link", answer every question with its own name (`tipo` in the question tipo, and so on), and copy the link.
-4. Put the link in `REPORTS_FORM_LINK` in `worker/wrangler.jsonc` and run `npm run deploy:worker`.
-
-The Worker fills every column: it gives the report an `id` and leaves `ate` empty. So a row is published as it arrived: copy it to the published tab, and set `ate` if it is about works. The app recognises its own report by that id once it is published, so do not change it.
+`public_note` is the only note the map shows; `until` (a date like `2026-10-30`) is the last day a report shows. Without it a blocked passage shows for 7 days and an elevator or toilet out of service for 14; the others stay.

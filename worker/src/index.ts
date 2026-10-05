@@ -2,12 +2,13 @@
  * The app's only backend. It holds the Olho Vivo token and the openrouteservice
  * key, signs in to Olho Vivo, forwards a fixed set of read-only calls, adds
  * CORS headers and caches briefly. Responses are the upstream payloads, untouched: all parsing
- * happens in the app's adapters. The one exception is `/reports`, which passes on only the
- * known columns of the reviewers' spreadsheet (see reports.ts).
+ * happens in the app's adapters. Reports are the exception: they are this Worker's own data,
+ * kept in a D1 database (see reports.ts and reportsDb.ts).
  */
 import { DATA_TTL_SECONDS, olhoVivo, UpstreamError } from './olhovivo';
 import { ORS_ROUTE_TTL_SECONDS, orsRoute } from './ors';
-import { MAX_SUBMISSION_BYTES, parseSubmission, reports, REPORTS_TTL_SECONDS, submitReport } from './reports';
+import { MAX_BODY_BYTES, newReportId, parseSubmission, todayInSaoPaulo } from './reports';
+import { insertReport, publishedReports, REPORTS_TTL_SECONDS } from './reportsDb';
 import { checkOrigin, matchRoute, type Route } from './routes';
 
 type ErrorCode = 'bad_request' | 'not_found' | 'forbidden' | 'rate_limited' | 'auth' | 'upstream' | 'timeout';
@@ -21,10 +22,10 @@ const json = (body: unknown, status: number, headers: Record<string, string>) =>
 const failure = (error: ErrorCode, status: number, headers: Record<string, string>, message?: string) =>
   json({ error, status, ...(message && { message }) }, status, { 'Cache-Control': 'no-store', ...headers });
 
-/** Reads, checks and passes on a report. The body is small and bounded, so it is read whole. */
+/** Reads, checks and stores a report, to wait for review. The body is small and bounded, so it is read whole. */
 async function acceptReport(request: Request, env: Env, cors: Record<string, string>): Promise<Response> {
   const text = await request.text();
-  if (text.length > MAX_SUBMISSION_BYTES) return failure('bad_request', 413, cors, 'the report is too large');
+  if (text.length > MAX_BODY_BYTES) return failure('bad_request', 413, cors, 'the report is too large');
   let body: unknown;
   try {
     body = JSON.parse(text);
@@ -34,7 +35,9 @@ async function acceptReport(request: Request, env: Env, cors: Record<string, str
   const submission = parseSubmission(body);
   if ('error' in submission) return failure('bad_request', 400, cors, submission.error);
   // The id lets the app recognise its own report once a reviewer publishes it.
-  const id = await submitReport(submission, env);
+  const id = newReportId();
+  const now = new Date();
+  await insertReport(env.DB, id, submission, todayInSaoPaulo(now), now.toISOString());
   return json({ ok: true, id }, 201, { 'Cache-Control': 'no-store', ...cors });
 }
 
@@ -58,7 +61,10 @@ async function respond(route: Route, request: Request, env: Env, ctx: ExecutionC
         ...cors,
       });
     case 'reports':
-      return json(await reports(env, ctx), 200, { 'Cache-Control': `public, max-age=${REPORTS_TTL_SECONDS}`, ...cors });
+      return json({ reports: await publishedReports(env.DB, todayInSaoPaulo()) }, 200, {
+        'Cache-Control': `public, max-age=${REPORTS_TTL_SECONDS}`,
+        ...cors,
+      });
     case 'submit-report':
       return acceptReport(request, env, cors);
     case 'bad-request':
