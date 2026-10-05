@@ -264,3 +264,26 @@ App layers are always inserted before one of the anchors (see `src/map/anchors.t
 ## Attribution
 
 Map rendering by [MapLibre GL JS](https://maplibre.org/). Tiles by [OpenFreeMap](https://openfreemap.org/), schema © [OpenMapTiles](https://openmaptiles.org/), data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors. Basemap style based on Katu-Maps (MIT License, © 2026 Karri Ojala); the bus stop icon is drawn for this project in the same style. Building addresses by [Nominatim](https://nominatim.org/) (© OpenStreetMap contributors). Descriptions from [Wikipedia](https://pt.wikipedia.org/) (CC BY-SA) and photos from [Wikimedia Commons](https://commons.wikimedia.org/), each credited to its author in the app. Floor plan of the Edifício Vilanova Artigas derived from the drawings of the Serviço Técnico de Infraestrutura, FAUUSP (2025). Interface font [Manrope](https://github.com/sharanda/manrope) (SIL Open Font License) and icons from [Material Symbols](https://fonts.google.com/icons) (Apache License 2.0). Walking routes by [Valhalla](https://valhalla1.openstreetmap.de/) (FOSSGIS) and [openrouteservice](https://openrouteservice.org/).
+
+## Reports
+
+People's reports of barriers (a blocked passage, a step, a narrow sidewalk, an elevator or an accessible toilet that is out of service or missing) are drawn on the map once a reviewer has published them. The plan and what is built so far are in `REPORTS_PLAN.md`; at this stage reports are entered by hand in a spreadsheet.
+
+To connect a spreadsheet:
+
+1. In a Google Sheet, make a tab that holds **only published reports and only public columns**, with this header row: `id`, `tipo`, `resposta`, `lng`, `lat`, `alvo`, `desde`, `ate`, `nota`. Anyone with the tab's link can read it.
+2. File → Share → Publish to web → that tab → CSV. Copy the link.
+3. Put the link in `REPORTS_CSV_URL` in `worker/wrangler.jsonc` and run `npm run deploy:worker`.
+
+| Column | What to write |
+|---|---|
+| `id` | A short name of your own, unique: `r12` |
+| `tipo` | `bloqueio`, `degrau`, `estreita`, `elevador` or `banheiro` |
+| `resposta` | For the first three, can one get through: `sim`, `ajuda` or `nao`. For `elevador`: `quebrado` or `inexistente`. For `banheiro`: `interditado` or `inexistente` |
+| `lng`, `lat` | The position, in degrees |
+| `alvo` | Optional: the id of the building or accessibility point (`way/158966879`) |
+| `desde` | The day it was reported: `2026-10-05` or `05/10/2026` |
+| `ate` | Optional: the last day it shows. Without it, a blocked passage shows for 7 days and an elevator or toilet out of service for 14; the others stay |
+| `nota` | Optional: a public note, up to 280 characters |
+
+A change in the spreadsheet reaches the map within about ten minutes.

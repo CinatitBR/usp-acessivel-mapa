@@ -4,7 +4,7 @@ import type { AccessFeatureKind, AccessStatus } from '../../domain/types';
 import { addBadgeImages, type Badge, type BadgeShape, type Glyph } from '../../map/badgeIcon';
 import { ACCESS_KINDS } from './parse';
 
-const GLYPHS: Record<AccessFeatureKind, Glyph> = {
+export const ACCESS_GLYPHS: Record<AccessFeatureKind, Glyph> = {
   ramp: { path: 'M3 19h18V7z' },
   elevator: { path: 'M12 3l5 6H7z M12 21l-5-6h10z' },
   entrance: { path: 'M6 3h12v18H6z M13.4 12a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0-2.6 0z' },
@@ -35,7 +35,7 @@ function badgeOf(kind: AccessFeatureKind, status: AccessStatus): Badge {
     outline: hollow ? color : '#ffffff',
     outlineWidth: hollow ? 2 : 1.5,
     ink: hollow ? color : '#ffffff',
-    glyph: GLYPHS[kind],
+    glyph: ACCESS_GLYPHS[kind],
   };
 }
 

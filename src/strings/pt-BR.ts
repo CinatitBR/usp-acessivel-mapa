@@ -1,3 +1,4 @@
+import type { ReportType } from '../domain/reports';
 import type { AccessFeatureKind, AccessStatus, PoiCategory } from '../domain/types';
 
 /** Every user-facing string lives here so the UI can be translated later. */
@@ -200,6 +201,29 @@ export const strings = {
   },
   place: {
     offCampus: 'Local fora do campus',
+  },
+  reports: {
+    subtitle: 'Relato de quem passou por aqui',
+    types: {
+      blocked: 'Passagem bloqueada',
+      step: 'Degrau ou falta de rampa',
+      narrow: 'Calçada estreita',
+      elevator: 'Elevador',
+      toilet: 'Banheiro acessível',
+    } satisfies Record<ReportType, string>,
+    /** An elevator or an accessible toilet that does not work, or is not there. */
+    states: {
+      broken: { elevator: 'Elevador fora de serviço', toilet: 'Banheiro acessível interditado' },
+      closed: { elevator: 'Elevador fora de serviço', toilet: 'Banheiro acessível interditado' },
+      missing: { elevator: 'Não há elevador', toilet: 'Não há banheiro acessível' },
+    },
+    passable: { yes: 'Dá para passar', help: 'Só com ajuda', no: 'Não dá para passar' },
+    since: 'Relatado em',
+    until: 'vale até',
+    gone: 'Este relato não está mais no mapa',
+    inBuilding: 'Relatos neste prédio',
+    layer: 'Avisos temporários',
+    layerHint: 'Obras, bloqueios e elevadores fora de serviço relatados por quem passou.',
   },
   access: {
     title: 'Acessibilidade',

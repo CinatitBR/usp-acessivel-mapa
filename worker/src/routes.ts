@@ -7,6 +7,8 @@ export type Route =
   | { kind: 'positions'; codes: number[] }
   /** One walking route from openrouteservice. The points are `lng,lat` strings with 5 decimals. */
   | { kind: 'ors'; profile: OrsProfile; from: string; to: string }
+  /** The reports that reviewers have published in the spreadsheet. */
+  | { kind: 'reports' }
   | { kind: 'bad-request'; message: string }
   | { kind: 'not-found' };
 
@@ -40,6 +42,9 @@ export function matchRoute(method: string, url: URL): Route {
   switch (url.pathname) {
     case '/health':
       return { kind: 'health' };
+
+    case '/reports':
+      return { kind: 'reports' };
 
     case '/olhovivo/Previsao/Parada': {
       const stop = parseCode(url.searchParams.get('codigoParada'));

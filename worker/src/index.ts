@@ -2,10 +2,12 @@
  * The app's only backend. It holds the Olho Vivo token and the openrouteservice
  * key, signs in to Olho Vivo, forwards a fixed set of read-only calls, adds
  * CORS headers and caches briefly. Responses are the upstream payloads, untouched: all parsing
- * happens in the app's adapters.
+ * happens in the app's adapters. The one exception is `/reports`, which passes on only the
+ * known columns of the reviewers' spreadsheet (see reports.ts).
  */
 import { DATA_TTL_SECONDS, olhoVivo, UpstreamError } from './olhovivo';
 import { ORS_ROUTE_TTL_SECONDS, orsRoute } from './ors';
+import { reports, REPORTS_TTL_SECONDS } from './reports';
 import { checkOrigin, matchRoute, type Route } from './routes';
 
 type ErrorCode = 'bad_request' | 'not_found' | 'forbidden' | 'rate_limited' | 'auth' | 'upstream' | 'timeout';
@@ -38,6 +40,8 @@ async function respond(route: Route, env: Env, ctx: ExecutionContext, cors: Reco
         'Cache-Control': `public, max-age=${ORS_ROUTE_TTL_SECONDS}`,
         ...cors,
       });
+    case 'reports':
+      return json(await reports(env, ctx), 200, { 'Cache-Control': `public, max-age=${REPORTS_TTL_SECONDS}`, ...cors });
     case 'bad-request':
       return failure('bad_request', 400, cors, route.message);
     case 'not-found':
@@ -57,8 +61,9 @@ export default {
       response = failure('forbidden', 403, {});
     } else if (request.method === 'OPTIONS') {
       response = new Response(null, { status: 204, headers: origin.headers });
-    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors') {
+    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors' || route.kind === 'reports') {
       const client = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+      // Reports share the general limit; only routing has a stricter one.
       const limiter = route.kind === 'ors' ? env.ORS_LIMITER : env.OLHOVIVO_LIMITER;
       const { success } = await limiter.limit({ key: client });
       if (!success) {

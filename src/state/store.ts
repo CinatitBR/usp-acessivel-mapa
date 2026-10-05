@@ -9,6 +9,7 @@ import {
   storeLiteChoice,
 } from '../features/litemode/detect';
 import type { Snap } from '../ui/sheetSnap';
+import { readReportsVisible, storeReportsVisible } from '../features/reports/visibility';
 import { readPoiCategories, storePoiCategories, togglePoiCategory } from '../features/pois/visibility';
 
 export type MapStatus = 'loading' | 'ready' | 'error';
@@ -20,6 +21,8 @@ export type Selection =
   | { kind: 'institute'; id: string; position: LngLat }
   | { kind: 'access'; id: string; position: LngLat }
   | { kind: 'stop'; id: string; position: LngLat }
+  /** A report published on the map. */
+  | { kind: 'report'; id: string; position: LngLat }
   /** A moving bus: no fixed position, so no marker. `fromStop` is the stop whose arrivals it was opened from. */
   | { kind: 'bus'; id: string; fromStop?: string }
   /** A room of the open floor plan; it is highlighted in place. */
@@ -81,6 +84,10 @@ type AppState = {
   /** POI categories drawn on the map, chosen in the layer menu and remembered on this device. */
   poiCategories: readonly PoiCategory[];
   togglePoiCategory: (category: PoiCategory) => void;
+
+  /** Temporary reports (works, a broken elevator) are drawn on the map; remembered on this device. */
+  reportsVisible: boolean;
+  toggleReportsVisible: () => void;
 
   /** The user's explicit choice for lite mode (no Three.js layer); `auto` follows the device. */
   liteChoice: LiteChoice;
@@ -172,6 +179,13 @@ export const useAppStore = create<AppState>((set) => ({
     set(({ hiddenAccessKinds: hidden }) => ({
       hiddenAccessKinds: hidden.includes(kind) ? hidden.filter((other) => other !== kind) : [...hidden, kind],
     })),
+
+  reportsVisible: readReportsVisible(),
+  toggleReportsVisible: () =>
+    set((state) => {
+      storeReportsVisible(!state.reportsVisible);
+      return { reportsVisible: !state.reportsVisible };
+    }),
 
   poiCategories: readPoiCategories(),
   togglePoiCategory: (category) =>

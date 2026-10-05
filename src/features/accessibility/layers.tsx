@@ -1,11 +1,13 @@
 import { Layer, Source, useMap } from '@vis.gl/react-maplibre';
 import type { FilterSpecification, SymbolLayerSpecification } from 'maplibre-gl';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ANCHORS } from '../../map/anchors';
 import { SELECTED_SUFFIX } from '../../map/badgeIcon';
 import { dataUrl } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { ACCESS_ICON_PREFIX, addAccessIcons } from './icons';
+import { isTemporary } from '../../domain/reports';
+import { useReports } from '../reports/useReports';
 import { ACCESS_KINDS } from './parse';
 
 export const ACCESS_SOURCE = 'accessibility';
@@ -38,6 +40,9 @@ export function AccessibilityLayers() {
   // is no use here: it is also false whenever tiles are still loading.
   const mapReady = useAppStore((state) => state.mapStatus === 'ready');
   const [iconsReady, setIconsReady] = useState(false);
+  // A point with a temporary report (an elevator out of service) is drawn as that report instead.
+  const reports = useReports();
+  const reported = useMemo(() => reports.filter((report) => report.target && isTemporary(report)).map((report) => report.target!), [reports]);
 
   useEffect(() => {
     if (!map || !accessMode || !mapReady) return;
@@ -49,7 +54,7 @@ export function AccessibilityLayers() {
 
   const visible = ACCESS_KINDS.filter((kind) => !hidden.includes(kind));
   const isSelected: FilterSpecification = ['==', ['get', 'id'], selectedId];
-  const filter: FilterSpecification = ['all', ['in', ['get', 'kind'], ['literal', visible]], ['!', isSelected]];
+  const filter: FilterSpecification = ['all', ['in', ['get', 'kind'], ['literal', visible]], ['!', isSelected], ['!', ['in', ['get', 'id'], ['literal', reported]]]];
   return (
     <Source id={ACCESS_SOURCE} type="geojson" data={ACCESS_URL} promoteId="id">
       <Layer id={ACCESS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={MIN_ZOOM} layout={layout} filter={filter} />

@@ -7,13 +7,14 @@ import { Icon } from './Icon';
 /** Shape as well as colour, so the status does not depend on colour vision. */
 const SYMBOL: Record<AccessStatus, string> = { yes: '✓', partial: '◐', no: '✕', unknown: '?' };
 
-export function StatusBadge({ status, label }: { status: AccessStatus; label?: string }) {
+/** `text` replaces the status's own words; `label` goes before them. */
+export function StatusBadge({ status, label, text }: { status: AccessStatus; label?: string; text?: string }) {
   return (
     <p className={`access-status access-${status}`} style={{ '--status-color': ACCESS_COLORS[status] } as CSSProperties}>
       <span aria-hidden="true" className="access-symbol">
         {SYMBOL[status]}
       </span>
-      {label ? `${label}: ${strings.access.status[status].toLowerCase()}` : strings.access.status[status]}
+      {text ?? (label ? `${label}: ${strings.access.status[status].toLowerCase()}` : strings.access.status[status])}
     </p>
   );
 }

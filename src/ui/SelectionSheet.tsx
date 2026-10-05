@@ -4,6 +4,7 @@ import { BuildingPanel } from '../features/buildings/BuildingPanel';
 import { RoomPanel } from '../features/indoor/RoomPanel';
 import { InstitutePanel } from '../features/institutes/InstitutePanel';
 import { PoiPanel } from '../features/pois/PoiPanel';
+import { ReportPanel } from '../features/reports/ReportPanel';
 import { RoutePanel } from '../features/routing/RoutePanel';
 import { BusPanel } from '../features/transit/BusPanel';
 import { StopPanel } from '../features/transit/StopPanel';
@@ -36,6 +37,8 @@ function panelFor(selection: Selection, onClose: () => void) {
       return <PoiPanel id={selection.id} />;
     case 'access':
       return <AccessFeaturePanel id={selection.id} />;
+    case 'report':
+      return <ReportPanel id={selection.id} />;
     case 'stop':
       return <StopPanel id={selection.id} />;
     case 'room':

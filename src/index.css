@@ -1626,3 +1626,15 @@ input {
   }
 
 }
+
+/* A report in a building's panel: what it says, and its dates on a second line */
+.report-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.report-row .access-status {
+  margin: 0;
+}

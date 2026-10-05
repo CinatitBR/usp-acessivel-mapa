@@ -11,18 +11,29 @@
   "vars": {
     // Comma-separated origins allowed to call this Worker from a browser.
     // Local dev and preview, plus the production site.
-    "ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:4173,https://usp-campus-map.pages.dev"
+    "ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:4173,https://usp-campus-map.pages.dev",
+    // The spreadsheet tab with the published reports, published to the web as CSV
+    // (https://docs.google.com/spreadsheets/d/e/.../pub?gid=...&single=true&output=csv). Empty: no reports.
+    "REPORTS_CSV_URL": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBPK_PA4kKlmSmD2EqpR98gIBLL0Sgyu6MyNW4lE18W4155Y80ezzrWpP-j86qspKhDLXSB342jVwr/pub?gid=0&single=true&output=csv",
   },
 
   // Per-client limits: 60 requests per minute on the Olho Vivo routes, 10 on routing.
   "ratelimits": [
-    { "name": "OLHOVIVO_LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
-    { "name": "ORS_LIMITER", "namespace_id": "1002", "simple": { "limit": 10, "period": 60 } }
+    {
+      "name": "OLHOVIVO_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 60, "period": 60 },
+    },
+    {
+      "name": "ORS_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 10, "period": 60 },
+    },
   ],
 
   "observability": {
     "enabled": true,
     "logs": { "enabled": true, "head_sampling_rate": 1 },
-    "traces": { "enabled": true, "head_sampling_rate": 0.01 }
-  }
+    "traces": { "enabled": true, "head_sampling_rate": 0.01 },
+  },
 }

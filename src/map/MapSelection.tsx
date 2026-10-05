@@ -6,6 +6,7 @@ import { ACCESS_LAYER, ACCESS_SELECTED_LAYER } from '../features/accessibility/l
 import { BUILDINGS_LAYER, BUILDINGS_SOURCE } from '../features/buildings/layers';
 import { INDOOR_ROOMS_LAYER, INDOOR_SLAB_LAYER, PASSAGE_CATEGORIES } from '../features/indoor/layers';
 import { POIS_LAYER, POIS_SELECTED_LAYER } from '../features/pois/layers';
+import { REPORTS_LAYER, REPORTS_SELECTED_LAYER } from '../features/reports/layers';
 import { STOPS_LAYER, STOPS_SELECTED_LAYER } from '../features/transit/layers';
 import { BUSES_LAYER } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
@@ -18,7 +19,9 @@ const CENTER_MS = 600;
 const SETTLE_MS = 2500;
 
 /** Point layers that can be tapped, and the selection each one produces. A selected symbol lives in its own layer. */
-const POINT_KINDS: Record<string, 'access' | 'stop' | 'poi'> = {
+const POINT_KINDS: Record<string, 'access' | 'stop' | 'poi' | 'report'> = {
+  [REPORTS_LAYER]: 'report',
+  [REPORTS_SELECTED_LAYER]: 'report',
   [ACCESS_LAYER]: 'access',
   [ACCESS_SELECTED_LAYER]: 'access',
   [STOPS_LAYER]: 'stop',
@@ -101,8 +104,8 @@ export function MapSelection() {
     };
   }, [map, flyTarget]);
 
-  // Stops, POIs and accessibility points mark themselves with a larger symbol; the pin is for what has none.
+  // Stops, POIs, reports and accessibility points mark themselves with a larger symbol; the pin is for what has none.
   if (!selection || !('position' in selection)) return null;
-  if (selection.kind === 'stop' || selection.kind === 'poi' || (selection.kind === 'access' && accessMode)) return null;
+  if (selection.kind === 'stop' || selection.kind === 'poi' || selection.kind === 'report' || (selection.kind === 'access' && accessMode)) return null;
   return <Marker longitude={selection.position[0]} latitude={selection.position[1]} anchor="bottom" color={MAP_ACCENT} />;
 }

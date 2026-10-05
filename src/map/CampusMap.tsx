@@ -15,6 +15,7 @@ import { BuildingLayers } from '../features/buildings/layers';
 import { IndoorLayers } from '../features/indoor/layers';
 import { FpsWatchdog } from '../features/litemode/LiteMode';
 import { PoiLayers } from '../features/pois/layers';
+import { ReportLayers } from '../features/reports/layers';
 import { RouteLayers } from '../features/routing/layers';
 import { FollowCamera } from '../features/transit/FollowCamera';
 import { FollowedLine } from '../features/transit/FollowedLine';
@@ -71,6 +72,7 @@ export function CampusMap() {
       <Scene3D />
       <FpsWatchdog />
       <AccessibilityLayers />
+      <ReportLayers />
       {/* Before anything that moves the camera, so the padding is in place first. */}
       <SheetPadding />
       <MapSelection />

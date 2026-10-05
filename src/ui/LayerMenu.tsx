@@ -16,6 +16,8 @@ export function LayerMenu() {
   const visible = useAppStore((state) => state.poiCategories);
   const togglePoiCategory = useAppStore((state) => state.togglePoiCategory);
   const accessMode = useAppStore((state) => state.accessMode);
+  const reportsVisible = useAppStore((state) => state.reportsVisible);
+  const toggleReportsVisible = useAppStore((state) => state.toggleReportsVisible);
 
   useEffect(() => {
     if (!open) return;
@@ -52,6 +54,13 @@ export function LayerMenu() {
             <span>
               <strong>{strings.lite.label}</strong>
               <span className="muted">{strings.lite.hint}</span>
+            </span>
+            <span className="switch" aria-hidden="true" />
+          </button>
+          <button type="button" className="switch-row" role="switch" aria-checked={reportsVisible} onClick={toggleReportsVisible}>
+            <span>
+              <strong>{strings.reports.layer}</strong>
+              <span className="muted">{strings.reports.layerHint}</span>
             </span>
             <span className="switch" aria-hidden="true" />
           </button>

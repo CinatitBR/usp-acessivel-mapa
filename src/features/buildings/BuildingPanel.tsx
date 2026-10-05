@@ -1,4 +1,5 @@
 import { use } from 'react';
+import { reportStatus } from '../../domain/reports';
 import { loadAccessFeatures, loadBuildings, loadInstitutes } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { buildingKindLabel, strings } from '../../strings/pt-BR';
@@ -6,6 +7,8 @@ import { AccessSummary, StatusBadge } from '../../ui/AccessSummary';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { Icon } from '../../ui/Icon';
 import { WebsiteLink } from '../../ui/WebsiteLink';
+import { reportDates, reportTitle } from '../reports/ReportPanel';
+import { useReports } from '../reports/useReports';
 import { WikiSection } from '../wiki/WikiSection';
 
 export function BuildingPanel({ id }: { id: string }) {
@@ -16,6 +19,8 @@ export function BuildingPanel({ id }: { id: string }) {
   const clearSelection = useAppStore((state) => state.clearSelection);
   const openIndoor = useAppStore((state) => state.openIndoor);
   const indoorOpen = useAppStore((state) => state.indoor?.buildingId === id);
+  // Reports about the building itself or about one of its points (an elevator, an entrance).
+  const reports = useReports().filter((report) => report.target === id || features.some((feature) => feature.id === report.target));
   if (!building) return null;
 
   const institute = institutes.find((candidate) => candidate.id === building.institute);
@@ -38,6 +43,25 @@ export function BuildingPanel({ id }: { id: string }) {
         </>
       }
     >
+      {reports.length > 0 && (
+        <div>
+          <h3 className="list-title">{strings.reports.inBuilding}</h3>
+          <ul className="link-list">
+            {reports.map((report) => (
+              <li key={report.id}>
+                <button
+                  type="button"
+                  className="link-row report-row"
+                  onClick={() => select({ kind: 'report', id: report.id, position: report.position }, report.position)}
+                >
+                  <StatusBadge status={reportStatus(report)} text={reportTitle(report)} />
+                  <span className="muted">{reportDates(report)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {building.address && <p className="muted">{building.address}</p>}
       {institute && (
         <button
