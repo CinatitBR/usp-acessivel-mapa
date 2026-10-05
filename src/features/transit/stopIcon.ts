@@ -1,7 +1,8 @@
 import type { Badge } from '../../map/badgeIcon';
+import { PALETTE } from '../../styles/palette';
 
 export const STOP_ICON = 'stop-bus';
-export const STOP_COLOR = '#1a5fe0';
+export const STOP_COLOR = PALETTE.primary500;
 
 /** The front of a bus: body, windscreen, two headlights and wheels. Drawn for this project, in the style of Katu-Maps. */
 const BUS_FRONT =
@@ -12,8 +13,8 @@ const BUS_FRONT =
 
 export const STOP_BADGE: Badge = {
   shape: 'circle',
-  fill: '#ffffff',
-  outline: '#b8c4d6',
+  fill: PALETTE.neutral0,
+  outline: PALETTE.primary200,
   outlineWidth: 1.5,
   ink: STOP_COLOR,
   glyph: { path: BUS_FRONT },

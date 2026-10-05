@@ -107,7 +107,7 @@ With the token in place, run `npm run data:transit` once more: it also looks up 
 
 ## Walking routes
 
-The round arrow button (or "Rota até aqui" in any detail panel) opens the route panel. Each end is chosen by tapping the map, picking a search result, or "Usar minha localização". There are two kinds of route:
+The round arrow button (or "Rota até aqui" in any detail panel) opens the route panel. Each end is a field in the panel: type in it and pick one of the places listed under it, or "Usar minha localização", which is always the first of them. The panel opens with the cursor in the end that is still missing. There are two kinds of route:
 
 | Kind | First choice | Fallback |
 |---|---|---|
@@ -193,6 +193,21 @@ The extraction keeps straight lines along the building's axes that are at least 
 ### What the FAU plan does not say
 
 The plan is the 2025 drawing of FAU's Serviço Técnico de Infraestrutura; only geometry derived from it is published, with credit in the room sheet. Each floor of the building is two half-levels joined by ramps, and the sheets do not mark which room is on which, so a room shows its floor's pair of heights. Some rooms are unnamed on the sheets and are left blank, and the borders of the three departments on floor 1 are estimates. `INDOOR_PLAN.md` lists what still needs checking on site.
+
+## Visual identity
+
+The look of the interface comes from the project's Figma file: the Manrope font, a blue scale on neutral greys, pill buttons with icons, chips, cards and a bottom sheet.
+
+- **Tokens.** `src/styles/tokens.css` is the only place with colours, font sizes, weights, radii and shadows. It has the two Figma scales (Primary and Neutral, 50 to 900), the four status colours, and *roles* built on them (`--surface`, `--text`, `--muted`, `--heading`, `--accent`, `--accent-tonal`, `--chip`, `--border` and so on). The rest of the CSS uses the roles, never a step of a scale. `npm test` fails if a colour or type literal appears in `src/index.css`, if a token is used without being defined, or if a pair of text and background colours falls under 4.5:1.
+- **Text styles**, as in Figma (size / line height): Display 40/48, Heading 32/40, Title 24/32, Subtitle 20/28, Body 16/24, Body small 14/20 and Label 12/16, in `rem`, so the browser's text size setting applies. Titles are semibold, subtitles and labels medium, body regular. Nothing is smaller than Label.
+- **Two tokens are not in Figma**: `success-700` and `warning-700`, darker steps for green and amber text and for the green chip with white text (white on the Figma green is only 2.3:1).
+- **Font.** Manrope is served with the app from `src/assets/fonts/manrope-latin.woff2`: the variable font cut down to Latin with Portuguese accents (24 KB, weights 200 to 800). To rebuild it from the full file: `python3 -m fontTools.subset Manrope-VariableFont_wght.ttf --unicodes="U+0020-007E,U+00A0-00FF,U+0131,U+0152-0153,U+2013-2014,U+2018-201A,U+201C-201E,U+2022,U+2026,U+2032-2033,U+2039-203A,U+20AC,U+2190-2193,U+2212" --flavor=woff2 --layout-features='*' --output-file=src/assets/fonts/manrope-latin.woff2` (needs `fonttools` and `brotli`). Names on the map itself stay in Noto Sans, which comes with the map tiles.
+- **Icons.** `src/ui/Icon.tsx` holds the app's icons as SVG paths copied from Material Symbols (rounded, weight 400), so there is no icon font. To add one, copy the `d` of its 24 px SVG into `PATHS`.
+- **On the map.** MapLibre cannot read CSS variables, so the few tokens drawn on the map (the route line, the pin, bus stops, label colours) are repeated in `src/styles/palette.ts`; a test keeps the two files equal. Colours that carry meaning are not part of the identity and keep their own values: accessibility status, bus lines, POI categories, indoor room categories, the stairs warning on a route.
+- **The bottom sheet.** On a phone the detail panel lies over the bottom of the map and rests at three heights (header, 45% of the screen, almost full). It is dragged by its handle and header, or with a finger on its content; the handle is also a button and the arrow keys move it. The snapping rules are in `src/ui/sheetSnap.ts`. The sheet reports how much of the map it covers, which moves the attribution, the toast and the floor switcher above it and makes the camera centre things in the part that shows (`src/map/SheetPadding.tsx`). From 760 px the panel stands beside the map instead.
+- **Touch and keyboard.** Controls are 44 px or have a 44 px touch area (MapLibre's own zoom buttons are enlarged for this), every control shows the same focus ring, and motion of the sheet is skipped under "reduce motion".
+
+The plan and what was built at each step are in `UI_PLAN.md`.
 
 ## Places on the map
 

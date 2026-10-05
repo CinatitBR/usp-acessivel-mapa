@@ -9,7 +9,7 @@ import { POIS_LAYER, POIS_SELECTED_LAYER } from '../features/pois/layers';
 import { STOPS_LAYER, STOPS_SELECTED_LAYER } from '../features/transit/layers';
 import { BUSES_LAYER } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
-import { strings } from '../strings/pt-BR';
+import { MAP_ACCENT } from '../styles/palette';
 
 const FLY_MIN_ZOOM = 17;
 /** How long the camera takes to centre on a tapped symbol. */
@@ -37,19 +37,10 @@ export function MapSelection() {
   useEffect(() => {
     if (!map) return;
     const onClick = (event: MapMouseEvent) => {
-      const { select, clearSelection, routePlan, setRouteEnd } = useAppStore.getState();
+      const { select, clearSelection } = useAppStore.getState();
       // Small symbols win over the building underneath them.
       const layers = [BUSES_LAYER, ...Object.keys(POINT_KINDS), INDOOR_ROOMS_LAYER, INDOOR_SLAB_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
       const feature = layers.length > 0 ? map.queryRenderedFeatures(event.point, { layers })[0] : undefined;
-      if (routePlan?.picking) {
-        // While an end of the route is being chosen, a tap sets it instead of selecting.
-        const name: unknown = feature?.properties.name;
-        setRouteEnd(routePlan.picking, {
-          label: typeof name === 'string' && name ? name : strings.route.mapPoint,
-          position: event.lngLat.toArray(),
-        });
-        return;
-      }
       // A tap on the bare floor of an open plan, or on a corridor, keeps whatever is selected.
       if (feature?.layer.id === INDOOR_SLAB_LAYER) return;
       const id: unknown = feature?.properties.id;
@@ -113,5 +104,5 @@ export function MapSelection() {
   // Stops, POIs and accessibility points mark themselves with a larger symbol; the pin is for what has none.
   if (!selection || !('position' in selection)) return null;
   if (selection.kind === 'stop' || selection.kind === 'poi' || (selection.kind === 'access' && accessMode)) return null;
-  return <Marker longitude={selection.position[0]} latitude={selection.position[1]} anchor="bottom" />;
+  return <Marker longitude={selection.position[0]} latitude={selection.position[1]} anchor="bottom" color={MAP_ACCENT} />;
 }

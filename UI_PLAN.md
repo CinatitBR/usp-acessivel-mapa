@@ -207,3 +207,21 @@ Each one ends working and is shown to the user before the next; commits only whe
 - **Floor switcher**: a pill of round buttons with the current floor filled; the floor's name in a white card.
 - Checked with screenshots of each panel raised to its full height at 390 × 844 and beside the map at 1280 × 800 (building, building with accessibility data, institute, POI, accessibility point, stop, route with and without an end being chosen, indoor map, room), no console errors.
 - **Not seen:** the bus panel and its stop timeline, because no live bus was on the map during the check. Their classes were restyled only through the shared tokens and the "Seguir" pill.
+
+### U5: map colours, accessibility pass, documentation (2026-10-05)
+
+- **On the map**: the route line is primary 500 over its white casing; the pin of a selected place and the outline of a selected room are primary 600; bus stops are primary 500 on white with a primary 200 rim; names the app writes on the map are neutral 900 (stops primary 800). These values live in `src/styles/palette.ts`, because MapLibre cannot read CSS variables, and a test keeps them equal to `tokens.css`. Colours that carry meaning (access status, bus lines, POI and room categories, the stairs warning) are unchanged.
+- **Touch targets**: MapLibre's zoom and compass buttons go from 29 to 44 px, and the two map buttons and the layer menu moved down to make room. Chips, the photo arrows, the toast's button, the sheet's back link and its handle keep their size and get a 44 px touch area. What is still smaller: the links inside running text (attribution, photo credits, "Ler na Wikipédia") and MapLibre's small attribution button.
+- **Keyboard**: tabbed through the page with a building open. Every control shows the 3 px accent ring, including MapLibre's own buttons, which had a different one. The order follows the page: the map and its controls first, then search, the accessibility switch, the map buttons and the sheet.
+- **Text at 200%**: checked the building, route, stop and indoor screens with the root font size doubled. Everything stays readable and reachable. Two things were fixed for it: the line badge on a stop no longer breaks in two, and the legend's entries wrap instead of running out of their card. Left as is: at 200% the legend and the floor switcher overlap when both are open on a phone.
+- **Reduced motion**: the sheet and what rides on it do not animate. Camera moves are MapLibre's and were not changed.
+- **Wide screens**: reviewed by screenshot at 1280 × 800 after each milestone; the panel beside the map needed no change beyond the action row wrapping (U4).
+- **Sizes**, built before the redesign and now: CSS 98.5 → 108.3 kB (gzip 14.1 → 15.6), JavaScript 350.4 → 365.4 kB (gzip 111.9 → 118.1), plus the 23.8 kB font. The precache grew from 2,874 to 2,921 KiB.
+- README has a "Visual identity" section. `npm test`, `npm run typecheck`, `npm run check:data` and `npm run build` pass.
+- **Still open from earlier milestones:** the font is not preloaded (U1); the bus panel and its timeline have not been seen in the new style (U4); flicks and the feel of the sheet under a finger need a real phone (U3).
+
+### After U5: route ends typed in the panel (2026-10-05, user's request)
+
+- Each end of a route is a text field in the route panel's card (`src/features/routing/RouteEndField.tsx`). While it is typed in, the places that match are listed under it, campus first and then outside it, with "Usar minha localização" always first; arrows and Enter choose, Escape ends the typing without closing the panel. The panel opens with the cursor in the end that is still missing, and moves to the other end after a choice if that one is empty.
+- The main search box no longer takes part in choosing an end, and a tap on the map no longer sets one; the store's "picking" state is gone. The search logic the two boxes share is in `src/features/search/usePlaceSearch.ts`.
+- On a phone the sheet goes to its highest rest while a field has the focus and back to half afterwards, and the page's viewport now shrinks with the on-screen keyboard (`interactive-widget=resizes-content`), so the sheet stays above it. Neither can be seen in headless Chrome, which has no on-screen keyboard.

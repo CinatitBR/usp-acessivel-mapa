@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from '../../ui/Icon';
 import type { RouteProfile } from '../../domain/types';
 import { useOnline } from '../../lib/useOnline';
@@ -6,6 +6,7 @@ import { type RouteEnd, type RoutePlan, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { formatDistance, formatDuration } from './format';
+import { RouteEndField } from './RouteEndField';
 import { type RouteResult, useRoute } from './useRoute';
 
 const ENDS: RouteEnd[] = ['from', 'to'];
@@ -47,7 +48,6 @@ function Result({ result }: { result: RouteResult }) {
 
 /** Plans a walking route: two ends, a profile, and the result. */
 export function RoutePanel({ plan }: { plan: RoutePlan }) {
-  const pickRouteEnd = useAppStore((state) => state.pickRouteEnd);
   const setRouteEnd = useAppStore((state) => state.setRouteEnd);
   const setRouteProfile = useAppStore((state) => state.setRouteProfile);
   const swapRouteEnds = useAppStore((state) => state.swapRouteEnds);
@@ -66,35 +66,40 @@ export function RoutePanel({ plan }: { plan: RoutePlan }) {
     );
   };
 
+  // The panel opens ready for typing: at the end that is still missing, the destination first.
+  const fields = { from: useRef<HTMLInputElement>(null), to: useRef<HTMLInputElement>(null) };
+  useEffect(() => {
+    const { routePlan } = useAppStore.getState();
+    if (!routePlan?.to) fields.to.current?.focus();
+    else if (!routePlan.from) fields.from.current?.focus();
+    // Only when the panel opens.
+  }, []);
+  /** After an end is chosen: on to the other one if it is empty, or done with typing. */
+  const afterChoice = (end: RouteEnd) => {
+    const other = end === 'from' ? 'to' : 'from';
+    if (useAppStore.getState().routePlan?.[other]) fields[end].current?.blur();
+    else fields[other].current?.focus();
+  };
+
   const ready = plan.from && plan.to;
   return (
     <BottomSheet title={strings.route.title} onClose={closeRoute}>
       <div className="route-ends">
         {ENDS.map((end) => (
-          <button
+          <RouteEndField
             key={end}
-            type="button"
-            className="route-end"
-            aria-pressed={plan.picking === end}
-            onClick={() => pickRouteEnd(plan.picking === end ? null : end)}
-          >
-            <span className="muted">{strings.route[end]}</span>
-            <span>{plan[end]?.label ?? strings.route.choose}</span>
-          </button>
+            end={end}
+            point={plan[end]}
+            inputRef={fields[end]}
+            onChosen={() => afterChoice(end)}
+            onUseLocation={() => useMyLocation(end)}
+          />
         ))}
         <button type="button" className="route-swap" aria-label={strings.route.swap} title={strings.route.swap} onClick={swapRouteEnds}>
           <Icon name="swap" />
         </button>
       </div>
-      {plan.picking && (
-        <div className="route-pick" role="status">
-          <p className="muted">{strings.route.pickHint[plan.picking]}</p>
-          <button type="button" className="chip" onClick={() => useMyLocation(plan.picking!)}>
-            {strings.route.useMyLocation}
-          </button>
-          {locationFailed && <p className="route-warning">{strings.route.locationError}</p>}
-        </div>
-      )}
+      {locationFailed && <p className="route-warning">{strings.route.locationError}</p>}
       <div className="chips chips-wrap" role="group" aria-label={strings.route.profile}>
         {PROFILES.map((profile) => (
           <button

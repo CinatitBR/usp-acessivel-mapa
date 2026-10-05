@@ -6,6 +6,7 @@ import { ANCHORS } from '../../map/anchors';
 import { useAppStore } from '../../state/store';
 import { zoomToFit } from './camera';
 import { useOpenPlan } from './usePlan';
+import { MAP_ACCENT } from '../../styles/palette';
 
 export const INDOOR_SLAB_LAYER = 'indoor-slab';
 export const INDOOR_ROOMS_LAYER = 'indoor-rooms';
@@ -41,7 +42,7 @@ const IS_PASSAGE: ExpressionSpecification = ['in', ['get', 'cat'], ['literal', P
 const nameFrom = (area: number): ExpressionSpecification => ['case', ['all', ['>=', ['get', 'area'], area], ['!', IS_PASSAGE]], NAME, ''];
 
 const roomPaint: FillLayerSpecification['paint'] = { 'fill-color': ROOM_COLOR };
-const selectedPaint: LineLayerSpecification['paint'] = { 'line-color': '#0b57a4', 'line-width': 3 };
+const selectedPaint: LineLayerSpecification['paint'] = { 'line-color': MAP_ACCENT, 'line-width': 3 };
 const nameLayout: SymbolLayerSpecification['layout'] = {
   // Large rooms are named first; every room has its name from zoom 19.5.
   'text-field': ['step', ['zoom'], '', 17, nameFrom(350), 18.2, nameFrom(60), 19, nameFrom(20), 19.6, NAME],

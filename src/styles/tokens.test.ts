@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { PALETTE } from './palette';
 
 const tokens = readFileSync('src/styles/tokens.css', 'utf8');
 const styles = readFileSync('src/index.css', 'utf8');
@@ -65,5 +66,12 @@ describe('design tokens', () => {
     ];
     const failing = pairs.filter(([text, background]) => contrast(text, background) < 4.5).map((pair) => pair.join(' on '));
     expect(failing).toEqual([]);
+  });
+
+  it('match the copy that is drawn on the map', () => {
+    for (const [name, value] of Object.entries(PALETTE)) {
+      const token = name.replace(/(\d+)$/, '-$1');
+      expect(resolve(`--${token}`), token).toBe(value);
+    }
   });
 });

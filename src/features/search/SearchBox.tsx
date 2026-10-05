@@ -1,10 +1,9 @@
-import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { type KeyboardEvent, useId, useRef, useState } from 'react';
 import { Icon } from '../../ui/Icon';
 import type { GeocodeResult } from '../../domain/types';
 import { type Selection, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
-import type { SearchFn } from './engine';
-import { PHOTON_DEBOUNCE_MS, PHOTON_MIN_CHARS, searchPhoton } from './photon';
+import { usePlaceSearch } from './usePlaceSearch';
 
 function toSelection(result: GeocodeResult): Selection {
   const { ref, position } = result;
@@ -13,57 +12,22 @@ function toSelection(result: GeocodeResult): Selection {
   return { kind: 'place', label: result.label, detail: result.detail, position };
 }
 
-/** Off-campus results, only while online. Any failure just leaves the section empty. */
-function usePhoton(query: string): GeocodeResult[] {
-  const [results, setResults] = useState<GeocodeResult[]>([]);
-  useEffect(() => {
-    setResults([]);
-    if (query.length < PHOTON_MIN_CHARS || !navigator.onLine) return;
-    const controller = new AbortController();
-    const timer = setTimeout(() => {
-      searchPhoton(query, controller.signal).then(setResults, () => undefined);
-    }, PHOTON_DEBOUNCE_MS);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [query]);
-  return results;
-}
+/** The line shown in place of campus results. */
+export const searchNote = (note: 'failed' | 'none' | 'loading') =>
+  note === 'failed' ? strings.dataError : note === 'none' ? strings.search.noLocalResults : strings.loading;
 
 export function SearchBox() {
   const select = useAppStore((state) => state.select);
   const [text, setText] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const [search, setSearch] = useState<SearchFn | null>(null);
-  const [failed, setFailed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
-
-  const query = text.trim();
-  const local = useMemo(() => (search && query ? search(query) : []), [search, query]);
-  const remote = usePhoton(open ? query : '');
-  const results = [...local, ...remote];
-
-  const ensureIndex = () => {
-    if (search) return;
-    setFailed(false);
-    import('./load')
-      .then((module) => module.loadSearch())
-      .then((fn) => setSearch(() => fn), () => setFailed(true));
-  };
+  const { query, local, remote, results, note, ensureIndex } = usePlaceSearch(text, open);
 
   const choose = (result: GeocodeResult) => {
-    const { routePlan, setRouteEnd } = useAppStore.getState();
-    if (routePlan?.picking) {
-      // While an end of the route is being chosen, a result sets it instead of selecting.
-      setRouteEnd(routePlan.picking, { label: result.label, position: result.position });
-      setText('');
-    } else {
-      select(toSelection(result), result.position);
-      setText(result.label);
-    }
+    select(toSelection(result), result.position);
+    setText(result.label);
     setOpen(false);
     inputRef.current?.blur();
   };
@@ -152,7 +116,7 @@ export function SearchBox() {
           {local.map(option)}
           {local.length === 0 && (
             <li role="presentation" className="search-note">
-              {failed ? strings.dataError : search ? strings.search.noLocalResults : strings.loading}
+              {searchNote(note)}
             </li>
           )}
           {remote.length > 0 && (

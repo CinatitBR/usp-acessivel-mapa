@@ -54,12 +54,12 @@ export function BottomSheet({ title, subtitle, icon, onClose, routeTo, back, act
   const [sizes, setSizes] = useState<Sizes | null>(null);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
 
-  // Something else needs the map (a floor plan was opened): show only the header.
-  const collapses = useAppStore((state) => state.sheetCollapses);
-  const [collapsesSeen, setCollapsesSeen] = useState(collapses);
-  if (collapses !== collapsesSeen) {
-    setCollapsesSeen(collapses);
-    setSnap('collapsed');
+  // Something asks for another rest: a floor plan needs the map, or a field in the sheet is being typed in.
+  const request = useAppStore((state) => state.sheetRequest);
+  const [requestSeen, setRequestSeen] = useState(request);
+  if (request !== requestSeen) {
+    setRequestSeen(request);
+    if (request) setSnap(request.snap);
   }
 
   useEffect(() => {

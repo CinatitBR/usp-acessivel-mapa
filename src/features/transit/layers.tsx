@@ -6,6 +6,7 @@ import { addBadgeImages, SELECTED_SUFFIX } from '../../map/badgeIcon';
 import { dataUrl } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { STOP_BADGE, STOP_COLOR, STOP_ICON } from './stopIcon';
+import { MAP_HALO, PALETTE } from '../../styles/palette';
 
 export const STOPS_SOURCE = 'bus-stops';
 export const STOPS_LAYER = 'bus-stops';
@@ -43,8 +44,8 @@ const selectedLayout: SymbolLayerSpecification['layout'] = {
 };
 
 const paint: SymbolLayerSpecification['paint'] = {
-  'text-color': '#33506b',
-  'text-halo-color': '#ffffff',
+  'text-color': PALETTE.primary800,
+  'text-halo-color': MAP_HALO,
   'text-halo-width': 1.4,
 };
 

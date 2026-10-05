@@ -3,6 +3,7 @@ import { type AccessCode, decodeAccess } from '../../domain/access';
 import { geometryCenter } from '../../domain/geo';
 import type { BusStop, LineDirection, LngLat } from '../../domain/types';
 import { optionalString } from '../buildings/parse';
+import { PALETTE } from '../../styles/palette';
 
 /** Property schema of public/data/stops.geojson, written by scripts/build-transit.ts. */
 export type BusStopProperties = {
@@ -44,7 +45,7 @@ export function parseLineDirection(feature: {
     direction: properties.dir === 1 ? 1 : 0,
     headsign: optionalString(properties.head) ?? '',
     name: optionalString(properties.name) ?? properties.id,
-    color: optionalString(properties.color) ?? '#1f2933',
+    color: optionalString(properties.color) ?? PALETTE.neutral800,
     ...(typeof properties.code === 'number' && { code: properties.code }),
     stopIds: typeof properties.stops === 'string' && properties.stops ? properties.stops.split(',') : [],
     shape: feature.geometry.coordinates as LngLat[],

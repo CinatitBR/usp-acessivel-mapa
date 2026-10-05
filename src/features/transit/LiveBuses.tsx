@@ -10,6 +10,7 @@ import { loadLines } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { busTracker } from './busTracker';
 import { useVehicles } from './useVehicles';
+import { MAP_HALO, MAP_TEXT } from '../../styles/palette';
 
 /** Invisible tap targets, one per bus. This is the layer selection queries. */
 export const BUSES_LAYER = 'buses-hit';
@@ -95,8 +96,8 @@ export function LiveBuses() {
     'text-allow-overlap': true,
   };
   const labelPaint: SymbolLayerSpecification['paint'] = {
-    'text-color': '#1f2933',
-    'text-halo-color': '#ffffff',
+    'text-color': MAP_TEXT,
+    'text-halo-color': MAP_HALO,
     'text-halo-width': 1.5,
     'text-opacity': opacity,
   };

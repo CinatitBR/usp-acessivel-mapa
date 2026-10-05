@@ -6,6 +6,7 @@ import { addBadgeImages, SELECTED_SUFFIX } from '../../map/badgeIcon';
 import { dataUrl } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { POI_CATEGORIES, POI_STYLES } from './style';
+import { MAP_HALO, MAP_TEXT } from '../../styles/palette';
 
 export const POIS_LAYER = 'pois-points';
 export const POIS_SELECTED_LAYER = 'pois-selected';
@@ -43,8 +44,8 @@ const selectedLayout: SymbolLayerSpecification['layout'] = {
 };
 
 const paint: SymbolLayerSpecification['paint'] = {
-  'text-color': '#1f2933',
-  'text-halo-color': '#ffffff',
+  'text-color': MAP_TEXT,
+  'text-halo-color': MAP_HALO,
   'text-halo-width': 1.4,
 };
 

@@ -8,6 +8,7 @@ import {
   shouldStartLite,
   storeLiteChoice,
 } from '../features/litemode/detect';
+import type { Snap } from '../ui/sheetSnap';
 import { readPoiCategories, storePoiCategories, togglePoiCategory } from '../features/pois/visibility';
 
 export type MapStatus = 'loading' | 'ready' | 'error';
@@ -32,8 +33,6 @@ export type RoutePlan = {
   from: RoutePoint | null;
   to: RoutePoint | null;
   profile: RouteProfile;
-  /** The end that the next map tap or search result fills in. */
-  picking: RouteEnd | null;
 };
 
 type AppState = {
@@ -68,7 +67,6 @@ type AppState = {
   /** Opens the route panel, optionally with a destination. Starts step-free when the accessibility view is on. */
   startRoute: (to?: RoutePoint) => void;
   setRouteEnd: (end: RouteEnd, point: RoutePoint) => void;
-  pickRouteEnd: (end: RouteEnd | null) => void;
   setRouteProfile: (profile: RouteProfile) => void;
   swapRouteEnds: () => void;
   closeRoute: () => void;
@@ -105,8 +103,9 @@ type AppState = {
   /** Pixels of the map's bottom that the sheet covers on a phone, once it rests; 0 beside the map. */
   sheetCover: number;
   setSheetCover: (cover: number) => void;
-  /** Goes up by one each time the open sheet should get out of the way and show only its header. */
-  sheetCollapses: number;
+  /** Asks the open sheet to go to a rest: out of the way of a floor plan, or up for typing. A new object each time. */
+  sheetRequest: { snap: Snap } | null;
+  requestSheet: (snap: Snap) => void;
 
   toast: Toast | null;
   showToast: (toast: Toast) => void;
@@ -118,9 +117,6 @@ export type Toast = { message: string; actionLabel?: string; action?: () => void
 
 /** Lite mode is on: no trees, flat buses, and the 3D code is not even downloaded. */
 export const selectLite = (state: AppState) => resolveLite(state.liteChoice, state.liteDetected, state.watchdogTripped);
-
-/** Points the plan at the end that is still missing, destination first. */
-const withNextPick = (plan: RoutePlan): RoutePlan => ({ ...plan, picking: !plan.to ? 'to' : !plan.from ? 'from' : null });
 
 export const useAppStore = create<AppState>((set) => ({
   mapStatus: 'loading',
@@ -145,7 +141,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   indoor: null,
   // The floor plan needs the map: the building's sheet steps aside.
-  openIndoor: (buildingId, plan) => set((state) => ({ indoor: { buildingId, plan, level: null }, sheetCollapses: state.sheetCollapses + 1 })),
+  openIndoor: (buildingId, plan) => set({ indoor: { buildingId, plan, level: null }, sheetRequest: { snap: 'collapsed' } }),
   // A selected room belongs to the floor that was showing, so it goes with it.
   setIndoorLevel: (level) =>
     set(({ indoor, selection }) => (indoor ? { indoor: { ...indoor, level }, ...(selection?.kind === 'room' && { selection: null }) } : {})),
@@ -156,16 +152,14 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       selection: null,
       followBus: false,
-      routePlan: withNextPick({
+      routePlan: {
         from: state.routePlan?.from ?? null,
         to: to ?? state.routePlan?.to ?? null,
         profile: state.routePlan?.profile ?? (state.accessMode ? 'wheelchair' : 'walk'),
-        picking: null,
-      }),
+      },
     })),
   setRouteEnd: (end, point) =>
-    set(({ routePlan }) => (routePlan ? { routePlan: withNextPick({ ...routePlan, [end]: point }) } : {})),
-  pickRouteEnd: (picking) => set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, picking } } : {})),
+    set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, [end]: point } } : {})),
   setRouteProfile: (profile) => set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, profile } } : {})),
   swapRouteEnds: () =>
     set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, from: routePlan.to, to: routePlan.from } } : {})),
@@ -204,7 +198,8 @@ export const useAppStore = create<AppState>((set) => ({
 
   toast: null,
   sheetCover: 0,
-  sheetCollapses: 0,
+  sheetRequest: null,
+  requestSheet: (snap) => set({ sheetRequest: { snap } }),
   setSheetCover: (sheetCover) => set((state) => (state.sheetCover === sheetCover ? state : { sheetCover })),
 
   showToast: (toast) => set({ toast }),

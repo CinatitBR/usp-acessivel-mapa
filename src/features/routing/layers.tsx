@@ -7,8 +7,9 @@ import { ANCHORS } from '../../map/anchors';
 import { type RouteEnd, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { useRoute } from './useRoute';
+import { MAP_HALO, MAP_ROUTE } from '../../styles/palette';
 
-const ROUTE_COLOR = '#0b5cad';
+const ROUTE_COLOR = MAP_ROUTE;
 const STAIRS_COLOR = '#d9480f';
 const ENDS: RouteEnd[] = ['from', 'to'];
 const END_LETTERS: Record<RouteEnd, string> = { from: 'A', to: 'B' };
@@ -63,7 +64,7 @@ export function RouteLayers() {
     <>
       {features && (
         <Source id="route" type="geojson" data={features}>
-          <Layer id="route-casing" type="line" beforeId={ANCHORS.features} layout={lineLayout} paint={{ ...width(9), 'line-color': '#ffffff' }} />
+          <Layer id="route-casing" type="line" beforeId={ANCHORS.features} layout={lineLayout} paint={{ ...width(9), 'line-color': MAP_HALO }} />
           <Layer
             id="route-line"
             type="line"
