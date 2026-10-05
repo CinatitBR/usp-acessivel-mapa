@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { StrictMode } from 'react';
+import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
@@ -22,10 +22,20 @@ const updateServiceWorker = registerSW({
   },
 });
 
+// `?revisar` opens the reviewers' page instead of the map; its code is only fetched then.
+const reviewing = new URLSearchParams(window.location.search).has('revisar');
+const ReviewPage = lazy(() => import('./features/review/ReviewPage').then((module) => ({ default: module.ReviewPage })));
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      {reviewing ? (
+        <Suspense fallback={null}>
+          <ReviewPage />
+        </Suspense>
+      ) : (
+        <App />
+      )}
     </QueryClientProvider>
   </StrictMode>,
 );

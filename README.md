@@ -279,13 +279,12 @@ Setting up, once:
 2. `npm run db:migrate` creates the tables in that database. `npm run db:migrate:local` does the same for the copy `npm run worker:dev` uses.
 3. `npm run deploy:worker`.
 
-Until the review page exists, a report is published from the command line (add `--local` instead of `--remote` for the local copy):
+Reviewers work on the review page, at `…/?revisar`: it lists the reports waiting and those on the map, and publishes, refuses or withdraws them. It asks for the reviewers' password, which is the Worker secret `REVIEW_TOKEN`:
 
 ```
-npx wrangler d1 execute usp-campus-db --remote -c worker/wrangler.jsonc \
-  --command "SELECT id, type, answer, note, since FROM reports WHERE status = 'pending'"
-npx wrangler d1 execute usp-campus-db --remote -c worker/wrangler.jsonc \
-  --command "UPDATE reports SET status = 'published', public_note = note WHERE id = 'r-xxxxxxxx'"
+npx wrangler secret put REVIEW_TOKEN -c worker/wrangler.jsonc
 ```
 
-`public_note` is the only note the map shows; `until` (a date like `2026-10-30`) is the last day a report shows. Without it a blocked passage shows for 7 days and an elevator or toilet out of service for 14; the others stay.
+Choose a long random one and share it only with reviewers. For local work it is `REVIEW_TOKEN=…` in `worker/.dev.vars`.
+
+The public note is the only note the map shows; the reporter's own note stays with the reviewers. "Vale até" is the last day a report shows. Without it a blocked passage shows for 7 days and an elevator or toilet out of service for 14; the others stay.

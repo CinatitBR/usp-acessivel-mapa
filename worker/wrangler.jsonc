@@ -6,7 +6,8 @@
   "compatibility_flags": ["nodejs_compat"],
 
   // Set with `wrangler secret put <NAME>`; for local dev put them in worker/.dev.vars (gitignored).
-  "secrets": { "required": ["OLHOVIVO_TOKEN", "ORS_API_KEY"] },
+  // REVIEW_TOKEN is the password reviewers type on the review page; choose a long random one.
+  "secrets": { "required": ["OLHOVIVO_TOKEN", "ORS_API_KEY", "REVIEW_TOKEN"] },
 
   "vars": {
     // Comma-separated origins allowed to call this Worker from a browser.
@@ -42,6 +43,12 @@
       "name": "REPORT_LIMITER",
       "namespace_id": "1003",
       "simple": { "limit": 3, "period": 60 },
+    },
+    // The review page: 30 per minute per client, which also keeps its password from being guessed.
+    {
+      "name": "REVIEW_LIMITER",
+      "namespace_id": "1004",
+      "simple": { "limit": 30, "period": 60 },
     },
   ],
 

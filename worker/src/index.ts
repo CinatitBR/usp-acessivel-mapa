@@ -8,10 +8,11 @@
 import { DATA_TTL_SECONDS, olhoVivo, UpstreamError } from './olhovivo';
 import { ORS_ROUTE_TTL_SECONDS, orsRoute } from './ors';
 import { MAX_BODY_BYTES, newReportId, parseSubmission, todayInSaoPaulo } from './reports';
-import { insertReport, publishedReports, REPORTS_TTL_SECONDS } from './reportsDb';
+import { decideReport, insertReport, publishedReports, REPORTS_TTL_SECONDS, reviewReports } from './reportsDb';
+import { isReviewer, parseDecision } from './review';
 import { checkOrigin, matchRoute, type Route } from './routes';
 
-type ErrorCode = 'bad_request' | 'not_found' | 'forbidden' | 'rate_limited' | 'auth' | 'upstream' | 'timeout';
+type ErrorCode = 'bad_request' | 'not_found' | 'forbidden' | 'unauthorized' | 'rate_limited' | 'auth' | 'upstream' | 'timeout';
 
 const json = (body: unknown, status: number, headers: Record<string, string>) =>
   new Response(typeof body === 'string' ? body : JSON.stringify(body), {
@@ -24,21 +25,39 @@ const failure = (error: ErrorCode, status: number, headers: Record<string, strin
 
 /** Reads, checks and stores a report, to wait for review. The body is small and bounded, so it is read whole. */
 async function acceptReport(request: Request, env: Env, cors: Record<string, string>): Promise<Response> {
-  const text = await request.text();
-  if (text.length > MAX_BODY_BYTES) return failure('bad_request', 413, cors, 'the report is too large');
-  let body: unknown;
-  try {
-    body = JSON.parse(text);
-  } catch {
-    return failure('bad_request', 400, cors, 'the body must be JSON');
-  }
-  const submission = parseSubmission(body);
+  const read = await readBody(request, cors);
+  if ('refused' in read) return read.refused;
+  const submission = parseSubmission(read.body);
   if ('error' in submission) return failure('bad_request', 400, cors, submission.error);
   // The id lets the app recognise its own report once a reviewer publishes it.
   const id = newReportId();
   const now = new Date();
   await insertReport(env.DB, id, submission, todayInSaoPaulo(now), now.toISOString());
   return json({ ok: true, id }, 201, { 'Cache-Control': 'no-store', ...cors });
+}
+
+/** A JSON body of bounded size, or the answer that refuses it. */
+async function readBody(request: Request, cors: Record<string, string>): Promise<{ body: unknown } | { refused: Response }> {
+  const text = await request.text();
+  if (text.length > MAX_BODY_BYTES) return { refused: failure('bad_request', 413, cors, 'the body is too large') };
+  try {
+    return { body: JSON.parse(text) as unknown };
+  } catch {
+    return { refused: failure('bad_request', 400, cors, 'the body must be JSON') };
+  }
+}
+
+/** The review routes: nothing is read or changed without the reviewers' password. */
+async function review(route: Extract<Route, { kind: 'review-list' | 'review-decide' }>, request: Request, env: Env, cors: Record<string, string>): Promise<Response> {
+  const noStore = { 'Cache-Control': 'no-store', ...cors };
+  if (!(await isReviewer(request.headers.get('Authorization'), env.REVIEW_TOKEN))) return failure('unauthorized', 401, cors);
+  if (route.kind === 'review-list') return json(await reviewReports(env.DB), 200, noStore);
+  const read = await readBody(request, cors);
+  if ('refused' in read) return read.refused;
+  const decision = parseDecision(read.body);
+  if ('error' in decision) return failure('bad_request', 400, cors, decision.error);
+  const found = await decideReport(env.DB, route.id, decision, new Date().toISOString());
+  return found ? json({ ok: true }, 200, noStore) : failure('not_found', 404, cors);
 }
 
 async function respond(route: Route, request: Request, env: Env, ctx: ExecutionContext, cors: Record<string, string>): Promise<Response> {
@@ -67,6 +86,9 @@ async function respond(route: Route, request: Request, env: Env, ctx: ExecutionC
       });
     case 'submit-report':
       return acceptReport(request, env, cors);
+    case 'review-list':
+    case 'review-decide':
+      return review(route, request, env, cors);
     case 'bad-request':
       return failure('bad_request', 400, cors, route.message);
     case 'not-found':
@@ -89,10 +111,15 @@ export default {
       response = failure('forbidden', 403, {});
     } else if (request.method === 'OPTIONS') {
       response = new Response(null, { status: 204, headers: origin.headers });
-    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors' || route.kind === 'reports' || route.kind === 'submit-report') {
+    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors' || route.kind === 'reports' || route.kind === 'submit-report' || route.kind === 'review-list' || route.kind === 'review-decide') {
       const client = request.headers.get('CF-Connecting-IP') ?? 'unknown';
       // Reading reports shares the general limit; routing and sending a report have stricter ones.
-      const limiter = route.kind === 'ors' ? env.ORS_LIMITER : route.kind === 'submit-report' ? env.REPORT_LIMITER : env.OLHOVIVO_LIMITER;
+      const limiter =
+        route.kind === 'ors' ? env.ORS_LIMITER
+        : route.kind === 'submit-report' ? env.REPORT_LIMITER
+        // Slow enough that the reviewers' password cannot be found by trying.
+        : route.kind === 'review-list' || route.kind === 'review-decide' ? env.REVIEW_LIMITER
+        : env.OLHOVIVO_LIMITER;
       const { success } = await limiter.limit({ key: client });
       if (!success) {
         response = failure('rate_limited', 429, { 'Retry-After': '60', ...origin.headers });

@@ -7,7 +7,8 @@ import type { ReportAnswer, ReportType } from './reports';
  * migration there that says the same thing.
  */
 
-export const REPORT_STATUSES = ['pending', 'published', 'refused', 'duplicate'] as const;
+/** `withdrawn`: it was published and a reviewer took it off the map, for instance because it was resolved. */
+export const REPORT_STATUSES = ['pending', 'published', 'refused', 'duplicate', 'withdrawn'] as const;
 export type ReportStatus = (typeof REPORT_STATUSES)[number];
 
 /** A report made on the map. Nothing about the sender is stored. */

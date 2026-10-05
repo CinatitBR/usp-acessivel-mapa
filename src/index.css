@@ -1715,3 +1715,110 @@ input {
   font-size: var(--size-body-small);
   line-height: var(--line-body-small);
 }
+
+/* Review page (for reviewers, at ?revisar): a plain column of cards that works on a phone */
+.review {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 32px);
+}
+
+/* The map page never scrolls; this one must. */
+html:has(.review),
+html:has(.review) body,
+html:has(.review) #root {
+  height: auto;
+  overflow: auto;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
+.review h1 {
+  margin: 0;
+  font-size: var(--size-title);
+  line-height: var(--line-title);
+}
+
+.review h2 {
+  margin: 24px 0 8px;
+  font-size: var(--size-subtitle);
+  line-height: var(--line-subtitle);
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-card,
+.review-login {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.review-login {
+  margin-top: 24px;
+}
+
+.review-card h3,
+.review-card p {
+  margin: 0;
+}
+
+.review-note {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--accent-tonal);
+}
+
+.review-fields,
+.review-fields label,
+.review-login label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-fields {
+  gap: 8px;
+}
+
+.review-fields span,
+.review-login span {
+  color: var(--muted);
+  font-size: var(--size-body-small);
+}
+
+.review input,
+.review textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font: inherit;
+}
+
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

@@ -1,4 +1,4 @@
-/** What a request to the Worker asks for, after validation. Only these read-only routes exist. */
+/** What a request to the Worker asks for, after validation. Only these routes exist. */
 export type Route =
   | { kind: 'health' }
   /** One Olho Vivo call, forwarded as is. `upstream` is the path and query on the Olho Vivo API. */
@@ -11,6 +11,9 @@ export type Route =
   | { kind: 'reports' }
   /** A new report, in the request's body, to add to the reviewers' queue. */
   | { kind: 'submit-report' }
+  /** For reviewers, with their password: the reports to review, and a decision about one, in the body. */
+  | { kind: 'review-list' }
+  | { kind: 'review-decide'; id: string }
   | { kind: 'bad-request'; message: string }
   | { kind: 'not-found' };
 
@@ -40,6 +43,8 @@ function parseCode(value: string | null): number | undefined {
 
 export function matchRoute(method: string, url: URL): Route {
   if (method === 'POST' && url.pathname === '/reports') return { kind: 'submit-report' };
+  const decided = method === 'POST' ? /^\/review\/reports\/([\w-]{1,40})$/.exec(url.pathname) : null;
+  if (decided) return { kind: 'review-decide', id: decided[1]! };
   if (method !== 'GET') return { kind: 'not-found' };
 
   switch (url.pathname) {
@@ -48,6 +53,9 @@ export function matchRoute(method: string, url: URL): Route {
 
     case '/reports':
       return { kind: 'reports' };
+
+    case '/review/reports':
+      return { kind: 'review-list' };
 
     case '/olhovivo/Previsao/Parada': {
       const stop = parseCode(url.searchParams.get('codigoParada'));
@@ -101,7 +109,7 @@ export function checkOrigin(origin: string | null, allowed: string): { ok: boole
     headers: {
       'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
       Vary: 'Origin',
     },
