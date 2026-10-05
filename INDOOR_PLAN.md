@@ -1,6 +1,6 @@
 # Indoor map plan: Edifício Vilanova Artigas (FAU)
 
-This is a plan of its own, separate from `PLAN.md` (the general plan of the campus map). Approved by the user on 2026-10-04. I1, I2 and I3 are built (I3 is a first pass, waiting for the user's review); I4 is not.
+This is a plan of its own, separate from `PLAN.md` (the general plan of the campus map). Approved by the user on 2026-10-04. I1 to I4 are built. I3's rooms are a first pass: see "For the user to confirm" under I3.
 
 ## Context
 
@@ -119,3 +119,8 @@ Each one ends working and is shown to the user before the next; commits only whe
   - Toilets on floors 1 and 2 are "Sanitários" without male or female, except the one the sheet names.
 - Known: POIs and the house number from the base map (the canteen, the stationery shop, "876") show over every floor; floor 0 is drawn on a slab the size of the whole building although its walls stop short of it.
 - **Stairs redrawn** (user's review): the sheets draw the flight left of the lift on floor 0 and the one right of it on floor 1 cut by a break line, with some steps slightly turned or hidden under a label, so the extraction lost part of their treads. `source.json` now lists such flights per sheet (`stairs`: a box and a number of treads) and `npm run indoor:extract` redraws them whole, 12 treads each, matching the flight beside them.
+
+### I4: documentation and checks (2026-10-04)
+
+- README has an "Indoor maps" section (the files, the building's axes, editing rooms, adding a building, what the FAU plan does not say) and the plan's credit under "Attribution".
+- `npm test`, `npm run typecheck`, `npm run check:data` and `npm run build` pass.

@@ -157,6 +157,43 @@ The key is the building's OSM id (`way/…` or `relation/…`), the `id` propert
 
 A monument is drawn in 3D from stacked blocks listed in `data/overlay/landmarks.json`: the id of the POI it stands on, `rotation` (the compass bearing its front faces) and `parts`. Each part is a `box` or a `pyramid` of `[width, depth, height]` metres, with `z` (height of its foot above the ground), `at` (its centre, as metres to the right and to the front), `colour` and, for a pyramid, `lean` (how far the tip moves to the front, as a share of the depth). The Monumento a Ramos de Azevedo is the only one so far. Monuments are written into `roofs.json` with the roofs, so they cost no extra download, and like the roofs they are not drawn in lite mode.
 
+## Indoor maps
+
+A building with a floor plan gets a **Ver planta interna** button in its panel. The plan replaces the building's 3D block: a slab, coloured rooms with their names, the walls, and a switch between floors. Tapping a room opens its sheet. It is drawn with plain map layers, so it is the same in lite mode. The plan's file is fetched the first time it is opened and kept for offline use from then on.
+
+The Edifício Vilanova Artigas (FAU) is the only building with a plan so far. Its data is in `data/indoor/fau-artigas/`:
+
+| File | Made by | What it holds |
+|---|---|---|
+| `source.json` | hand | The building's OSM id, its box in metres and the map position of the box's four corners, the credit, the floors, and how each sheet of the PDF sits on the box |
+| `walls.json` | `npm run indoor:extract` | Wall lines per floor, in centimetres on the building's axes |
+| `labels.json` | `npm run indoor:extract` | The text of the sheets with its position; only a reference for drawing rooms |
+| `rooms.json` | hand | Rooms per floor: name, category, and a `box` or a `ring` in metres on the building's axes |
+
+`npm run data:build` turns these into `public/data/indoor/<folder>.json` and marks the building as having a plan. It stops with an error if a room is on a floor that does not exist, has an unknown category or no name, is not a polygon, or reaches more than 0.5 m outside the building's box.
+
+### The building's axes
+
+Everything indoor is measured in metres from one corner of the building: `x` along its width, `y` along its depth, as on the sheet with `y` going down. `size` in `source.json` is `[width, depth]` and `corners` are the map positions of (0, 0), (width, 0), (width, depth) and (0, depth). This keeps a building with right angles easy to edit by hand whatever way it faces on the map.
+
+### Editing rooms
+
+Each entry of `rooms` in `rooms.json` has a `level`, a `name`, a `cat` and either `box: [x1, y1, x2, y2]` or `ring: [[x, y], …]` for a shape that is not a rectangle. Rooms are drawn in the order of the file, so a room listed later lies over an earlier one. Categories: `classroom`, `studio`, `laboratory`, `library`, `museum`, `auditorium`, `administration`, `department`, `food`, `services`, `bathroom`, `hall`, `circulation`, `ramp`, `stairs`, `elevator`, `void`, `technical`. The last five passage categories (`circulation`, `ramp`, `stairs`, `elevator`, `void`) are drawn but cannot be tapped. Run `npm run data:build` after editing.
+
+### Adding a building
+
+1. Get the floor plan as a vector PDF (exported from CAD, not scanned), one floor per page. The PDF stays out of the repository.
+2. Create `data/indoor/<folder>/source.json`, following the FAU one: `building` (the OSM id, the `id` property in `public/data/buildings.geojson`), `credit`, `size`, `corners`, `defaultLevel` and one entry in `sheets` per page with its `page`, `level`, `name` and `elevations`.
+3. Give each sheet at least two `controls`: a point on the page (in PDF points) and the same point on the building's axes (in metres). Structural columns work well. If the page has other drawings inside the building's box, limit the sheet with `extent`; if a floor is smaller than the building, give its `floor` box.
+4. Run `npm run indoor:extract -- <plan.pdf> <folder>` (needs `pdftocairo` and `pdftotext` from poppler-utils). It stops if a control point is more than 0.1 m off or the corners are more than 0.5 m from a true box, and writes `walls.json` and `labels.json`.
+5. Write `rooms.json` against the walls and labels, then run `npm run data:build` and `npm run check:data`.
+
+The extraction keeps straight lines along the building's axes that are at least 1.2 m long, which drops furniture, door swings and dashed lines; curved walls are lost. A flight of stairs that the sheet draws cut by a break line loses steps the same way: list it under the sheet's `stairs` (a `box` and a number of `treads`) and the extraction redraws it whole.
+
+### What the FAU plan does not say
+
+The plan is the 2025 drawing of FAU's Serviço Técnico de Infraestrutura; only geometry derived from it is published, with credit in the room sheet. Each floor of the building is two half-levels joined by ramps, and the sheets do not mark which room is on which, so a room shows its floor's pair of heights. Some rooms are unnamed on the sheets and are left blank, and the borders of the three departments on floor 1 are estimates. `INDOOR_PLAN.md` lists what still needs checking on site.
+
 ## Places on the map
 
 The layer menu (the round button under the zoom controls) chooses which categories of places are drawn; the choice is remembered on the device. Categories, colours, icons and which ones start switched on are all in `src/features/pois/style.ts`. Places are hidden while the accessibility view is on, which has its own symbols.
@@ -211,4 +248,4 @@ App layers are always inserted before one of the anchors (see `src/map/anchors.t
 
 ## Attribution
 
-Map rendering by [MapLibre GL JS](https://maplibre.org/). Tiles by [OpenFreeMap](https://openfreemap.org/), schema © [OpenMapTiles](https://openmaptiles.org/), data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors. Basemap style based on Katu-Maps (MIT License, © 2026 Karri Ojala); the bus stop icon is drawn for this project in the same style. Building addresses by [Nominatim](https://nominatim.org/) (© OpenStreetMap contributors). Descriptions from [Wikipedia](https://pt.wikipedia.org/) (CC BY-SA) and photos from [Wikimedia Commons](https://commons.wikimedia.org/), each credited to its author in the app. Walking routes by [Valhalla](https://valhalla1.openstreetmap.de/) (FOSSGIS) and [openrouteservice](https://openrouteservice.org/).
+Map rendering by [MapLibre GL JS](https://maplibre.org/). Tiles by [OpenFreeMap](https://openfreemap.org/), schema © [OpenMapTiles](https://openmaptiles.org/), data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors. Basemap style based on Katu-Maps (MIT License, © 2026 Karri Ojala); the bus stop icon is drawn for this project in the same style. Building addresses by [Nominatim](https://nominatim.org/) (© OpenStreetMap contributors). Descriptions from [Wikipedia](https://pt.wikipedia.org/) (CC BY-SA) and photos from [Wikimedia Commons](https://commons.wikimedia.org/), each credited to its author in the app. Floor plan of the Edifício Vilanova Artigas derived from the drawings of the Serviço Técnico de Infraestrutura, FAUUSP (2025). Walking routes by [Valhalla](https://valhalla1.openstreetmap.de/) (FOSSGIS) and [openrouteservice](https://openrouteservice.org/).
