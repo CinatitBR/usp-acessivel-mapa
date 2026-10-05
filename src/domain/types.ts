@@ -52,6 +52,8 @@ export interface Building {
   address?: string;
   wiki?: WikiRef;
   website?: string;
+  /** Name of its floor plan in public/data/indoor/, when it has an indoor map. */
+  indoor?: string;
   access: AccessInfo;
 }
 

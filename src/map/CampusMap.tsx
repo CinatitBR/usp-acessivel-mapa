@@ -12,6 +12,7 @@ import {
 } from '../config';
 import { AccessibilityLayers } from '../features/accessibility/layers';
 import { BuildingLayers } from '../features/buildings/layers';
+import { IndoorLayers } from '../features/indoor/layers';
 import { FpsWatchdog } from '../features/litemode/LiteMode';
 import { PoiLayers } from '../features/pois/layers';
 import { RouteLayers } from '../features/routing/layers';
@@ -59,6 +60,7 @@ export function CampusMap() {
       <AttributionControl compact customAttribution={MAPLIBRE_ATTRIBUTION} position="bottom-right" />
       <NavigationControl position="top-right" visualizePitch />
       <BuildingLayers />
+      <IndoorLayers />
       <RouteLayers />
       <PoiLayers />
       <TransitLayers />

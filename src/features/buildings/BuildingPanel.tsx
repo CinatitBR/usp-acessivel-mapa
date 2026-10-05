@@ -13,6 +13,8 @@ export function BuildingPanel({ id }: { id: string }) {
   const features = use(loadAccessFeatures()).filter((feature) => feature.buildingId === id);
   const select = useAppStore((state) => state.select);
   const clearSelection = useAppStore((state) => state.clearSelection);
+  const openIndoor = useAppStore((state) => state.openIndoor);
+  const indoorOpen = useAppStore((state) => state.indoor?.buildingId === id);
   if (!building) return null;
 
   const institute = institutes.find((candidate) => candidate.id === building.institute);
@@ -23,6 +25,11 @@ export function BuildingPanel({ id }: { id: string }) {
       onClose={clearSelection}
       routeTo={{ label: building.name ?? strings.building.unnamed, position: building.center }}
     >
+      {building.indoor && !indoorOpen && (
+        <button type="button" className="route-button" onClick={() => openIndoor(building.id, building.indoor!)}>
+          {strings.indoor.open}
+        </button>
+      )}
       {building.address && <p className="muted">{building.address}</p>}
       {institute && (
         <button

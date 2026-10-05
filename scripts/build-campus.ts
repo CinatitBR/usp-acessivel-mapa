@@ -4,7 +4,7 @@
  *
  * Usage: npm run data:build
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import osmtogeojson from 'osmtogeojson';
 import { type Bbox, bboxContains, geometryBbox, geometryCenter, pointInGeometry } from '../src/domain/geo';
@@ -15,6 +15,7 @@ import { poiCategory } from '../src/features/pois/categories';
 import { classifyAccessFeature } from './lib/accessibility';
 import { formatAddress, type NamedRoad, nearestRoad, type NominatimAddress, website, wikiRef } from './lib/address';
 import { type CampusRecord, mergeOverlay, type OverlayFeature } from './lib/mergeOverlay';
+import { buildIndoorPlan, type IndoorSource, type IndoorWalls } from './lib/indoor/plan';
 import { buildLandmark, type Landmark } from './lib/landmarks';
 import { buildRoof, LANTERN_METERS, type RoofOverlay, roofSpec, roofTop, standsOnTop, type Xy } from './lib/roofs';
 import {
@@ -67,6 +68,8 @@ const MAPPED_TREE_WEIGHT = 34;
 const TREE_AREAS = 'data/overlay/tree-areas.json';
 /** Roofs of landmark buildings, by building id. OSM roof tags are read too; this file wins. */
 const ROOFS = 'data/overlay/roofs.json';
+/** Floor plans, one folder per building: `source.json` by hand, `walls.json` from `npm run indoor:extract`. */
+const INDOOR = 'data/indoor';
 /** Monuments drawn in 3D on a POI, as stacked blocks. */
 const LANDMARKS = 'data/overlay/landmarks.json';
 /** A mapped row within this distance of a street is a street row; of those, one tree in five is kept. */
@@ -488,7 +491,17 @@ const keptOf = (group: Iterable<Tree>) => [...group].filter((tree) => keptTrees.
 
 // --- Write and report ------------------------------------------------------
 
-mkdirSync(OUT_DIR, { recursive: true });
+mkdirSync(`${OUT_DIR}/indoor`, { recursive: true });
+// Indoor plans: one file per building, and the building says which file is its own.
+const indoorPlans = existsSync(INDOOR) ? readdirSync(INDOOR).filter((folder) => existsSync(`${INDOOR}/${folder}/source.json`)) : [];
+for (const folder of indoorPlans) {
+  const read = (name: string) => JSON.parse(readFileSync(`${INDOOR}/${folder}/${name}`, 'utf8')) as unknown;
+  const plan = buildIndoorPlan(read('source.json') as IndoorSource, read('walls.json') as IndoorWalls);
+  const building = buildings.find((candidate) => candidate.properties!.id === plan.building);
+  if (!building) fail(`${INDOOR}/${folder} is for a building that does not exist:`, [plan.building]);
+  building.properties!.indoor = folder;
+  writeJson(`indoor/${folder}.json`, plan, plan.levels.length);
+}
 writeFeatures('buildings.geojson', buildings);
 writeFeatures('pois.geojson', pois);
 writeFeatures('accessibility.geojson', accessFeatures);
@@ -529,4 +542,5 @@ console.log(`    named grounds:                  ${keptOf(groundTrees)} of ${gro
 console.log(`    parks, gardens and grass:       ${keptOf(lawnTrees)} of ${lawnTrees.length} in ${lawns.length} areas (before thinning: ${lawnCounts.join(', ')})`);
 console.log(`    woods:                          ${keptOf(woodTrees)} of ${woodTrees.length} (${keptOf(priorityWoodTrees)} of ${priorityWoodTrees.size} in priority woods)`);
 console.log(`  roofs:                            ${roofs.length} entries (${Object.keys(roofOverlay).length} roofs from the overlay, ${landmarks.length} monuments)`);
+console.log(`  indoor plans:                     ${indoorPlans.join(', ') || 'none'}`);
 console.log(`  accessibility features:           ${[...byKind].map(([kind, n]) => `${kind} ${n}`).join(', ') || 'none'}`);

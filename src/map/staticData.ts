@@ -1,4 +1,5 @@
 import type { FeatureCollection } from 'geojson';
+import type { IndoorPlan } from '../domain/indoor';
 import type { AccessibilityFeature, Building, BusStop, Institute, LineDirection, Poi } from '../domain/types';
 import { parseAccessFeature } from '../features/accessibility/parse';
 import { parseBuilding } from '../features/buildings/parse';
@@ -58,3 +59,6 @@ export const loadLines = () =>
 
 /** institutes.json is already in domain shape. */
 export const loadInstitutes = () => loadOnce('institutes.json', (json) => json as Institute[]);
+
+/** The floor plans of one building; already in domain shape. Fetched when its indoor map is opened. */
+export const loadIndoorPlan = (plan: string) => loadOnce(`indoor/${plan}.json`, (json) => json as IndoorPlan);

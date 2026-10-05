@@ -1,0 +1,63 @@
+{
+  "building": "way/158966879",
+  "credit": "Planta: Serviço Técnico de Infraestrutura, FAUUSP (2025)",
+  "note": "Axes of the building: x runs 110 m along the long side from the north-west corner towards the north-east one, y runs 66 m across towards the south-west corner. The structural columns stand every 11 m, from x = 11 to 99, in two rows at y = 11 and y = 55. Corners are those of the OSM footprint.",
+  "defaultLevel": 0,
+  "size": [110, 66],
+  "corners": [[-46.730214, -23.559675], [-46.729262, -23.560139], [-46.729566, -23.560667], [-46.730519, -23.560201]],
+  "sheets": [
+    {
+      "page": 1,
+      "level": -1,
+      "name": "Laboratórios e Auditório",
+      "elevations": "−3,00 / −1,10 m",
+      "note": "Controls: first and last column of the only row drawn (y = 11). Scale 1:300. The basement is smaller than the building, and the page's scale bar and legend fall inside the building's box, hence the extent.",
+      "extent": [6.5, 3.5, 104.5, 50.5],
+      "floor": [7.2, 3.95, 103.9, 49.95],
+      "controls": [
+        { "page": [199.86, 172.46], "building": [11, 11] },
+        { "page": [1031.34, 172.46], "building": [99, 11] }
+      ]
+    },
+    {
+      "page": 2,
+      "level": 0,
+      "name": "Caramelo e Museu",
+      "elevations": "+0,80 / +2,70 m",
+      "note": "Controls: the four corner columns. Scale 1:500.",
+      "controls": [
+        { "page": [357.42, 194.9], "building": [11, 11] },
+        { "page": [856.38, 194.9], "building": [99, 11] },
+        { "page": [856.38, 444.5], "building": [99, 55] },
+        { "page": [357.42, 444.38], "building": [11, 55] }
+      ]
+    },
+    {
+      "page": 3,
+      "level": 1,
+      "name": "Biblioteca e Departamentos",
+      "elevations": "+4,60 / +6,50 m",
+      "note": "Controls: the four corner columns. The sheet says 1:300 but its scale bar and the column spacing give about 1:368. The extent leaves out the scale bar.",
+      "extent": [-1, -1, 111, 59],
+      "controls": [
+        { "page": [292.26, 201.38], "building": [11, 11] },
+        { "page": [970.98, 201.38], "building": [99, 11] },
+        { "page": [970.98, 540.74], "building": [99, 55] },
+        { "page": [292.26, 540.74], "building": [11, 55] }
+      ]
+    },
+    {
+      "page": 4,
+      "level": 2,
+      "name": "Estúdios e Salas de Aula",
+      "elevations": "+8,40 / +10,30 m",
+      "note": "No columns are drawn as circles here. Controls: the corners of the outer frame, which is 110.26 by 66.25 m, centred on the box. Scale 1:500.",
+      "controls": [
+        { "page": [310.44, 151.04], "building": [-0.13, -0.125] },
+        { "page": [935.56, 151.04], "building": [110.13, -0.125] },
+        { "page": [935.56, 526.64], "building": [110.13, 66.125] },
+        { "page": [310.44, 526.64], "building": [-0.13, 66.125] }
+      ]
+    }
+  ]
+}

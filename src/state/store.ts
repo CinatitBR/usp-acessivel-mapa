@@ -53,6 +53,15 @@ type AppState = {
   followBus: boolean;
   setFollowBus: (follow: boolean) => void;
 
+  /**
+   * The building whose floor plan is drawn in place of its 3D block. `level` is null until
+   * the user picks a floor: the plan's default one shows.
+   */
+  indoor: { buildingId: string; plan: string; level: number | null } | null;
+  openIndoor: (buildingId: string, plan: string) => void;
+  setIndoorLevel: (level: number) => void;
+  closeIndoor: () => void;
+
   routePlan: RoutePlan | null;
   /** Opens the route panel, optionally with a destination. Starts step-free when the accessibility view is on. */
   startRoute: (to?: RoutePoint) => void;
@@ -113,12 +122,23 @@ export const useAppStore = create<AppState>((set) => ({
   flyTarget: null,
   select: (selection, flyTo, keepZoom) => {
     const followBus = selection.kind === 'bus' && selection.fromStop !== undefined;
-    set(flyTo ? { selection, followBus, flyTarget: { position: flyTo, keepZoom } } : { selection, followBus });
+    set((state) => ({
+      selection,
+      followBus,
+      ...(flyTo && { flyTarget: { position: flyTo, keepZoom } }),
+      // Opening another building puts the first one's block back.
+      ...(selection.kind === 'building' && state.indoor && state.indoor.buildingId !== selection.id && { indoor: null }),
+    }));
   },
   clearSelection: () => set({ selection: null, followBus: false }),
   flyTo: (position) => set({ flyTarget: { position }, followBus: false }),
   followBus: false,
   setFollowBus: (followBus) => set({ followBus }),
+
+  indoor: null,
+  openIndoor: (buildingId, plan) => set({ indoor: { buildingId, plan, level: null } }),
+  setIndoorLevel: (level) => set(({ indoor }) => (indoor ? { indoor: { ...indoor, level } } : {})),
+  closeIndoor: () => set({ indoor: null }),
 
   routePlan: null,
   startRoute: (to) =>

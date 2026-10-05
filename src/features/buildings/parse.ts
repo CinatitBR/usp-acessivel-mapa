@@ -31,6 +31,8 @@ export type BuildingProperties = {
   wiki?: string;
   /** Website URL. */
   web?: string;
+  /** Name of its floor plan file in public/data/indoor/, without the extension. */
+  indoor?: string;
   note?: string;
   /** ISO date of the last on-site check. */
   chk?: string;
@@ -63,6 +65,7 @@ export function parseBuilding(feature: {
     address: optionalString(properties.addr),
     wiki: optionalString(properties.wiki),
     website: optionalString(properties.web),
+    indoor: optionalString(properties.indoor),
     access: {
       status: decodeAccess(properties.acc),
       source: properties.src === 'curated' ? 'curated' : 'osm',

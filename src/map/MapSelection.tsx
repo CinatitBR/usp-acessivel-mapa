@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import type { LngLat } from '../domain/types';
 import { ACCESS_LAYER, ACCESS_SELECTED_LAYER } from '../features/accessibility/layers';
 import { BUILDINGS_LAYER, BUILDINGS_SOURCE } from '../features/buildings/layers';
+import { INDOOR_SLAB_LAYER } from '../features/indoor/layers';
 import { POIS_LAYER, POIS_SELECTED_LAYER } from '../features/pois/layers';
 import { STOPS_LAYER, STOPS_SELECTED_LAYER } from '../features/transit/layers';
 import { BUSES_LAYER } from '../features/transit/LiveBuses';
@@ -38,7 +39,7 @@ export function MapSelection() {
     const onClick = (event: MapMouseEvent) => {
       const { select, clearSelection, routePlan, setRouteEnd } = useAppStore.getState();
       // Small symbols win over the building underneath them.
-      const layers = [BUSES_LAYER, ...Object.keys(POINT_KINDS), BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
+      const layers = [BUSES_LAYER, ...Object.keys(POINT_KINDS), INDOOR_SLAB_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
       const feature = layers.length > 0 ? map.queryRenderedFeatures(event.point, { layers })[0] : undefined;
       if (routePlan?.picking) {
         // While an end of the route is being chosen, a tap sets it instead of selecting.
@@ -49,6 +50,8 @@ export function MapSelection() {
         });
         return;
       }
+      // A tap on an open floor plan keeps whatever is selected.
+      if (feature?.layer.id === INDOOR_SLAB_LAYER) return;
       const id: unknown = feature?.properties.id;
       const kind = feature && POINT_KINDS[feature.layer.id];
       if (typeof id !== 'string') clearSelection();

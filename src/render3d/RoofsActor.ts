@@ -16,7 +16,8 @@ export class RoofsActor implements SceneActor {
   readonly object: THREE.Mesh;
   private readonly geometry = new THREE.BufferGeometry();
   private readonly colors: THREE.BufferAttribute;
-  private placed = false;
+  /** The roof left out of the last placement: `undefined` before the first one, '' for none. */
+  private placedWithout: string | undefined;
   private look: Look | undefined;
 
   constructor(private readonly roofs: RoofEntry[]) {
@@ -31,11 +32,16 @@ export class RoofsActor implements SceneActor {
     this.object.frustumCulled = false;
   }
 
-  private place(toLocal: FrameContext['toLocal']) {
+  /** Writes the vertices. The roof of `hiddenId` is folded into one point, so it draws nothing. */
+  private place(toLocal: FrameContext['toLocal'], hiddenId: string) {
     const position = this.geometry.getAttribute('position') as THREE.BufferAttribute;
     let vertex = 0;
     for (const roof of this.roofs) {
       const [east, north] = toLocal(roof.at[0], roof.at[1]);
+      if (roof.id === hiddenId) {
+        for (let index = 0; index < roof.p.length; index += 3) position.setXYZ(vertex++, east, roof.base, north);
+        continue;
+      }
       for (let index = 0; index < roof.p.length; index += 3) {
         // The file is east, north, up; the scene is x east, y up, z north.
         position.setXYZ(
@@ -47,7 +53,7 @@ export class RoofsActor implements SceneActor {
       }
     }
     position.needsUpdate = true;
-    this.placed = true;
+    this.placedWithout = hiddenId;
   }
 
   private paint(look: Look) {
@@ -64,8 +70,10 @@ export class RoofsActor implements SceneActor {
   }
 
   update({ toLocal }: FrameContext): boolean {
-    if (!this.placed) this.place(toLocal);
-    const { accessMode, selection } = useAppStore.getState();
+    const { accessMode, selection, indoor } = useAppStore.getState();
+    // A building showing its floor plan has no block, so no roof either.
+    const hiddenId = indoor?.buildingId ?? '';
+    if (this.placedWithout !== hiddenId) this.place(toLocal, hiddenId);
     // A roof belongs to a building and a monument to a POI.
     const selectedId = selection?.kind === 'building' || selection?.kind === 'poi' ? selection.id : undefined;
     if (this.look?.accessMode !== accessMode || this.look.selectedId !== selectedId) this.paint({ accessMode, selectedId });

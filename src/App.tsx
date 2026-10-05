@@ -1,4 +1,5 @@
 import { AccessControl } from './features/accessibility/AccessControl';
+import { LevelSwitcher } from './features/indoor/LevelSwitcher';
 import { RouteButton } from './features/routing/RouteButton';
 import { SearchBox } from './features/search/SearchBox';
 import { CampusMap } from './map/CampusMap';
@@ -17,6 +18,7 @@ export function App() {
         <AccessControl />
         <LayerMenu />
         <RouteButton />
+        <LevelSwitcher />
         <Toast />
         <MapStatus />
       </div>

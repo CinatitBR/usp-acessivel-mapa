@@ -536,6 +536,7 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 | Bandejão menus, events, opening hours | New feature folder with its own adapter; `Poi.openingHours` already exists |
 | English UI | Replace `strings/pt-BR.ts` with a keyed lookup |
 | Custom domain | Change `ALLOWED_ORIGINS`, or route the Worker under `/api` |
+| Indoor maps (floor plans inside a building) | Planned separately in `INDOOR_PLAN.md`, starting with FAU's Edifício Vilanova Artigas |
 
 ## 11. Risks and mitigations
 

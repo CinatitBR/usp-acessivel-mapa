@@ -10,11 +10,19 @@ const DATA_DIR = 'public/data';
 const BUDGET_KB = 1024;
 
 let total = 0;
-for (const name of readdirSync(DATA_DIR).sort()) {
-  const size = statSync(join(DATA_DIR, name)).size / 1024;
-  total += size;
-  console.log(`  ${size.toFixed(0).padStart(5)} KB  ${name}`);
-}
+const measure = (directory: string) => {
+  for (const entry of readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      measure(path);
+      continue;
+    }
+    const size = statSync(path).size / 1024;
+    total += size;
+    console.log(`  ${size.toFixed(0).padStart(5)} KB  ${path.slice(DATA_DIR.length + 1)}`);
+  }
+};
+measure(DATA_DIR);
 
 console.log(`Static data: ${total.toFixed(0)} KB (budget ${BUDGET_KB} KB, uncompressed)`);
 if (total > BUDGET_KB) {

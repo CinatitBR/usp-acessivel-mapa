@@ -13,6 +13,7 @@
     "data:addresses": "tsx scripts/fetch-addresses.ts",
     "data:build": "tsx scripts/build-campus.ts",
     "data:transit": "tsx scripts/build-transit.ts",
+    "indoor:extract": "tsx scripts/extract-indoor.ts",
     "check:data": "tsx scripts/check-data.ts",
     "worker:types": "wrangler types worker/worker-configuration.d.ts -c worker/wrangler.jsonc",
     "worker:dev": "wrangler dev -c worker/wrangler.jsonc",

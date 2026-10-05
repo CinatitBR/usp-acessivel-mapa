@@ -1,5 +1,5 @@
 import { Layer, Source } from '@vis.gl/react-maplibre';
-import type { ExpressionSpecification, FillExtrusionLayerSpecification } from 'maplibre-gl';
+import type { ExpressionSpecification, FillExtrusionLayerSpecification, FilterSpecification } from 'maplibre-gl';
 import { useMemo } from 'react';
 import { ACCESS_COLORS } from '../../domain/access';
 import { ANCHORS } from '../../map/anchors';
@@ -46,10 +46,13 @@ const paintFor = (color: ExpressionSpecification, roofs: boolean): FillExtrusion
 export function BuildingLayers() {
   const accessMode = useAppStore((state) => state.accessMode);
   const roofs = useAppStore((state) => state.roofsActive);
+  // A building whose floor plan is open gives up its block.
+  const indoorId = useAppStore((state) => state.indoor?.buildingId ?? '');
   const paint = useMemo(() => paintFor(accessMode ? COLOR_BY_ACCESS : COLOR_BY_KIND, roofs), [accessMode, roofs]);
+  const filter = useMemo((): FilterSpecification => ['!=', ['get', 'id'], indoorId], [indoorId]);
   return (
     <Source id={BUILDINGS_SOURCE} type="geojson" data={BUILDINGS_URL} promoteId="id">
-      <Layer id={BUILDINGS_LAYER} type="fill-extrusion" beforeId={ANCHORS.scene3d} paint={paint} />
+      <Layer id={BUILDINGS_LAYER} type="fill-extrusion" beforeId={ANCHORS.scene3d} paint={paint} filter={filter} />
     </Source>
   );
 }

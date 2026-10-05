@@ -29,7 +29,7 @@ export default defineConfig({
         // App shell, basemap style and campus data are downloaded on the first visit.
         globPatterns: ['**/*.{js,css,html,json,geojson,png,svg}'],
         // The 3D code, its trees and its roofs are only fetched when 3D is on; they are cached on first use below.
-        globIgnores: ['**/render3d-*.js', 'data/trees.json', 'data/roofs.json'],
+        globIgnores: ['**/render3d-*.js', 'data/trees.json', 'data/roofs.json', 'data/indoor/**'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         // The first install takes over the open page at once, so tiles start being cached on the first visit.
@@ -44,6 +44,12 @@ export default defineConfig({
             urlPattern: /\/data\/(trees|roofs)\.json$/,
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'render3d-data', expiration: { maxEntries: 4 } },
+          },
+          {
+            // A building's floor plans are fetched when its indoor map is first opened.
+            urlPattern: /\/data\/indoor\/.+\.json$/,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'indoor', expiration: { maxEntries: 20 } },
           },
           {
             // The tile index names the current tile set, so it must be refreshed.

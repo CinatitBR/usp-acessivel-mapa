@@ -19,6 +19,13 @@ export const strings = {
     offCampus: 'Fora do campus',
     institute: 'Unidade',
   },
+  indoor: {
+    open: 'Ver planta interna',
+    close: 'Fechar planta interna',
+    levels: 'Andares',
+    level: (level: string) => `Nível ${level}`,
+    error: 'Não foi possível carregar a planta interna.',
+  },
   building: {
     unnamed: 'Edifício sem nome',
     kinds: {

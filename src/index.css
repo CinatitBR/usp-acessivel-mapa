@@ -1083,3 +1083,110 @@ input {
 .route-marker-to {
   background: #1f2933;
 }
+
+/* Indoor map: floor buttons in a row at the bottom left on phones, above the attribution */
+.level-switcher {
+  position: absolute;
+  left: calc(env(safe-area-inset-left) + 10px);
+  bottom: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: calc(100% - 20px);
+  pointer-events: none;
+}
+
+/* The status line and the toast, which share that corner on phones, go above the floor buttons. */
+.level-switcher ~ .map-status {
+  bottom: 172px;
+}
+
+.level-switcher ~ .toast {
+  bottom: 216px;
+}
+
+.level-name {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: var(--shadow);
+  font-size: 0.8125rem;
+}
+
+.level-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+}
+
+.level-button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--border);
+  background: transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.level-button:last-child {
+  border-left: 0;
+}
+
+.level-button[aria-pressed='true'] {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.level-close {
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.level-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+/* On wide screens the floors stack at the bottom right, top floor on top. */
+@media (min-width: 760px) {
+  .level-switcher {
+    right: calc(env(safe-area-inset-right) + 10px);
+    bottom: 44px;
+    left: auto;
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .level-buttons {
+    flex-direction: column;
+  }
+
+  .level-switcher ~ .map-status {
+    bottom: 64px;
+  }
+
+  .level-switcher ~ .toast {
+    bottom: 108px;
+  }
+
+  .level-button {
+    border-bottom: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .level-button:last-child {
+    border-bottom: 0;
+  }
+}
