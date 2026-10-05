@@ -64,3 +64,48 @@ export function isActive(report: Report, today: string): boolean {
 /** The accessibility status a report stands for: red when one cannot get through or use it, amber otherwise. */
 export const reportStatus = ({ answer }: Pick<Report, 'answer'>): Exclude<AccessStatus, 'yes' | 'unknown'> =>
   answer === 'yes' || answer === 'help' ? 'partial' : 'no';
+
+/** What a report is being made about: a spot on a path, a building, or an elevator or accessible toilet on the map. */
+export type ReportPlaceKind = 'path' | 'building' | 'elevator' | 'toilet';
+
+export type ReportPlace = {
+  position: LngLat;
+  /** Name shown to the reporter: the building's name, "Elevador", "Ponto no mapa". */
+  label: string;
+  on: ReportPlaceKind;
+  /** Id of the building or accessibility point. */
+  target?: string;
+};
+
+/** The types offered for a place, so the reporter only sees those that make sense there. */
+export const TYPES_FOR: Record<ReportPlaceKind, readonly ReportType[]> = {
+  path: ['blocked', 'step', 'narrow'],
+  building: ['blocked', 'step', 'elevator', 'toilet'],
+  elevator: ['elevator'],
+  toilet: ['toilet'],
+};
+
+/** A report being written. The step shown follows from what is still missing: the place, the type, the answer. */
+export type ReportDraft = {
+  place: ReportPlace | null;
+  /** Opened from a thing's panel: taps on the map do not move it. */
+  fixed: boolean;
+  type: ReportType | null;
+  answer: ReportAnswer | null;
+};
+
+/** A draft for a place, or without one yet. A place that allows a single type already has it. */
+export function draftFor(place: ReportPlace | null, fixed: boolean): ReportDraft {
+  const types = place ? TYPES_FOR[place.on] : [];
+  return { place, fixed, type: types.length === 1 ? types[0]! : null, answer: null };
+}
+
+/** The draft after its place changed: the type is kept if the new place still offers it. */
+export function movedTo(draft: ReportDraft, place: ReportPlace): ReportDraft {
+  const types = TYPES_FOR[place.on];
+  const type = draft.type && types.includes(draft.type) ? draft.type : types.length === 1 ? types[0]! : null;
+  return { ...draft, place, type, answer: type === draft.type ? draft.answer : null };
+}
+
+/** One of the person's own reports, kept on their device: sent and waiting for review, or still to be sent. */
+export type MyReport = Report & { sent: boolean };

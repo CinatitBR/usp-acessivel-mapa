@@ -9,6 +9,8 @@ export type Route =
   | { kind: 'ors'; profile: OrsProfile; from: string; to: string }
   /** The reports that reviewers have published in the spreadsheet. */
   | { kind: 'reports' }
+  /** A new report, in the request's body, to add to the reviewers' queue. */
+  | { kind: 'submit-report' }
   | { kind: 'bad-request'; message: string }
   | { kind: 'not-found' };
 
@@ -37,6 +39,7 @@ function parseCode(value: string | null): number | undefined {
 }
 
 export function matchRoute(method: string, url: URL): Route {
+  if (method === 'POST' && url.pathname === '/reports') return { kind: 'submit-report' };
   if (method !== 'GET') return { kind: 'not-found' };
 
   switch (url.pathname) {
@@ -97,7 +100,8 @@ export function checkOrigin(origin: string | null, allowed: string): { ok: boole
     ok: true,
     headers: {
       'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',
       Vary: 'Origin',
     },

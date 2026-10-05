@@ -6,10 +6,12 @@ import { ACCESS_LAYER, ACCESS_SELECTED_LAYER } from '../features/accessibility/l
 import { BUILDINGS_LAYER, BUILDINGS_SOURCE } from '../features/buildings/layers';
 import { INDOOR_ROOMS_LAYER, INDOOR_SLAB_LAYER, PASSAGE_CATEGORIES } from '../features/indoor/layers';
 import { POIS_LAYER, POIS_SELECTED_LAYER } from '../features/pois/layers';
-import { REPORTS_LAYER, REPORTS_SELECTED_LAYER } from '../features/reports/layers';
+import { MY_REPORTS_LAYER, MY_REPORTS_SELECTED_LAYER, REPORTS_LAYER, REPORTS_SELECTED_LAYER } from '../features/reports/layers';
+import { onCampus, placeAt } from '../features/reports/place';
 import { STOPS_LAYER, STOPS_SELECTED_LAYER } from '../features/transit/layers';
 import { BUSES_LAYER } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
+import { strings } from '../strings/pt-BR';
 import { MAP_ACCENT } from '../styles/palette';
 
 const FLY_MIN_ZOOM = 17;
@@ -22,6 +24,8 @@ const SETTLE_MS = 2500;
 const POINT_KINDS: Record<string, 'access' | 'stop' | 'poi' | 'report'> = {
   [REPORTS_LAYER]: 'report',
   [REPORTS_SELECTED_LAYER]: 'report',
+  [MY_REPORTS_LAYER]: 'report',
+  [MY_REPORTS_SELECTED_LAYER]: 'report',
   [ACCESS_LAYER]: 'access',
   [ACCESS_SELECTED_LAYER]: 'access',
   [STOPS_LAYER]: 'stop',
@@ -36,11 +40,22 @@ export function MapSelection() {
   const selection = useAppStore((state) => state.selection);
   const flyTarget = useAppStore((state) => state.flyTarget);
   const accessMode = useAppStore((state) => state.accessMode);
+  const reportPlace = useAppStore((state) => state.reportDraft?.place?.position);
 
   useEffect(() => {
     if (!map) return;
     const onClick = (event: MapMouseEvent) => {
-      const { select, clearSelection } = useAppStore.getState();
+      const { select, clearSelection, reportDraft, setReportPlace, showToast } = useAppStore.getState();
+      if (reportDraft) {
+        // While a report is being written a tap says where it is; with a fixed place it does nothing.
+        if (reportDraft.fixed) return;
+        const tapped = event.lngLat.toArray();
+        if (!onCampus(tapped)) return showToast({ message: strings.reports.offCampus });
+        const under = [ACCESS_LAYER, ACCESS_SELECTED_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
+        const hit = under.length > 0 ? map.queryRenderedFeatures(event.point, { layers: under })[0] : undefined;
+        setReportPlace(placeAt(tapped, hit, hit?.layer.id === BUILDINGS_LAYER));
+        return;
+      }
       // Small symbols win over the building underneath them.
       const layers = [BUSES_LAYER, ...Object.keys(POINT_KINDS), INDOOR_ROOMS_LAYER, INDOOR_SLAB_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
       const feature = layers.length > 0 ? map.queryRenderedFeatures(event.point, { layers })[0] : undefined;
@@ -104,6 +119,8 @@ export function MapSelection() {
     };
   }, [map, flyTarget]);
 
+  // The place of the report being written.
+  if (reportPlace) return <Marker longitude={reportPlace[0]} latitude={reportPlace[1]} anchor="bottom" color={MAP_ACCENT} />;
   // Stops, POIs, reports and accessibility points mark themselves with a larger symbol; the pin is for what has none.
   if (!selection || !('position' in selection)) return null;
   if (selection.kind === 'stop' || selection.kind === 'poi' || selection.kind === 'report' || (selection.kind === 'access' && accessMode)) return null;

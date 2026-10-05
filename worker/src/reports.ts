@@ -41,6 +41,9 @@ const ANSWERS: Record<ReportType, Record<string, ReportAnswer>> = {
   toilet: { interditado: 'closed', inexistente: 'missing' },
 };
 
+/** OSM-style ids (`way/123`) and the overlay's own (`curated/elevator-1`). */
+const TARGET = /^[a-z]+\/[\w-]{1,40}$/;
+
 /** The campus with a margin: [west, south, east, north]. */
 const CAMPUS_BBOX = [-46.75, -23.58, -46.705, -23.545] as const;
 
@@ -143,8 +146,7 @@ export function publishedReports(csv: string): PublishedReport[] {
       type,
       answer,
       at: [Number(lng.toFixed(6)), Number(lat.toFixed(6))],
-      // OSM-style ids (`way/123`) and the overlay's own (`curated/elevator-1`).
-      ...(/^[a-z]+\/[\w-]{1,40}$/.test(target) && { target }),
+      ...(TARGET.test(target) && { target }),
       since,
       ...(until && { until }),
       ...(note && { note }),
@@ -180,6 +182,112 @@ export async function reports(env: Env, ctx: ExecutionContext): Promise<string> 
       ),
     );
     return body;
+  } catch (error) {
+    if (error instanceof UpstreamError) throw error;
+    const timedOut = error instanceof DOMException && error.name === 'TimeoutError';
+    throw new UpstreamError(timedOut ? 'timeout' : 'upstream', timedOut ? 504 : 502);
+  }
+}
+
+// --- Sending a report --------------------------------------------------------
+
+/** A report as the app sends it: the same codes as a published one, without id or dates. */
+export type Submission = Pick<PublishedReport, 'type' | 'answer' | 'at' | 'target' | 'note'>;
+
+/** The largest body the app can produce is a few hundred bytes. */
+export const MAX_SUBMISSION_BYTES = 2048;
+
+const wordFor = <T extends string>(words: Record<string, T>, code: T) => Object.keys(words).find((word) => words[word] === code)!;
+
+/** Checks a report sent by the app. Anything that is not exactly a report is refused, with the reason. */
+export function parseSubmission(json: unknown): Submission | { error: string } {
+  if (!json || typeof json !== 'object' || Array.isArray(json)) return { error: 'the body must be a JSON object' };
+  const { type, answer, at, target, note } = json as Record<string, unknown>;
+  const known = Object.values(TYPES).find((candidate) => candidate === type);
+  if (!known) return { error: 'unknown type' };
+  const found = Object.values(ANSWERS[known]).find((candidate) => candidate === answer);
+  if (!found) return { error: 'this type does not take this answer' };
+  if (!Array.isArray(at) || at.length !== 2 || typeof at[0] !== 'number' || typeof at[1] !== 'number') return { error: 'at must be [lng, lat]' };
+  const [lng, lat] = at as [number, number];
+  const [west, south, east, north] = CAMPUS_BBOX;
+  if (!(lng >= west && lng <= east && lat >= south && lat <= north)) return { error: 'the place is outside the campus' };
+  if (target !== undefined && (typeof target !== 'string' || !TARGET.test(target))) return { error: 'target is not an id' };
+  if (note !== undefined && (typeof note !== 'string' || note.length > MAX_NOTE)) return { error: `note must be text of at most ${MAX_NOTE} characters` };
+  return {
+    type: known,
+    answer: found,
+    at: [Number(lng.toFixed(6)), Number(lat.toFixed(6))],
+    ...(typeof target === 'string' && { target }),
+    ...(typeof note === 'string' && note.trim() && { note: note.trim() }),
+  };
+}
+
+/** A spreadsheet takes text that starts like a formula for one; a leading apostrophe keeps it text. */
+const asText = (value: string) => (/^[=+\-@\t\r]/.test(value) ? `'${value}` : value);
+
+/**
+ * The cells of a new row, by column name, in the words and number format the reviewers'
+ * spreadsheet uses: every column of the published tab, so an approved row is published as it is.
+ * `ate` is left empty for the reviewer; without it the app applies its default.
+ */
+export function submissionRow({ type, answer, at, target, note }: Submission, today: string, id: string): Record<string, string> {
+  return {
+    id,
+    tipo: wordFor(TYPES, type),
+    resposta: wordFor(ANSWERS[type], answer),
+    // A decimal comma is read as a number under Brazilian settings and left alone under others.
+    lng: at[0].toFixed(6).replace('.', ','),
+    lat: at[1].toFixed(6).replace('.', ','),
+    alvo: target ?? '',
+    desde: today,
+    ate: '',
+    nota: asText(note ?? ''),
+  };
+}
+
+const FORM_LINK = /^https:\/\/docs\.google\.com\/forms\/d\/e\/[\w-]+\/viewform\?/;
+const REQUIRED_FIELDS = ['tipo', 'resposta', 'lng', 'lat'];
+
+/**
+ * Where to send a row, read from a pre-filled link of the Google Form in which every question
+ * was answered with its own column name (`id`, `tipo`, `resposta`, `lng`, `lat`, `alvo`,
+ * `desde`, `ate`, `nota`). The link then says which form field stands for which column. Nothing is returned
+ * if the link is not such a link or a required column is missing.
+ */
+export function formTarget(prefilledLink: string): { url: string; fields: Record<string, string> } | undefined {
+  if (!FORM_LINK.test(prefilledLink)) return undefined;
+  const link = new URL(prefilledLink);
+  const fields: Record<string, string> = {};
+  for (const [name, value] of link.searchParams) {
+    if (/^entry\.\d+$/.test(name)) fields[plain(value)] = name;
+  }
+  if (REQUIRED_FIELDS.some((column) => !fields[column])) return undefined;
+  return { url: `${link.origin}${link.pathname.replace(/\/viewform$/, '/formResponse')}`, fields };
+}
+
+/** A new id for a report: short, unique enough for a spreadsheet, and nothing in it says who sent it. */
+export const newReportId = () => `r-${crypto.randomUUID().slice(0, 8)}`;
+
+/**
+ * Adds the report to the reviewers' spreadsheet, through the form named by REPORTS_FORM_LINK, and
+ * returns the id it was given. Stores nothing here.
+ */
+export async function submitReport(submission: Submission, env: Env): Promise<string> {
+  const target = formTarget(env.REPORTS_FORM_LINK ?? '');
+  if (!target) throw new UpstreamError('upstream', 502);
+  // The day in São Paulo, where the campus is.
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+  const id = newReportId();
+  const row = submissionRow(submission, today, id);
+  const body = new URLSearchParams();
+  for (const [column, field] of Object.entries(target.fields)) {
+    if (row[column] !== undefined) body.set(field, row[column]);
+  }
+  try {
+    const response = await fetch(target.url, { method: 'POST', body, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
+    if (!response.ok) throw new UpstreamError('upstream', 502);
+    await response.body?.cancel();
+    return id;
   } catch (error) {
     if (error instanceof UpstreamError) throw error;
     const timedOut = error instanceof DOMException && error.name === 'TimeoutError';

@@ -82,4 +82,11 @@ describe('checkOrigin', () => {
   it('lets requests without an Origin through, with no CORS headers', () => {
     expect(checkOrigin(null, allowed)).toEqual({ ok: true, headers: {} });
   });
+
+  it('takes a report only as a POST to /reports', () => {
+    expect(matchRoute('POST', new URL('https://w/reports'))).toEqual({ kind: 'submit-report' });
+    expect(matchRoute('GET', new URL('https://w/reports'))).toEqual({ kind: 'reports' });
+    expect(matchRoute('POST', new URL('https://w/health'))).toEqual({ kind: 'not-found' });
+    expect(matchRoute('PUT', new URL('https://w/reports'))).toEqual({ kind: 'not-found' });
+  });
 });

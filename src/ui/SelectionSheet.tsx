@@ -4,6 +4,7 @@ import { BuildingPanel } from '../features/buildings/BuildingPanel';
 import { RoomPanel } from '../features/indoor/RoomPanel';
 import { InstitutePanel } from '../features/institutes/InstitutePanel';
 import { PoiPanel } from '../features/pois/PoiPanel';
+import { ReportFlow } from '../features/reports/ReportFlow';
 import { ReportPanel } from '../features/reports/ReportPanel';
 import { RoutePanel } from '../features/routing/RoutePanel';
 import { BusPanel } from '../features/transit/BusPanel';
@@ -64,6 +65,9 @@ export function SelectionSheet() {
   const selection = useAppStore((state) => state.selection);
   const clearSelection = useAppStore((state) => state.clearSelection);
   const routePlan = useAppStore((state) => state.routePlan);
+  const reportDraft = useAppStore((state) => state.reportDraft);
+  // Writing a report takes the panel until it is sent or closed.
+  if (reportDraft) return <ReportFlow draft={reportDraft} />;
   // A selection made while planning a route covers the route panel until it is closed.
   if (!selection) return routePlan ? <RoutePanel plan={routePlan} /> : null;
 

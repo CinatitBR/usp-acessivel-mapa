@@ -1638,3 +1638,80 @@ input {
 .report-row .access-status {
   margin: 0;
 }
+
+/* Reporting */
+.report-open {
+  display: grid;
+  place-items: center;
+  top: calc(env(safe-area-inset-top) + 258px);
+  padding: 0;
+}
+
+/* The types to choose from: tall rows, easy to hit */
+.report-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.report-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.report-choice strong {
+  color: var(--accent);
+  font-weight: var(--weight-semibold);
+}
+
+.report-answer {
+  min-height: 56px;
+  padding: 0 24px;
+}
+
+.report-wide {
+  align-self: stretch;
+  min-height: 52px;
+}
+
+.report-wide:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.report-note {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.report-note textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font: inherit;
+  resize: vertical;
+}
+
+.report-summary,
+.report-pending {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--accent-tonal);
+  color: var(--on-accent-tonal);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+}

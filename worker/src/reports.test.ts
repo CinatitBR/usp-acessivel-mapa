@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCsv, publishedReports } from './reports';
+import { formTarget, newReportId, parseCsv, parseSubmission, publishedReports, submissionRow } from './reports';
 
 describe('parseCsv', () => {
   it('reads quoted fields with commas, quotes and line breaks', () => {
@@ -72,5 +72,82 @@ describe('publishedReports', () => {
   it('gives nothing for an empty tab', () => {
     expect(publishedReports('')).toEqual([]);
     expect(publishedReports(header)).toEqual([]);
+  });
+});
+
+describe('parseSubmission', () => {
+  const good = { type: 'blocked', answer: 'no', at: [-46.7251851, -23.5629561] };
+
+  it('accepts a report and rounds its place', () => {
+    expect(parseSubmission({ ...good, target: 'way/158966879', note: '  Tapume  ' })).toEqual({
+      type: 'blocked', answer: 'no', at: [-46.725185, -23.562956], target: 'way/158966879', note: 'Tapume',
+    });
+    expect(parseSubmission(good)).toEqual({ type: 'blocked', answer: 'no', at: [-46.725185, -23.562956] });
+  });
+
+  it('drops an empty note and fields it does not know', () => {
+    expect(parseSubmission({ ...good, note: '   ', id: 'x', until: '2030-01-01' })).toEqual({ type: 'blocked', answer: 'no', at: [-46.725185, -23.562956] });
+  });
+
+  it('refuses anything else', () => {
+    const refused = [
+      null,
+      'text',
+      [good],
+      { ...good, type: 'pothole' },
+      { ...good, answer: 'broken' },
+      { type: 'elevator', answer: 'no', at: good.at },
+      { ...good, at: [-43.2, -22.9] },
+      { ...good, at: ['-46.72', '-23.56'] },
+      { ...good, at: [-46.72, -23.56, 700] },
+      { ...good, target: '<script>' },
+      { ...good, target: 7 },
+      { ...good, note: 'x'.repeat(281) },
+      { ...good, note: 5 },
+    ];
+    for (const body of refused) expect(parseSubmission(body)).toHaveProperty('error');
+  });
+});
+
+describe('submissionRow', () => {
+  it('writes the row in the spreadsheet\'s own words', () => {
+    expect(submissionRow({ type: 'narrow', answer: 'help', at: [-46.725185, -23.562956], note: 'Raízes' }, '2026-10-05', 'r-1')).toEqual({
+      id: 'r-1', ate: '', tipo: 'estreita', resposta: 'ajuda', lng: '-46,725185', lat: '-23,562956', alvo: '', desde: '2026-10-05', nota: 'Raízes',
+    });
+    expect(submissionRow({ type: 'toilet', answer: 'closed', at: [-46.73, -23.56], target: 'way/1' }, '2026-10-05', 'r-2')).toMatchObject({
+      tipo: 'banheiro', resposta: 'interditado', alvo: 'way/1', nota: '',
+    });
+  });
+
+  it('comes back unchanged through the published tab', () => {
+    const row = submissionRow({ type: 'elevator', answer: 'broken', at: [-46.725185, -23.562956], target: 'node/4120153445', note: 'Parado, sem previsão' }, '2026-10-05', newReportId());
+    const quote = (value: string) => `"${value.replaceAll('"', '""')}"`;
+    const csv = `${Object.keys(row).join(',')}\n${Object.values(row).map(quote).join(',')}`;
+    expect(publishedReports(csv)).toEqual([
+      { id: row.id, type: 'elevator', answer: 'broken', at: [-46.725185, -23.562956], target: 'node/4120153445', since: '2026-10-05', note: 'Parado, sem previsão' },
+    ]);
+  });
+
+  it('keeps a note that looks like a formula as text', () => {
+    for (const note of ['=IMPORTXML("http://x")', '+1', '-1', '@x']) {
+      expect(submissionRow({ type: 'blocked', answer: 'no', at: [-46.73, -23.56], note }, '2026-10-05', 'r-3').nota).toBe(`'${note}`);
+    }
+  });
+});
+
+describe('formTarget', () => {
+  const link = 'https://docs.google.com/forms/d/e/1FAIpQLSabc-_123/viewform?usp=pp_url&entry.11=tipo&entry.22=Resposta&entry.33=lng&entry.44=lat&entry.55=alvo&entry.66=desde&entry.77=nota';
+
+  it('reads the form address and which field is which column', () => {
+    expect(formTarget(link)).toEqual({
+      url: 'https://docs.google.com/forms/d/e/1FAIpQLSabc-_123/formResponse',
+      fields: { tipo: 'entry.11', resposta: 'entry.22', lng: 'entry.33', lat: 'entry.44', alvo: 'entry.55', desde: 'entry.66', nota: 'entry.77' },
+    });
+  });
+
+  it('refuses a link that is not a pre-filled form link, or lacks a required column', () => {
+    expect(formTarget('')).toBeUndefined();
+    expect(formTarget('https://example.com/forms/d/e/x/viewform?entry.1=tipo')).toBeUndefined();
+    expect(formTarget(link.replace('&entry.44=lat', ''))).toBeUndefined();
   });
 });

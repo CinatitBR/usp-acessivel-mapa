@@ -7,6 +7,7 @@ import { AccessSummary, StatusBadge } from '../../ui/AccessSummary';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { Icon } from '../../ui/Icon';
 import { WebsiteLink } from '../../ui/WebsiteLink';
+import { ReportAction } from '../reports/ReportButton';
 import { reportDates, reportTitle } from '../reports/ReportPanel';
 import { useReports } from '../reports/useReports';
 import { WikiSection } from '../wiki/WikiSection';
@@ -18,6 +19,7 @@ export function BuildingPanel({ id }: { id: string }) {
   const select = useAppStore((state) => state.select);
   const clearSelection = useAppStore((state) => state.clearSelection);
   const openIndoor = useAppStore((state) => state.openIndoor);
+  const startReport = useAppStore((state) => state.startReport);
   const indoorOpen = useAppStore((state) => state.indoor?.buildingId === id);
   // Reports about the building itself or about one of its points (an elevator, an entrance).
   const reports = useReports().filter((report) => report.target === id || features.some((feature) => feature.id === report.target));
@@ -39,6 +41,7 @@ export function BuildingPanel({ id }: { id: string }) {
               {strings.indoor.open}
             </button>
           )}
+          <ReportAction onClick={() => startReport({ position: building.center, label: building.name ?? strings.building.unnamed, on: 'building', target: building.id })} />
           <WebsiteLink url={building.website ?? institute?.website} />
         </>
       }

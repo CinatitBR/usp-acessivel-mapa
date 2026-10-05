@@ -18,6 +18,8 @@ export const REPORT_ICON_PREFIX = 'report-';
 
 /** Image name of a report's symbol. */
 export const reportIconId = ({ type, answer }: Pick<Report, 'type' | 'answer'>) => `${REPORT_ICON_PREFIX}${type}-${answer}`;
+/** The same symbol hollow, with a dashed outline: the person's own report, not reviewed yet. */
+export const PENDING_SUFFIX = '-pending';
 
 /**
  * Registers the symbol of every kind of report, plus its selected form. A temporary report is
@@ -31,7 +33,10 @@ export function addReportIcons(map: Pick<MaplibreMap, 'hasImage' | 'addImage'>) 
       const status = reportStatus({ answer });
       const color = ACCESS_COLORS[status];
       const shape = isTemporary({ type, answer }) ? 'triangle' : status === 'no' ? 'diamond' : 'square';
-      addBadgeImages(map, reportIconId({ type, answer }), { shape, fill: color, outline: '#ffffff', outlineWidth: 1.5, ink: '#ffffff', glyph: GLYPHS[type] }, color);
+      const id = reportIconId({ type, answer });
+      addBadgeImages(map, id, { shape, fill: color, outline: '#ffffff', outlineWidth: 1.5, ink: '#ffffff', glyph: GLYPHS[type] }, color);
+      // Hollow already means "no confirmed information" among the accessibility symbols.
+      addBadgeImages(map, `${id}${PENDING_SUFFIX}`, { shape, fill: '#ffffff', outline: color, outlineWidth: 2, ink: color, glyph: GLYPHS[type], dashed: true }, color);
     }
   }
 }

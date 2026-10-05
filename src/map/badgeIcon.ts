@@ -15,6 +15,8 @@ export type Badge = {
   glyph: Glyph;
   /** Size of the pictogram relative to the badge. Defaults to a size that suits the shape. */
   glyphScale?: number;
+  /** The outline is drawn in dashes: not confirmed yet. */
+  dashed?: boolean;
 };
 
 const SIZE = 28;
@@ -51,13 +53,15 @@ function traceShape(context: CanvasRenderingContext2D, shape: BadgeShape) {
 }
 
 /** Paints a badge in the SIZE × SIZE square at the context's origin. */
-function paintBadge(context: CanvasRenderingContext2D, { shape, fill, outline, outlineWidth, ink, glyph, glyphScale }: Badge) {
+function paintBadge(context: CanvasRenderingContext2D, { shape, fill, outline, outlineWidth, ink, glyph, glyphScale, dashed }: Badge) {
   traceShape(context, shape);
   context.fillStyle = fill;
   context.fill();
   context.lineWidth = outlineWidth;
   context.strokeStyle = outline;
+  if (dashed) context.setLineDash([3.5, 2.5]);
   context.stroke();
+  context.setLineDash([]);
 
   context.fillStyle = context.strokeStyle = ink;
   if ('text' in glyph) {

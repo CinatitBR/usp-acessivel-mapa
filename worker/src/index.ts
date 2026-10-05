@@ -7,7 +7,7 @@
  */
 import { DATA_TTL_SECONDS, olhoVivo, UpstreamError } from './olhovivo';
 import { ORS_ROUTE_TTL_SECONDS, orsRoute } from './ors';
-import { reports, REPORTS_TTL_SECONDS } from './reports';
+import { MAX_SUBMISSION_BYTES, parseSubmission, reports, REPORTS_TTL_SECONDS, submitReport } from './reports';
 import { checkOrigin, matchRoute, type Route } from './routes';
 
 type ErrorCode = 'bad_request' | 'not_found' | 'forbidden' | 'rate_limited' | 'auth' | 'upstream' | 'timeout';
@@ -21,7 +21,24 @@ const json = (body: unknown, status: number, headers: Record<string, string>) =>
 const failure = (error: ErrorCode, status: number, headers: Record<string, string>, message?: string) =>
   json({ error, status, ...(message && { message }) }, status, { 'Cache-Control': 'no-store', ...headers });
 
-async function respond(route: Route, env: Env, ctx: ExecutionContext, cors: Record<string, string>): Promise<Response> {
+/** Reads, checks and passes on a report. The body is small and bounded, so it is read whole. */
+async function acceptReport(request: Request, env: Env, cors: Record<string, string>): Promise<Response> {
+  const text = await request.text();
+  if (text.length > MAX_SUBMISSION_BYTES) return failure('bad_request', 413, cors, 'the report is too large');
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    return failure('bad_request', 400, cors, 'the body must be JSON');
+  }
+  const submission = parseSubmission(body);
+  if ('error' in submission) return failure('bad_request', 400, cors, submission.error);
+  // The id lets the app recognise its own report once a reviewer publishes it.
+  const id = await submitReport(submission, env);
+  return json({ ok: true, id }, 201, { 'Cache-Control': 'no-store', ...cors });
+}
+
+async function respond(route: Route, request: Request, env: Env, ctx: ExecutionContext, cors: Record<string, string>): Promise<Response> {
   const cached = { 'Cache-Control': `public, max-age=${DATA_TTL_SECONDS}`, ...cors };
   switch (route.kind) {
     case 'health':
@@ -42,6 +59,8 @@ async function respond(route: Route, env: Env, ctx: ExecutionContext, cors: Reco
       });
     case 'reports':
       return json(await reports(env, ctx), 200, { 'Cache-Control': `public, max-age=${REPORTS_TTL_SECONDS}`, ...cors });
+    case 'submit-report':
+      return acceptReport(request, env, cors);
     case 'bad-request':
       return failure('bad_request', 400, cors, route.message);
     case 'not-found':
@@ -59,25 +78,28 @@ export default {
     let response: Response;
     if (!origin.ok) {
       response = failure('forbidden', 403, {});
+    } else if (route.kind === 'submit-report' && !request.headers.get('Origin')) {
+      // Reports come from the app in a browser, which always says where it is.
+      response = failure('forbidden', 403, {});
     } else if (request.method === 'OPTIONS') {
       response = new Response(null, { status: 204, headers: origin.headers });
-    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors' || route.kind === 'reports') {
+    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors' || route.kind === 'reports' || route.kind === 'submit-report') {
       const client = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-      // Reports share the general limit; only routing has a stricter one.
-      const limiter = route.kind === 'ors' ? env.ORS_LIMITER : env.OLHOVIVO_LIMITER;
+      // Reading reports shares the general limit; routing and sending a report have stricter ones.
+      const limiter = route.kind === 'ors' ? env.ORS_LIMITER : route.kind === 'submit-report' ? env.REPORT_LIMITER : env.OLHOVIVO_LIMITER;
       const { success } = await limiter.limit({ key: client });
       if (!success) {
         response = failure('rate_limited', 429, { 'Retry-After': '60', ...origin.headers });
       } else {
         try {
-          response = await respond(route, env, ctx, origin.headers);
+          response = await respond(route, request, env, ctx, origin.headers);
         } catch (error) {
           const upstream = error instanceof UpstreamError ? error : new UpstreamError('upstream', 502);
           response = failure(upstream.code, upstream.status, origin.headers);
         }
       }
     } else {
-      response = await respond(route, env, ctx, origin.headers);
+      response = await respond(route, request, env, ctx, origin.headers);
     }
 
     // Path only: the query holds no secrets, but nothing else about the request is needed either.

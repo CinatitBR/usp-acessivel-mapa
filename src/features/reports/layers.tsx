@@ -6,11 +6,13 @@ import { isTemporary, type Report } from '../../domain/reports';
 import { ANCHORS } from '../../map/anchors';
 import { SELECTED_SUFFIX } from '../../map/badgeIcon';
 import { useAppStore } from '../../state/store';
-import { addReportIcons, reportIconId } from './icons';
+import { addReportIcons, PENDING_SUFFIX, reportIconId } from './icons';
 import { useReports } from './useReports';
 
 export const REPORTS_LAYER = 'reports';
 export const REPORTS_SELECTED_LAYER = 'reports-selected';
+export const MY_REPORTS_LAYER = 'my-reports';
+export const MY_REPORTS_SELECTED_LAYER = 'my-reports-selected';
 
 const MIN_ZOOM = 14;
 
@@ -42,14 +44,27 @@ const selectedLayout: SymbolLayerSpecification['layout'] = {
   'icon-ignore-placement': true,
 };
 
+const mineLayout: SymbolLayerSpecification['layout'] = {
+  'icon-image': ['concat', ['get', 'icon'], PENDING_SUFFIX],
+  'icon-size': ['interpolate', ['linear'], ['zoom'], MIN_ZOOM, 0.6, 18, 1],
+  'icon-allow-overlap': true,
+  'icon-ignore-placement': true,
+};
+
+const mineSelectedLayout: SymbolLayerSpecification['layout'] = {
+  ...selectedLayout,
+  'icon-image': ['concat', ['get', 'icon'], PENDING_SUFFIX, SELECTED_SUFFIX],
+};
+
 /**
  * Published reports. Temporary ones (triangles) are always drawn, unless switched off in the
- * layer menu; permanent ones are part of the accessibility view. The selected one is drawn
- * larger, with a ring.
+ * layer menu; permanent ones are part of the accessibility view. The person's own reports,
+ * not reviewed yet, are always drawn, hollow. The selected one is drawn larger, with a ring.
  */
 export function ReportLayers() {
   const { current: map } = useMap();
   const reports = useReports();
+  const mine = useAppStore((state) => state.myReports);
   const accessMode = useAppStore((state) => state.accessMode);
   const showTemporary = useAppStore((state) => state.reportsVisible);
   const selectedId = useAppStore((state) => (state.selection?.kind === 'report' ? state.selection.id : ''));
@@ -57,21 +72,29 @@ export function ReportLayers() {
   const mapReady = useAppStore((state) => state.mapStatus === 'ready');
   const [iconsReady, setIconsReady] = useState(false);
   const data = useMemo(() => reportFeatures(reports), [reports]);
+  const mineData = useMemo(() => reportFeatures(mine), [mine]);
+  const any = reports.length + mine.length > 0;
 
   useEffect(() => {
-    if (!map || !mapReady || reports.length === 0) return;
+    if (!map || !mapReady || !any) return;
     addReportIcons(map);
     setIconsReady(true);
-  }, [map, mapReady, reports.length]);
+  }, [map, mapReady, any]);
 
-  if (!iconsReady || reports.length === 0) return null;
+  if (!iconsReady || !any) return null;
 
   const isSelected: FilterSpecification = ['==', ['get', 'id'], selectedId];
   const shown: FilterSpecification = ['case', ['get', 'temporary'], showTemporary, accessMode];
   return (
-    <Source id="reports" type="geojson" data={data}>
-      <Layer id={REPORTS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={MIN_ZOOM} layout={layout} filter={['all', shown, ['!', isSelected]]} />
-      <Layer id={REPORTS_SELECTED_LAYER} type="symbol" beforeId={ANCHORS.labels} layout={selectedLayout} filter={isSelected} />
-    </Source>
+    <>
+      <Source id="reports" type="geojson" data={data}>
+        <Layer id={REPORTS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={MIN_ZOOM} layout={layout} filter={['all', shown, ['!', isSelected]]} />
+        <Layer id={REPORTS_SELECTED_LAYER} type="symbol" beforeId={ANCHORS.labels} layout={selectedLayout} filter={isSelected} />
+      </Source>
+      <Source id="my-reports" type="geojson" data={mineData}>
+        <Layer id={MY_REPORTS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={MIN_ZOOM} layout={mineLayout} filter={['!', isSelected]} />
+        <Layer id={MY_REPORTS_SELECTED_LAYER} type="symbol" beforeId={ANCHORS.labels} layout={mineSelectedLayout} filter={isSelected} />
+      </Source>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isActive, isTemporary, lastDay, type Report, reportStatus } from './reports';
+import { draftFor, isActive, isTemporary, lastDay, movedTo, type Report, type ReportPlace, reportStatus } from './reports';
 
 const report = (fields: Partial<Report>): Report => ({ id: 'r', type: 'blocked', answer: 'no', position: [-46.73, -23.56], since: '2026-10-05', ...fields });
 
@@ -52,5 +52,31 @@ describe('reportStatus', () => {
     expect(reportStatus({ answer: 'yes' })).toBe('partial');
     expect(reportStatus({ answer: 'help' })).toBe('partial');
     for (const answer of ['no', 'broken', 'closed', 'missing'] as const) expect(reportStatus({ answer })).toBe('no');
+  });
+});
+
+describe('a draft', () => {
+  const path: ReportPlace = { position: [-46.73, -23.56], label: 'Ponto no mapa', on: 'path' };
+  const building: ReportPlace = { position: [-46.73, -23.56], label: 'FAU', on: 'building', target: 'way/1' };
+  const elevator: ReportPlace = { position: [-46.73, -23.56], label: 'Elevador', on: 'elevator', target: 'node/2' };
+
+  it('starts at the place, or at the type when the place is known', () => {
+    expect(draftFor(null, false)).toEqual({ place: null, fixed: false, type: null, answer: null });
+    expect(draftFor(building, true)).toEqual({ place: building, fixed: true, type: null, answer: null });
+  });
+
+  it('skips the type when the place allows only one', () => {
+    expect(draftFor(elevator, true).type).toBe('elevator');
+  });
+
+  it('keeps the type and the answer when the place moves to one that still offers it', () => {
+    const draft = { ...draftFor(path, false), type: 'blocked' as const, answer: 'no' as const };
+    expect(movedTo(draft, building)).toEqual({ place: building, fixed: false, type: 'blocked', answer: 'no' });
+  });
+
+  it('drops a type the new place does not offer, and its answer', () => {
+    const draft = { ...draftFor(path, false), type: 'narrow' as const, answer: 'help' as const };
+    expect(movedTo(draft, building)).toMatchObject({ type: null, answer: null });
+    expect(movedTo(draft, elevator)).toMatchObject({ type: 'elevator', answer: null });
   });
 });

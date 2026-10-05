@@ -287,3 +287,14 @@ To connect a spreadsheet:
 | `nota` | Optional: a public note, up to 280 characters |
 
 A change in the spreadsheet reaches the map within about ten minutes.
+
+### Receiving reports from the app
+
+People send reports from the app ("Relatar"). The Worker passes each one to a Google Form whose answers land in the review spreadsheet; nothing shows on the map until a reviewer copies the row to the published tab.
+
+1. Create a Google Form with nine short-answer questions named after the columns of the published tab: `id`, `tipo`, `resposta`, `lng`, `lat`, `alvo`, `desde`, `ate`, `nota`. None required, no sign-in required, and do not collect e-mail addresses.
+2. In the Form's "Responses", link it to the review spreadsheet. The answers arrive in a new tab with its header row already written, which must **not** be the published one.
+3. In the Form's menu choose "Get pre-filled link", answer every question with its own name (`tipo` in the question tipo, and so on), and copy the link.
+4. Put the link in `REPORTS_FORM_LINK` in `worker/wrangler.jsonc` and run `npm run deploy:worker`.
+
+The Worker fills every column: it gives the report an `id` and leaves `ate` empty. So a row is published as it arrived: copy it to the published tab, and set `ate` if it is about works. The app recognises its own report by that id once it is published, so do not change it.

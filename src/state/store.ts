@@ -9,6 +9,9 @@ import {
   storeLiteChoice,
 } from '../features/litemode/detect';
 import type { Snap } from '../ui/sheetSnap';
+import { draftFor, movedTo, type MyReport, type ReportAnswer, type ReportDraft, type ReportPlace, type ReportType } from '../domain/reports';
+import { readMine, storeMine } from '../features/reports/mine';
+import { today } from '../features/reports/today';
 import { readReportsVisible, storeReportsVisible } from '../features/reports/visibility';
 import { readPoiCategories, storePoiCategories, togglePoiCategory } from '../features/pois/visibility';
 
@@ -85,6 +88,23 @@ type AppState = {
   poiCategories: readonly PoiCategory[];
   togglePoiCategory: (category: PoiCategory) => void;
 
+  /** The report being written, shown in place of any other panel. */
+  reportDraft: ReportDraft | null;
+  /** Starts a report about a thing on the map, or with the place still to be tapped. */
+  startReport: (place?: ReportPlace) => void;
+  /** A tap on the map while a report is being written. Ignored when the report is about a fixed thing. */
+  setReportPlace: (place: ReportPlace) => void;
+  setReportType: (type: ReportType | null) => void;
+  setReportAnswer: (answer: ReportAnswer | null) => void;
+  closeReport: () => void;
+  /** The person's own reports, kept on this device until they are reviewed. */
+  myReports: readonly MyReport[];
+  addMyReport: (report: MyReport) => void;
+  /** `publishedId` is the id the Worker gave it, which replaces the one made on the device. */
+  markReportSent: (id: string, publishedId?: string) => void;
+  /** `keepSelection`: its sheet stays open, for a report that goes on as a published one. */
+  removeMyReport: (id: string, keepSelection?: boolean) => void;
+
   /** Temporary reports (works, a broken elevator) are drawn on the map; remembered on this device. */
   reportsVisible: boolean;
   toggleReportsVisible: () => void;
@@ -124,6 +144,12 @@ export type Toast = { message: string; actionLabel?: string; action?: () => void
 
 /** Lite mode is on: no trees, flat buses, and the 3D code is not even downloaded. */
 export const selectLite = (state: AppState) => resolveLite(state.liteChoice, state.liteDetected, state.watchdogTripped);
+
+/** Writes the person's own reports to the device and gives them back. */
+const saved = (mine: MyReport[]) => {
+  storeMine(mine);
+  return mine;
+};
 
 export const useAppStore = create<AppState>((set) => ({
   mapStatus: 'loading',
@@ -178,6 +204,24 @@ export const useAppStore = create<AppState>((set) => ({
   toggleAccessKind: (kind) =>
     set(({ hiddenAccessKinds: hidden }) => ({
       hiddenAccessKinds: hidden.includes(kind) ? hidden.filter((other) => other !== kind) : [...hidden, kind],
+    })),
+
+  reportDraft: null,
+  startReport: (place) => set({ reportDraft: draftFor(place ?? null, place !== undefined), selection: null, followBus: false }),
+  setReportPlace: (place) => set(({ reportDraft }) => (reportDraft && !reportDraft.fixed ? { reportDraft: movedTo(reportDraft, place) } : {})),
+  setReportType: (type) => set(({ reportDraft }) => (reportDraft ? { reportDraft: { ...reportDraft, type, answer: null } } : {})),
+  setReportAnswer: (answer) => set(({ reportDraft }) => (reportDraft ? { reportDraft: { ...reportDraft, answer } } : {})),
+  closeReport: () => set({ reportDraft: null }),
+  myReports: readMine(today()),
+  addMyReport: (report) => set(({ myReports }) => ({ myReports: saved([...myReports, report]) })),
+  markReportSent: (id, publishedId) =>
+    set(({ myReports }) => ({
+      myReports: saved(myReports.map((report) => (report.id === id ? { ...report, id: publishedId ?? id, sent: true } : report))),
+    })),
+  removeMyReport: (id, keepSelection) =>
+    set(({ myReports, selection }) => ({
+      myReports: saved(myReports.filter((report) => report.id !== id)),
+      ...(!keepSelection && selection?.kind === 'report' && selection.id === id && { selection: null }),
     })),
 
   reportsVisible: readReportsVisible(),

@@ -15,9 +15,12 @@
     // The spreadsheet tab with the published reports, published to the web as CSV
     // (https://docs.google.com/spreadsheets/d/e/.../pub?gid=...&single=true&output=csv). Empty: no reports.
     "REPORTS_CSV_URL": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBPK_PA4kKlmSmD2EqpR98gIBLL0Sgyu6MyNW4lE18W4155Y80ezzrWpP-j86qspKhDLXSB342jVwr/pub?gid=0&single=true&output=csv",
+    // A pre-filled link of the Google Form that feeds the review queue, with every question answered
+    // by its column name (tipo, resposta, lng, lat, alvo, desde, nota). Empty: reports cannot be sent.
+    "REPORTS_FORM_LINK": "https://docs.google.com/forms/d/e/1FAIpQLSdtiwUVcRX-cDdROMZnrcDoKJQL51Wb4NhI7haC_dnsKU-BZw/viewform?usp=pp_url&entry.576974451=id&entry.2040240536=tipo&entry.643909224=resposta&entry.1884049496=lng&entry.1995585255=lat&entry.1614839898=alvo&entry.1500582225=desde&entry.378099373=ate&entry.238265858=nota",
   },
 
-  // Per-client limits: 60 requests per minute on the Olho Vivo routes, 10 on routing.
+  // Per-client limits: 60 requests per minute on the Olho Vivo routes and on reading reports, 10 on routing.
   "ratelimits": [
     {
       "name": "OLHOVIVO_LIMITER",
@@ -28,6 +31,12 @@
       "name": "ORS_LIMITER",
       "namespace_id": "1002",
       "simple": { "limit": 10, "period": 60 },
+    },
+    // Sending a report: 3 per minute per client.
+    {
+      "name": "REPORT_LIMITER",
+      "namespace_id": "1003",
+      "simple": { "limit": 3, "period": 60 },
     },
   ],
 

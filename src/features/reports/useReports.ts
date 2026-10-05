@@ -4,14 +4,11 @@ import { API_BASE } from '../../config';
 import { isActive, type Report } from '../../domain/reports';
 import { fetchJson } from '../../lib/http';
 import { parseReports } from './parse';
+import { today } from './today';
 
 /** The Worker keeps the list for five minutes, so asking more often brings nothing new. */
 const POLL_MS = 5 * 60_000;
 const NONE: Report[] = [];
-
-/** Today's date where the user is, as an ISO date. */
-export const today = (now = new Date()) =>
-  `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
 /**
  * The published reports that are in force today, refreshed every five minutes. Without the

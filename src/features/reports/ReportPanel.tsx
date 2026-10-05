@@ -18,7 +18,10 @@ export function reportDates(report: Report): string {
 }
 
 export function ReportPanel({ id }: { id: string }) {
-  const report = useReports().find((candidate) => candidate.id === id);
+  const published = useReports().find((candidate) => candidate.id === id);
+  const mine = useAppStore((state) => state.myReports.find((candidate) => candidate.id === id));
+  const removeMyReport = useAppStore((state) => state.removeMyReport);
+  const report = published ?? mine;
   const buildings = use(loadBuildings());
   const features = use(loadAccessFeatures());
   const select = useAppStore((state) => state.select);
@@ -31,7 +34,8 @@ export function ReportPanel({ id }: { id: string }) {
   const building = buildings.find((candidate) => candidate.id === buildingId);
   const passable = report.answer === 'yes' || report.answer === 'help' || report.answer === 'no';
   return (
-    <BottomSheet title={reportTitle(report)} subtitle={strings.reports.subtitle} icon="info" onClose={clearSelection}>
+    <BottomSheet title={reportTitle(report)} subtitle={mine ? strings.reports.mine : strings.reports.subtitle} icon="info" onClose={clearSelection}>
+      {mine && <p className="report-pending">{mine.sent ? strings.reports.pending : strings.reports.unsent}</p>}
       {passable && (
         <div className="access">
           <StatusBadge status={reportStatus(report)} text={strings.reports.passable[report.answer as 'yes' | 'help' | 'no']} />
@@ -43,7 +47,12 @@ export function ReportPanel({ id }: { id: string }) {
           {strings.poi.inside} {building.name ?? strings.building.unnamed}
         </button>
       )}
-      <p className="muted">{reportDates(report)}</p>
+      <p className="muted">{mine ? `${strings.reports.since} ${formatDate(report.since)}` : reportDates(report)}</p>
+      {mine && (
+        <button type="button" className="link-row" onClick={() => removeMyReport(mine.id)}>
+          {strings.reports.remove}
+        </button>
+      )}
     </BottomSheet>
   );
 }

@@ -1,6 +1,6 @@
 # Reports plan: user reports on the campus map
 
-This is a plan of its own, separate from `PLAN.md`, `INDOOR_PLAN.md` and `UI_PLAN.md`. It records a brainstorm with the user on 2026-10-05. The user asked for it to be built on 2026-10-05, one milestone at a time. R1 is built; R2 to R5 are not.
+This is a plan of its own, separate from `PLAN.md`, `INDOOR_PLAN.md` and `UI_PLAN.md`. It records a brainstorm with the user on 2026-10-05. The user asked for it to be built on 2026-10-05, one milestone at a time. R1 and R2 are built; R3 to R5 are not.
 
 ## Context
 
@@ -118,3 +118,19 @@ R1 comes first so that reviewers can publish known problems before anyone can re
 - **After the first real row (user's spreadsheet, 2026-10-05):** a coordinate typed with a point in a spreadsheet with Brazilian settings is published grouped by thousands (`-23.562.956`), and the first row had longitude and latitude the wrong way round. The Worker now reads the grouped form and swaps a pair back, since on campus the two cannot be confused. The Worker was then deployed by the user and returns the row.
 - **Known risk:** in the user's browser the request to `/reports` was blocked on the client, most likely by an ad blocker whose lists match that word (inferred, not seen). Visitors with such a blocker would get no reports. Renaming the route would avoid it; not decided.
 - **Checked** in headless Chrome at 1100 × 800 and 390 × 844 with nine sample reports served in place of the Worker: each symbol, an expired report staying off the map, two reports on one spot, the sheet of a blocked passage and of an elevator, the building panel, the accessibility view and the switch. The Worker has since been checked against the user's published sheet.
+
+### R2: reporting (2026-10-05)
+
+- **Decisions (user):** new reports reach the spreadsheet through a Google Form linked to it; abuse is held back by a rate limit only, no bot check for now; the route keeps the name `/reports` although an ad blocker blocked it in the user's browser.
+- **Worker:** `POST /reports` takes `{ type, answer, at, target?, note? }`, checks it (a known type with one of its own answers, a place on campus, an id-shaped target, a note of at most 280 characters, a body of at most 2 KB) and submits a row to the Form. It needs an `Origin` it knows, and allows 3 reports a minute per network address (`REPORT_LIMITER`). It stores nothing. The row is written in the spreadsheet's own words and with decimal commas, so an approved row can be copied to the published tab as it is; a note that starts like a formula gets an apostrophe in front.
+- **Connecting the Form:** `REPORTS_FORM_LINK` holds a pre-filled link of the Form in which every question was answered with its column name. The Worker reads from it the form's address and which field is which column. Empty, as it is now: sending fails and the report waits on the device.
+- **App** (`src/features/reports/`): a third round button on the map and a "Relatar" pill in the panel of a building or an accessibility point. Three steps in the sheet, each with a way back: where (a tap on the map, or "Usar minha localização"; a tap on a building or on an elevator or toilet symbol attaches the report to it), what (the types that fit the place; skipped for an elevator or a toilet), and one question with an optional note and "Enviar". While a report is being written, taps on the map only move its place.
+- **The person's own reports** are kept on the device (`usp-map:my-reports`) and drawn hollow with a dashed outline, in every view. Their sheet says "Aguardando revisão" and can remove them. They leave by themselves after 14 days: the app cannot tell when a reviewer has published or refused one, since the published row gets an id of the reviewer's own.
+- **Without a connection**, or when the Worker cannot be reached, the report is kept unsent and tried again when the browser comes back online, every minute while the app is open, and when it is next opened. A report the Worker refuses is dropped.
+- **Different from the plan:** the place cannot be attached to a ramp, entrance, kerb or steps as a kind of its own; such a point is remembered as the report's target and the types offered are those of a path.
+- **Checked** in headless Chrome at 390 × 844 and 1100 × 800, with the Worker's answers simulated: both ways in, the three steps, the limit message, a sent report, a report kept while unreachable and sent on the next start, the pending symbols, a pending report's sheet and its removal. Found and fixed there: the same waiting report could be sent twice. **Not checked:** the Worker against a real Google Form (none exists yet), "Usar minha localização", and anything on a real phone.
+
+### R2 addition: the Worker gives the id (user's idea, 2026-10-05)
+
+- The Form has every column of the published tab. The Worker makes the `id` (`r-` and eight characters), leaves `ate` empty and answers `{ ok, id }`. A row is then published exactly as it arrived.
+- The app keeps its own report under that id and drops the hollow copy as soon as the same id appears among the published reports. A report sent before this change, or published under another id, still leaves after 14 days.
