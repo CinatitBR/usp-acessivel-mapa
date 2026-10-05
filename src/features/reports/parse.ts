@@ -6,7 +6,7 @@ const isDate = (value: unknown): value is string => typeof value === 'string' &&
 
 function parseReport(value: unknown): Report | undefined {
   if (!value || typeof value !== 'object') return undefined;
-  const { id, type, answer, at, target, since, until, note } = value as Record<string, unknown>;
+  const { id, type, answer, at, target, since, until, note, confirmed, changed } = value as Record<string, unknown>;
   const known = REPORT_TYPES.find((candidate): candidate is ReportType => candidate === type);
   const answers = known ? REPORT_ANSWERS[known] : [];
   const found = answers.find((candidate) => candidate === answer);
@@ -21,6 +21,8 @@ function parseReport(value: unknown): Report | undefined {
     since,
     until: isDate(until) ? until : undefined,
     note: optionalString(note),
+    ...(isDate(confirmed) && { confirmed }),
+    ...(changed === true && { changed }),
   };
 }
 

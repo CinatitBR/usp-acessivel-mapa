@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isReportId, newReportId, parseSubmission, todayInSaoPaulo } from './reports';
+import { isReportId, newReportId, parseFeedback, parseSubmission, summarize, todayInSaoPaulo } from './reports';
 import { toPublished } from './reportsDb';
 
 describe('parseSubmission', () => {
@@ -66,5 +66,44 @@ describe('toPublished', () => {
     expect(toPublished({ ...row, target: 'way/1', until: '2026-10-20', publicNote: 'Tapume' })).toEqual({
       id: 'r1', type: 'blocked', answer: 'no', at: [-46.73, -23.56], target: 'way/1', since: '2026-10-05', until: '2026-10-20', note: 'Tapume',
     });
+  });
+});
+
+describe('parseFeedback', () => {
+  it('reads the three answers, with an optional note', () => {
+    expect(parseFeedback({ kind: 'still' })).toEqual({ kind: 'still' });
+    expect(parseFeedback({ kind: 'resolved', note: '  Tiraram o tapume ' })).toEqual({ kind: 'resolved', note: 'Tiraram o tapume' });
+    expect(parseFeedback({ kind: 'different', note: '   ' })).toEqual({ kind: 'different' });
+  });
+
+  it('refuses anything else', () => {
+    for (const body of [null, [], {}, { kind: 'gone' }, { kind: 'still', note: 5 }, { kind: 'still', note: 'x'.repeat(281) }]) {
+      expect(parseFeedback(body)).toHaveProperty('error');
+    }
+  });
+});
+
+describe('summarize', () => {
+  const at = (kind: 'still' | 'resolved' | 'different', createdAt: string, handled = false) => ({ kind, createdAt, handled });
+
+  it('says nothing when nobody answered', () => {
+    expect(summarize([])).toEqual({});
+  });
+
+  it('gives the São Paulo day of the last confirmation', () => {
+    expect(summarize([at('still', '2026-10-06T15:00:00.000Z'), at('still', '2026-10-08T01:30:00.000Z')])).toEqual({ confirmed: '2026-10-07' });
+  });
+
+  it('marks a change that came after the last confirmation', () => {
+    expect(summarize([at('still', '2026-10-06T15:00:00.000Z'), at('resolved', '2026-10-07T15:00:00.000Z')])).toEqual({ confirmed: '2026-10-06', changed: true });
+    expect(summarize([at('different', '2026-10-07T15:00:00.000Z')])).toEqual({ changed: true });
+  });
+
+  it('lets a later confirmation clear the mark', () => {
+    expect(summarize([at('resolved', '2026-10-07T15:00:00.000Z'), at('still', '2026-10-08T15:00:00.000Z')])).toEqual({ confirmed: '2026-10-08' });
+  });
+
+  it('ignores a change a reviewer has dealt with', () => {
+    expect(summarize([at('resolved', '2026-10-07T15:00:00.000Z', true)])).toEqual({});
   });
 });

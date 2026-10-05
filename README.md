@@ -287,4 +287,6 @@ npx wrangler secret put REVIEW_TOKEN -c worker/wrangler.jsonc
 
 Choose a long random one and share it only with reviewers. For local work it is `REVIEW_TOKEN=…` in `worker/.dev.vars`.
 
+Under a published report anyone can say "Continua assim" or "Mudou". A confirmation keeps a temporary report on the map for its default days from that day; a "mudou" marks it "pode ter mudado" and lists it under "Mudanças relatadas" on the review page, but never removes it by itself.
+
 The public note is the only note the map shows; the reporter's own note stays with the reviewers. "Vale até" is the last day a report shows. Without it a blocked passage shows for 7 days and an elevator or toilet out of service for 14; the others stay.

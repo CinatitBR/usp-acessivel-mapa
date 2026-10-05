@@ -11,6 +11,10 @@ export type PublishedReport = {
   since: string;
   until?: string;
   note?: string;
+  /** ISO date of the last time someone said it is still so. */
+  confirmed?: string;
+  /** Someone has since said it changed, and no reviewer has dealt with that yet. */
+  changed?: true;
 };
 
 export type ReportType = (typeof TYPES)[number];
@@ -70,3 +74,38 @@ export const isReportId = (value: string) => /^[\w-]{1,40}$/.test(value);
 
 /** Today's date in São Paulo, where the campus is, as an ISO date. */
 export const todayInSaoPaulo = (now = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(now);
+
+// --- What people say later about a published report ---------------------------
+
+export const FEEDBACK_KINDS = ['still', 'resolved', 'different'] as const;
+export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];
+export type Feedback = { kind: FeedbackKind; note?: string };
+
+/** Checks an answer about a report: "continua assim", "foi resolvido" or "está diferente". */
+export function parseFeedback(json: unknown): Feedback | { error: string } {
+  if (!json || typeof json !== 'object' || Array.isArray(json)) return { error: 'the body must be a JSON object' };
+  const { kind, note } = json as Record<string, unknown>;
+  const known = FEEDBACK_KINDS.find((candidate) => candidate === kind);
+  if (!known) return { error: `kind must be one of ${FEEDBACK_KINDS.join(', ')}` };
+  if (note !== undefined && (typeof note !== 'string' || note.length > MAX_NOTE)) return { error: `note must be text of at most ${MAX_NOTE} characters` };
+  return { kind: known, ...(typeof note === 'string' && note.trim() && { note: note.trim() }) };
+}
+
+/**
+ * What the answers about one report add up to. `confirmed` is the day of the last "continua
+ * assim". `changed` holds while a "mudou" that no reviewer has dealt with is newer than that:
+ * a later confirmation clears it, and one person can never take a report off the map.
+ * `answers` are in any order, with `createdAt` as ISO timestamps.
+ */
+export function summarize(answers: readonly { kind: FeedbackKind; createdAt: string; handled: boolean }[]): Pick<PublishedReport, 'confirmed' | 'changed'> {
+  let lastStill = '';
+  let lastChange = '';
+  for (const { kind, createdAt, handled } of answers) {
+    if (kind === 'still') lastStill = createdAt > lastStill ? createdAt : lastStill;
+    else if (!handled) lastChange = createdAt > lastChange ? createdAt : lastChange;
+  }
+  return {
+    ...(lastStill && { confirmed: todayInSaoPaulo(new Date(lastStill)) }),
+    ...(lastChange > lastStill && { changed: true as const }),
+  };
+}

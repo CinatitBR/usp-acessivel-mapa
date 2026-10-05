@@ -11,9 +11,24 @@ describe('parseReview', () => {
       published: [{ ...row, id: 'r-2', note: 'Tapume', until: '2026-10-30' }],
     });
     expect(lists.pending).toEqual([
-      { id: 'r-1', type: 'blocked', answer: 'no', position: [-46.73, -23.56], since: '2026-10-05', target: undefined, until: undefined, note: undefined, reporterNote: 'Falar com João', createdAt: '2026-10-05T12:00:00.000Z' },
+      { id: 'r-1', type: 'blocked', answer: 'no', position: [-46.73, -23.56], since: '2026-10-05', target: undefined, until: undefined, note: undefined, reporterNote: 'Falar com João', createdAt: '2026-10-05T12:00:00.000Z', changes: undefined },
     ]);
     expect(lists.published[0]).toMatchObject({ id: 'r-2', note: 'Tapume', until: '2026-10-30', reporterNote: undefined });
+  });
+
+  it('reads what people said changed about a published report', () => {
+    const changes = [
+      { kind: 'resolved', note: 'Tiraram o tapume', createdAt: '2026-10-07T15:00:00.000Z' },
+      { kind: 'different', createdAt: '2026-10-08T15:00:00.000Z' },
+      { kind: 'still', createdAt: '2026-10-08T16:00:00.000Z' },
+      null,
+    ];
+    const [report] = parseReview({ published: [{ ...row, changes }] }).published;
+    expect(report!.changes).toEqual([
+      { kind: 'resolved', note: 'Tiraram o tapume', createdAt: '2026-10-07T15:00:00.000Z' },
+      { kind: 'different', note: undefined, createdAt: '2026-10-08T15:00:00.000Z' },
+    ]);
+    expect(parseReview({ published: [{ ...row, changes: [] }] }).published[0]!.changes).toBeUndefined();
   });
 
   it('leaves out what it cannot read, and survives anything', () => {

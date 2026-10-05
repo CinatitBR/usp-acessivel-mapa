@@ -1,5 +1,5 @@
 import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import type { ReportAnswer, ReportType } from './reports';
+import type { FeedbackKind, ReportAnswer, ReportType } from './reports';
 
 /**
  * The tables of the D1 database, for Drizzle. They are created by the SQL files in
@@ -38,9 +38,6 @@ export const reports = sqliteTable(
   },
   (table) => [index('reports_status').on(table.status)],
 );
-
-export const FEEDBACK_KINDS = ['still', 'resolved', 'different'] as const;
-export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];
 
 /** What someone said later about a published report: it is still so, or it changed. */
 export const reportFeedback = sqliteTable(

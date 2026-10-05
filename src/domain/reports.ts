@@ -32,6 +32,10 @@ export interface Report {
   /** ISO date after which it no longer shows. Temporary reports without one get a default. */
   until?: string;
   note?: string;
+  /** ISO date of the last time someone said it is still so. */
+  confirmed?: string;
+  /** Someone has since said it changed, and no reviewer has dealt with that yet. */
+  changed?: boolean;
 }
 
 /**
@@ -46,13 +50,21 @@ const DEFAULT_DAYS: Partial<Record<ReportType, number>> = { blocked: 7, elevator
 
 const DAY_MS = 86_400_000;
 
-/** The last day a report shows, as an ISO date; nothing for a permanent report without an end date. */
+const daysAfter = (date: string, days: number) => {
+  const start = Date.parse(`${date}T00:00:00Z`);
+  return Number.isNaN(start) ? undefined : new Date(start + days * DAY_MS).toISOString().slice(0, 10);
+};
+
+/**
+ * The last day a report shows, as an ISO date; nothing for a permanent report without an end
+ * date. A temporary report that someone confirmed ("continua assim") lasts at least its type's
+ * default days from that confirmation, even past the end date a reviewer gave.
+ */
 export function lastDay(report: Report): string | undefined {
-  if (report.until) return report.until;
   const days = isTemporary(report) ? DEFAULT_DAYS[report.type] : undefined;
-  const start = Date.parse(`${report.since}T00:00:00Z`);
-  if (days === undefined || Number.isNaN(start)) return undefined;
-  return new Date(start + days * DAY_MS).toISOString().slice(0, 10);
+  const own = report.until ?? (days === undefined ? undefined : daysAfter(report.since, days));
+  const confirmed = days !== undefined && report.confirmed ? daysAfter(report.confirmed, days) : undefined;
+  return own && confirmed && confirmed > own ? confirmed : own ?? confirmed;
 }
 
 /** `today` is an ISO date. A report dated in the future is not shown yet. */
@@ -109,3 +121,7 @@ export function movedTo(draft: ReportDraft, place: ReportPlace): ReportDraft {
 
 /** One of the person's own reports, kept on their device: sent and waiting for review, or still to be sent. */
 export type MyReport = Report & { sent: boolean };
+
+/** What a person says later about a published report: it is still so, it was resolved, or it is different now. */
+export const FEEDBACK_KINDS = ['still', 'resolved', 'different'] as const;
+export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];

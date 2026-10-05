@@ -30,6 +30,14 @@ describe('parseReports', () => {
     expect(parseReports({ reports: [{ id: 'r', type: 'step', answer: 'help', at: [1, 2], since: '2026-10-05', until: 'soon' }] })[0]!.until).toBeUndefined();
   });
 
+  it('reads what people said since: the last confirmation and the changed mark', () => {
+    const base = { id: 'r', type: 'blocked', answer: 'no', at: [1, 2], since: '2026-10-05' };
+    expect(parseReports({ reports: [{ ...base, confirmed: '2026-10-07', changed: true }] })[0]).toMatchObject({ confirmed: '2026-10-07', changed: true });
+    const plain = parseReports({ reports: [{ ...base, confirmed: 'yesterday', changed: 'yes' }] })[0]!;
+    expect(plain).not.toHaveProperty('confirmed');
+    expect(plain).not.toHaveProperty('changed');
+  });
+
   it('gives nothing for anything else', () => {
     expect(parseReports(null)).toEqual([]);
     expect(parseReports({})).toEqual([]);

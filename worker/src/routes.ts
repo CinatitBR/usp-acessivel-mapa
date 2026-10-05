@@ -14,6 +14,10 @@ export type Route =
   /** For reviewers, with their password: the reports to review, and a decision about one, in the body. */
   | { kind: 'review-list' }
   | { kind: 'review-decide'; id: string }
+  /** A reviewer looked at what people said about a report and keeps it as it is. */
+  | { kind: 'review-keep'; id: string }
+  /** What someone says about a published report, in the body: it is still so, or it changed. */
+  | { kind: 'feedback'; id: string }
   | { kind: 'bad-request'; message: string }
   | { kind: 'not-found' };
 
@@ -45,6 +49,10 @@ export function matchRoute(method: string, url: URL): Route {
   if (method === 'POST' && url.pathname === '/reports') return { kind: 'submit-report' };
   const decided = method === 'POST' ? /^\/review\/reports\/([\w-]{1,40})$/.exec(url.pathname) : null;
   if (decided) return { kind: 'review-decide', id: decided[1]! };
+  const kept = method === 'POST' ? /^\/review\/reports\/([\w-]{1,40})\/keep$/.exec(url.pathname) : null;
+  if (kept) return { kind: 'review-keep', id: kept[1]! };
+  const answered = method === 'POST' ? /^\/reports\/([\w-]{1,40})\/feedback$/.exec(url.pathname) : null;
+  if (answered) return { kind: 'feedback', id: answered[1]! };
   if (method !== 'GET') return { kind: 'not-found' };
 
   switch (url.pathname) {

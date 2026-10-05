@@ -1822,3 +1822,41 @@ html:has(.review) #root {
   opacity: 0.5;
   cursor: default;
 }
+
+/* "Continua assim" and "Mudou" under a report, and the mark of a report that may have changed */
+.report-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.report-feedback-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-feedback-buttons button {
+  min-height: 52px;
+}
+
+.report-feedback-buttons button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.report-changed,
+.review-changes {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--warning);
+  color: var(--text);
+  font-size: var(--size-body-small);
+  font-weight: var(--weight-semibold);
+}
+
+.review-changes {
+  margin: 0;
+  padding-left: 28px;
+  font-weight: var(--weight-regular);
+}

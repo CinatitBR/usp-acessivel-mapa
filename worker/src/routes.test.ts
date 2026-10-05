@@ -91,6 +91,13 @@ describe('checkOrigin', () => {
     expect(matchRoute('GET', new URL('https://w/review/reports/r12'))).toEqual({ kind: 'not-found' });
   });
 
+  it('knows the routes for answers about a report', () => {
+    expect(matchRoute('POST', new URL('https://w/reports/r-3f9a1c2e/feedback'))).toEqual({ kind: 'feedback', id: 'r-3f9a1c2e' });
+    expect(matchRoute('GET', new URL('https://w/reports/r-3f9a1c2e/feedback'))).toEqual({ kind: 'not-found' });
+    expect(matchRoute('POST', new URL('https://w/review/reports/r12/keep'))).toEqual({ kind: 'review-keep', id: 'r12' });
+    expect(matchRoute('POST', new URL('https://w/reports/a/b/feedback'))).toEqual({ kind: 'not-found' });
+  });
+
   it('takes a report only as a POST to /reports', () => {
     expect(matchRoute('POST', new URL('https://w/reports'))).toEqual({ kind: 'submit-report' });
     expect(matchRoute('GET', new URL('https://w/reports'))).toEqual({ kind: 'reports' });

@@ -58,7 +58,10 @@ export function BuildingPanel({ id }: { id: string }) {
                   onClick={() => select({ kind: 'report', id: report.id, position: report.position }, report.position)}
                 >
                   <StatusBadge status={reportStatus(report)} text={reportTitle(report)} />
-                  <span className="muted">{reportDates(report)}</span>
+                  <span className="muted">
+                    {report.changed && `${strings.reports.feedback.mayHaveChanged} · `}
+                    {reportDates(report)}
+                  </span>
                 </button>
               </li>
             ))}

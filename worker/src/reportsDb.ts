@@ -1,8 +1,8 @@
-import { and, asc, desc, eq, gte, isNull, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNull, ne, or } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/d1';
-import type { PublishedReport, Submission } from './reports';
+import { type Feedback, type FeedbackKind, type PublishedReport, type Submission, summarize } from './reports';
 import type { Decision } from './review';
-import { type ReportStatus, reports } from './schema';
+import { reportFeedback, type ReportStatus, reports } from './schema';
 
 /** How long a browser may reuse the list of published reports. */
 export const REPORTS_TTL_SECONDS = 60;
@@ -34,18 +34,52 @@ export const toPublished = (row: PublishedRow): PublishedReport => ({
   ...(row.publicNote && { note: row.publicNote }),
 });
 
+/** A confirmation can keep a temporary report past its end date for at most this long (the longest default). */
+const CONFIRMED_GRACE_DAYS = 14;
+const DAY_MS = 86_400_000;
+
+type Answer = { reportId: string; kind: FeedbackKind; createdAt: string; handled: boolean; id: number; note: string | null };
+
+/** Every answer about the given reports, by report. */
+async function answersFor(d1: D1Database, ids: readonly string[]): Promise<Map<string, Answer[]>> {
+  const byReport = new Map<string, Answer[]>();
+  if (ids.length === 0) return byReport;
+  const rows = await drizzle(d1)
+    .select()
+    .from(reportFeedback)
+    .where(inArray(reportFeedback.reportId, [...ids]));
+  for (const row of rows) {
+    const answer = { reportId: row.reportId, kind: row.kind, createdAt: row.createdAt, handled: row.handledAt !== null, id: row.id, note: row.note };
+    byReport.set(row.reportId, [...(byReport.get(row.reportId) ?? []), answer]);
+  }
+  return byReport;
+}
+
 /**
- * The reports reviewers have published that have not passed the end date a reviewer gave.
- * A report without one is left to the app, which knows each type's default.
+ * The reports reviewers have published, each with what people have said about it since. One
+ * whose end date passed more than `CONFIRMED_GRACE_DAYS` ago is left out; within that time the
+ * app decides, since a confirmation may have kept it alive. A report without an end date is
+ * left to the app too, which knows each type's default.
  */
 export async function publishedReports(d1: D1Database, today: string): Promise<PublishedReport[]> {
+  const cutoff = new Date(Date.parse(`${today}T00:00:00Z`) - CONFIRMED_GRACE_DAYS * DAY_MS).toISOString().slice(0, 10);
   const rows = await drizzle(d1)
     .select(published)
     .from(reports)
-    .where(and(eq(reports.status, 'published'), or(isNull(reports.until), gte(reports.until, today))))
+    .where(and(eq(reports.status, 'published'), or(isNull(reports.until), gte(reports.until, cutoff))))
     .orderBy(desc(reports.since), asc(reports.id))
     .limit(MAX_PUBLISHED);
-  return rows.map(toPublished);
+  const answers = await answersFor(d1, rows.map((row) => row.id));
+  return rows.map((row) => ({ ...toPublished(row), ...summarize(answers.get(row.id) ?? []) }));
+}
+
+/** Stores what someone says about a published report. False when there is no such report on the map. */
+export async function insertFeedback(d1: D1Database, reportId: string, { kind, note }: Feedback, now: string): Promise<boolean> {
+  const db = drizzle(d1);
+  const [report] = await db.select({ id: reports.id }).from(reports).where(and(eq(reports.id, reportId), eq(reports.status, 'published'))).limit(1);
+  if (!report) return false;
+  await db.insert(reportFeedback).values({ reportId, kind, note, createdAt: now });
+  return true;
 }
 
 /** Stores a new report, waiting for review. */
@@ -58,7 +92,14 @@ export async function insertReport(d1: D1Database, id: string, { type, answer, a
 // --- For reviewers -----------------------------------------------------------
 
 /** A report as a reviewer sees it: everything, including the reporter's own note. */
-export type ReviewReport = PublishedReport & { status: ReportStatus; reporterNote?: string; createdAt: string; reviewedAt?: string };
+export type ReviewReport = PublishedReport & {
+  status: ReportStatus;
+  reporterNote?: string;
+  createdAt: string;
+  reviewedAt?: string;
+  /** The "mudou" answers no reviewer has dealt with yet, oldest first, with their notes. */
+  changes?: { kind: FeedbackKind; note?: string; createdAt: string }[];
+};
 
 const MAX_REVIEW = 300;
 
@@ -76,7 +117,24 @@ export async function reviewReports(d1: D1Database): Promise<{ pending: ReviewRe
     db.select().from(reports).where(eq(reports.status, 'pending')).orderBy(asc(reports.createdAt)).limit(MAX_REVIEW),
     db.select().from(reports).where(eq(reports.status, 'published')).orderBy(desc(reports.reviewedAt)).limit(MAX_REVIEW),
   ]);
-  return { pending: pending.map(toReview), published: published.map(toReview) };
+  const answers = await answersFor(d1, published.map((row) => row.id));
+  const withAnswers = (row: typeof reports.$inferSelect): ReviewReport => {
+    const all = answers.get(row.id) ?? [];
+    const changes = all
+      .filter((answer) => answer.kind !== 'still' && !answer.handled)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .map(({ kind, note, createdAt }) => ({ kind, ...(note && { note }), createdAt }));
+    return { ...toReview(row), ...summarize(all), ...(changes.length > 0 && { changes }) };
+  };
+  return { pending: pending.map(toReview), published: published.map(withAnswers) };
+}
+
+/** Marks every "mudou" about a report as dealt with: the reviewer looked and the report stays as it is. */
+export async function keepReport(d1: D1Database, id: string, now: string): Promise<void> {
+  await drizzle(d1)
+    .update(reportFeedback)
+    .set({ handledAt: now })
+    .where(and(eq(reportFeedback.reportId, id), ne(reportFeedback.kind, 'still'), isNull(reportFeedback.handledAt)));
 }
 
 /** Applies a reviewer's decision. False when there is no such report. */
@@ -86,5 +144,7 @@ export async function decideReport(d1: D1Database, id: string, { status, until, 
     .set({ status, reviewedAt: now, ...(until !== undefined && { until }), ...(publicNote !== undefined && { publicNote }) })
     .where(eq(reports.id, id))
     .returning({ id: reports.id });
+  // Whatever was decided, the reviewer has seen what people said about it.
+  if (changed.length > 0) await keepReport(d1, id, now);
   return changed.length > 0;
 }

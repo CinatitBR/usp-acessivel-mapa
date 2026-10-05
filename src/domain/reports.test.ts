@@ -33,6 +33,23 @@ describe('lastDay', () => {
   });
 });
 
+describe('lastDay after a confirmation', () => {
+  it('runs the default days again from the day it was confirmed', () => {
+    expect(lastDay(report({ confirmed: '2026-10-10' }))).toBe('2026-10-17');
+    expect(lastDay(report({ type: 'elevator', answer: 'broken', confirmed: '2026-10-10' }))).toBe('2026-10-24');
+  });
+
+  it('can outlast the end date a reviewer gave, but never shortens it', () => {
+    expect(lastDay(report({ until: '2026-10-08', confirmed: '2026-10-08' }))).toBe('2026-10-15');
+    expect(lastDay(report({ until: '2026-11-30', confirmed: '2026-10-08' }))).toBe('2026-11-30');
+  });
+
+  it('does not touch a permanent report', () => {
+    expect(lastDay(report({ type: 'step', confirmed: '2026-10-10' }))).toBeUndefined();
+    expect(lastDay(report({ type: 'narrow', until: '2027-01-01', confirmed: '2026-10-10' }))).toBe('2027-01-01');
+  });
+});
+
 describe('isActive', () => {
   it('holds from the day it was reported to its last day, both included', () => {
     const blocked = report({});

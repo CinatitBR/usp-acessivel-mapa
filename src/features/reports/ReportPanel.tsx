@@ -5,6 +5,7 @@ import { useAppStore } from '../../state/store';
 import { formatDate, strings } from '../../strings/pt-BR';
 import { StatusBadge } from '../../ui/AccessSummary';
 import { BottomSheet } from '../../ui/BottomSheet';
+import { ReportFeedback } from './ReportFeedback';
 import { useReports } from './useReports';
 
 /** "Passagem bloqueada", "Elevador fora de serviço"… */
@@ -14,7 +15,8 @@ export const reportTitle = ({ type, answer }: Pick<Report, 'type' | 'answer'>) =
 /** "Relatado em 03/10/2026 · vale até 17/10/2026" */
 export function reportDates(report: Report): string {
   const last = lastDay(report);
-  return `${strings.reports.since} ${formatDate(report.since)}${last ? ` · ${strings.reports.until} ${formatDate(last)}` : ''}`;
+  const confirmed = report.confirmed ? ` · ${strings.reports.feedback.confirmed} ${formatDate(report.confirmed)}` : '';
+  return `${strings.reports.since} ${formatDate(report.since)}${confirmed}${last ? ` · ${strings.reports.until} ${formatDate(last)}` : ''}`;
 }
 
 export function ReportPanel({ id }: { id: string }) {
@@ -36,6 +38,7 @@ export function ReportPanel({ id }: { id: string }) {
   return (
     <BottomSheet title={reportTitle(report)} subtitle={mine ? strings.reports.mine : strings.reports.subtitle} icon="info" onClose={clearSelection}>
       {mine && <p className="report-pending">{mine.sent ? strings.reports.pending : strings.reports.unsent}</p>}
+      {report.changed && <p className="report-changed">{strings.reports.feedback.mayHaveChanged}</p>}
       {passable && (
         <div className="access">
           <StatusBadge status={reportStatus(report)} text={strings.reports.passable[report.answer as 'yes' | 'help' | 'no']} />
@@ -48,6 +51,8 @@ export function ReportPanel({ id }: { id: string }) {
         </button>
       )}
       <p className="muted">{mine ? `${strings.reports.since} ${formatDate(report.since)}` : reportDates(report)}</p>
+      {/* Keyed so the answer given about one report is not shown under another. */}
+      {published && <ReportFeedback key={published.id} report={published} />}
       {mine && (
         <button type="button" className="link-row" onClick={() => removeMyReport(mine.id)}>
           {strings.reports.remove}

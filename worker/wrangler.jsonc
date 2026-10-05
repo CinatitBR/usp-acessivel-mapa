@@ -44,6 +44,12 @@
       "namespace_id": "1003",
       "simple": { "limit": 3, "period": 60 },
     },
+    // "Continua assim" and "Mudou" on a report: 10 per minute per client.
+    {
+      "name": "FEEDBACK_LIMITER",
+      "namespace_id": "1005",
+      "simple": { "limit": 10, "period": 60 },
+    },
     // The review page: 30 per minute per client, which also keeps its password from being guessed.
     {
       "name": "REVIEW_LIMITER",
