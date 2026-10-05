@@ -21,11 +21,12 @@ export function InstitutePanel({ id }: { id: string }) {
     <BottomSheet
       title={institute.name}
       subtitle={institute.sigla}
+      icon="school"
       onClose={clearSelection}
       routeTo={{ label: institute.sigla ?? institute.name, position: institute.center }}
+      actions={<WebsiteLink url={institute.website} />}
     >
       <WikiSection wiki={institute.wiki} />
-      <WebsiteLink url={institute.website} />
       <h3 className="list-title">{strings.institute.buildings}</h3>
       {named.length === 0 ? (
         <p className="muted">{strings.institute.noNamedBuildings}</p>

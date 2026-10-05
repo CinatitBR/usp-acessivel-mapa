@@ -367,6 +367,9 @@ input {
 }
 
 .sheet-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 2px 0 0;
   color: var(--muted);
   font-size: var(--size-body-small);
@@ -400,6 +403,20 @@ input {
   margin: 0;
 }
 
+/* The actions of a place in one row that scrolls sideways: the route first, then what else it offers. */
+.sheet-actions {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 2px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sheet-actions > * {
+  flex: none;
+}
+
 .link-list {
   margin: 0;
   padding: 0;
@@ -410,23 +427,27 @@ input {
   display: block;
   width: 100%;
   min-height: 44px;
-  padding: 8px 0;
+  padding: 10px 0;
   border: 0;
   background: transparent;
   color: var(--accent);
+  font-weight: var(--weight-medium);
   text-align: left;
   cursor: pointer;
 }
 
+.link-list li + li {
+  border-top: 1px solid var(--border);
+}
+
+/* Section heading inside a sheet. */
 .list-title,
 .access-title {
-  margin: 0 0 4px;
-  color: var(--muted);
-  font-size: var(--size-label);
-  line-height: var(--line-label);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: 8px 0;
+  color: var(--heading);
+  font-size: var(--size-subtitle);
+  line-height: var(--line-subtitle);
+  font-weight: var(--weight-medium);
 }
 
 .access-status {
@@ -436,22 +457,71 @@ input {
   font-weight: var(--weight-semibold);
 }
 
+/* In the accessibility block the status is a chip; shape and words carry it as well as colour. */
+.access > .access-status {
+  display: inline-flex;
+  min-height: 32px;
+  padding: 0 14px 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--chip);
+  color: var(--on-chip);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+}
+
+.access > .access-status .access-symbol {
+  background: transparent;
+  color: inherit;
+}
+
+.access > .access-yes {
+  background: var(--success-strong);
+  color: var(--on-accent);
+}
+
+.access > .access-partial {
+  background: var(--warning);
+  color: var(--text);
+}
+
+.access > .access-no {
+  background: var(--error);
+  color: var(--on-accent);
+}
+
 .access-symbol {
   display: inline-grid;
   place-items: center;
   width: 26px;
   height: 26px;
   border-radius: 50%;
+  background: var(--status-color);
   color: var(--on-accent);
   font-size: var(--size-body-small);
   line-height: var(--line-body-small);
 }
 
 .access-details {
-  margin: 6px 0 0;
-  padding-left: 18px;
-  font-size: var(--size-body);
-  line-height: var(--line-body);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.access-details li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--chip);
+  color: var(--on-chip);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  font-weight: var(--weight-medium);
 }
 
 .link-row .access-status {
@@ -647,6 +717,12 @@ input {
   margin: 0;
 }
 
+.layer-menu .list-title {
+  font-size: var(--size-body);
+  line-height: var(--line-body);
+  font-weight: var(--weight-semibold);
+}
+
 .switch-row {
   display: flex;
   align-items: center;
@@ -750,7 +826,7 @@ input {
 /* Roughly the height of a photo and a few lines, so the panel does not jump when the article arrives. */
 .wiki-loading {
   min-height: 120px;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: var(--skeleton);
 }
 
@@ -771,17 +847,10 @@ input {
   line-height: var(--line-label);
 }
 
-.wiki a,
-.external-link {
+.wiki a {
   color: var(--accent);
 }
 
-.external-link {
-  align-self: flex-start;
-  overflow-wrap: anywhere;
-  font-size: var(--size-body-small);
-  line-height: var(--line-body-small);
-}
 
 .carousel {
   margin: 0;
@@ -790,7 +859,7 @@ input {
 .carousel-frame {
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: var(--photo-backdrop);
 }
 
@@ -876,15 +945,15 @@ input {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 10px;
-  padding: 8px 0;
+  gap: 12px;
+  padding: 12px 0;
   border-top: 1px solid var(--border);
 }
 
 .arrival-line {
-  min-width: 68px;
-  padding: 3px 8px;
-  border-radius: 6px;
+  min-width: 72px;
+  padding: 4px 8px;
+  border-radius: var(--radius-small);
   background: var(--surface-inverse);
   color: var(--on-inverse);
   font-size: var(--size-body-small);
@@ -901,12 +970,13 @@ input {
 }
 
 .arrival-tag {
-  padding: 1px 6px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--muted);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--chip);
+  color: var(--on-chip);
   font-size: var(--size-label);
   line-height: var(--line-label);
+  font-weight: var(--weight-medium);
 }
 
 .arrival-time {
@@ -1174,6 +1244,12 @@ input {
     overflow-y: auto;
     touch-action: auto;
   }
+
+  /* There is no swiping sideways with a mouse: the actions wrap. */
+  .sheet-actions {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
 }
 
 /* Routing */
@@ -1184,27 +1260,17 @@ input {
   padding: 0;
 }
 
-.route-button {
-  display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 20px 0 16px;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: var(--size-body-small);
-  line-height: var(--line-body-small);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
-}
 
+/* From and to in one card, with the swap button beside them. */
 .route-ends {
   display: grid;
   grid-template-columns: 1fr 44px;
-  gap: 6px 8px;
+  align-items: center;
+  column-gap: 8px;
+  padding: 0 8px 0 0;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .route-end {
@@ -1212,13 +1278,21 @@ input {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
+  min-height: 52px;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
   text-align: left;
   cursor: pointer;
+}
+
+.route-end:first-child {
+  border-radius: var(--radius-card) 0 0 0;
+}
+
+.route-end + .route-end {
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 0 var(--radius-card);
 }
 
 .route-end .muted {
@@ -1227,8 +1301,8 @@ input {
 }
 
 .route-end[aria-pressed='true'] {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent);
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .route-swap {
@@ -1247,7 +1321,6 @@ input {
   cursor: pointer;
 }
 
-.route-button:focus-visible,
 .route-end:focus-visible,
 .route-swap:focus-visible {
   outline: 3px solid var(--accent);
@@ -1266,15 +1339,38 @@ input {
   display: none;
 }
 
-/* Exactly one of these is chosen, so the unchosen one is not struck through. */
+/* Exactly one of these is chosen: it is filled, and the other is not struck through. */
+.chip-choice {
+  min-height: 44px;
+  padding: 0 20px;
+}
+
+.chip-choice[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
 .chip-choice[aria-pressed='false'] {
-  color: var(--text);
+  background: var(--accent-tonal);
+  color: var(--on-accent-tonal);
   text-decoration: none;
 }
 
+/* The time stands out; the distance sits beside it. */
 .route-summary {
-  font-size: var(--size-subtitle);
-  line-height: var(--line-subtitle);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--muted);
+  font-size: var(--size-body);
+  line-height: var(--line-body);
+}
+
+.route-summary strong {
+  color: var(--text);
+  font-size: var(--size-heading);
+  line-height: var(--line-heading);
+  font-weight: var(--weight-semibold);
 }
 
 .route-ok {
@@ -1300,7 +1396,7 @@ input {
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 0;
+  padding: 12px 0;
   border-top: 1px solid var(--border);
 }
 
@@ -1360,20 +1456,25 @@ input {
   display: flex;
   flex-direction: column;
   margin: 0;
-  padding: 6px 12px;
-  border-radius: 12px;
-  background: var(--surface-translucent);
+  padding: 8px 16px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
   box-shadow: var(--shadow);
+  color: var(--muted);
   font-size: var(--size-body-small);
   line-height: var(--line-body-small);
+}
+
+.level-name strong {
+  color: var(--heading);
 }
 
 .level-buttons {
   display: flex;
   flex-direction: row-reverse;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
   background: var(--surface);
   box-shadow: var(--shadow);
   pointer-events: auto;
@@ -1384,19 +1485,19 @@ input {
   height: 44px;
   padding: 0;
   border: 0;
-  border-left: 1px solid var(--border);
+  border-radius: 50%;
   background: transparent;
-  font-weight: var(--weight-bold);
+  color: var(--on-accent-tonal);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  font-weight: var(--weight-medium);
   cursor: pointer;
-}
-
-.level-button:last-child {
-  border-left: 0;
 }
 
 .level-button[aria-pressed='true'] {
   background: var(--accent);
   color: var(--on-accent);
+  font-weight: var(--weight-semibold);
 }
 
 .level-close {
@@ -1407,7 +1508,7 @@ input {
 
 .level-button:focus-visible {
   outline: 3px solid var(--accent);
-  outline-offset: -3px;
+  outline-offset: 2px;
 }
 
 /* On wide screens the floors stack at the bottom right, top floor on top. */
@@ -1432,12 +1533,4 @@ input {
     bottom: 108px;
   }
 
-  .level-button {
-    border-bottom: 1px solid var(--border);
-    border-left: 0;
-  }
-
-  .level-button:last-child {
-    border-bottom: 0;
-  }
 }

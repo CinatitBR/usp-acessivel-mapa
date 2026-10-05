@@ -68,6 +68,7 @@ export function BusPanel({ id, fromStop }: { id: string; fromStop?: string }) {
     <BottomSheet
       title={`${pose.lineId} · ${pose.headsign}`}
       subtitle={strings.transit.bus}
+      icon="bus"
       onClose={clearSelection}
       {...(back && { back })}
     >
@@ -77,7 +78,7 @@ export function BusPanel({ id, fromStop }: { id: string; fromStop?: string }) {
           {following ? strings.transit.following : strings.transit.followPaused}
         </p>
         {!following && (
-          <button type="button" className="route-button" onClick={() => setFollowBus(true)}>
+          <button type="button" className="button-tonal" onClick={() => setFollowBus(true)}>
             {strings.transit.follow}
           </button>
         )}

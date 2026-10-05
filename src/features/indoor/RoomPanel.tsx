@@ -23,6 +23,7 @@ export function RoomPanel({ id, buildingId }: { id: string; buildingId: string }
     <BottomSheet
       title={room.name}
       subtitle={strings.indoor.categories[room.cat]}
+      icon="floor"
       onClose={clearSelection}
       routeTo={{ label: buildingName, position: building.center }}
     >

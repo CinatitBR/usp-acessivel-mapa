@@ -1,14 +1,16 @@
+import type { CSSProperties } from 'react';
 import { ACCESS_COLORS } from '../domain/access';
 import type { AccessInfo, AccessStatus } from '../domain/types';
 import { formatDate, strings } from '../strings/pt-BR';
+import { Icon } from './Icon';
 
 /** Shape as well as colour, so the status does not depend on colour vision. */
 const SYMBOL: Record<AccessStatus, string> = { yes: '✓', partial: '◐', no: '✕', unknown: '?' };
 
 export function StatusBadge({ status, label }: { status: AccessStatus; label?: string }) {
   return (
-    <p className="access-status">
-      <span aria-hidden="true" className="access-symbol" style={{ background: ACCESS_COLORS[status] }}>
+    <p className={`access-status access-${status}`} style={{ '--status-color': ACCESS_COLORS[status] } as CSSProperties}>
+      <span aria-hidden="true" className="access-symbol">
         {SYMBOL[status]}
       </span>
       {label ? `${label}: ${strings.access.status[status].toLowerCase()}` : strings.access.status[status]}
@@ -29,11 +31,13 @@ export function AccessSummary({ access }: { access: AccessInfo }) {
         <ul className="access-details">
           {access.toilet && (
             <li>
+              <Icon name="toilet" size={18} />
               {strings.access.toilet}: {strings.access.status[access.toilet].toLowerCase()}
             </li>
           )}
           {access.elevator !== undefined && (
             <li>
+              <Icon name="elevator" size={18} />
               {strings.access.elevator}: {yesNo(access.elevator).toLowerCase()}
             </li>
           )}

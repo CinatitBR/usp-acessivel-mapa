@@ -96,6 +96,7 @@ export function StopPanel({ id }: { id: string }) {
     <BottomSheet
       title={stop.name}
       subtitle={strings.transit.stop}
+      icon="bus"
       onClose={clearSelection}
       routeTo={{ label: stop.name, position: stop.position }}
     >

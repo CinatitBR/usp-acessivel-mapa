@@ -4,6 +4,7 @@ import { useAppStore } from '../../state/store';
 import { buildingKindLabel, strings } from '../../strings/pt-BR';
 import { AccessSummary, StatusBadge } from '../../ui/AccessSummary';
 import { BottomSheet } from '../../ui/BottomSheet';
+import { Icon } from '../../ui/Icon';
 import { WebsiteLink } from '../../ui/WebsiteLink';
 import { WikiSection } from '../wiki/WikiSection';
 
@@ -22,14 +23,21 @@ export function BuildingPanel({ id }: { id: string }) {
     <BottomSheet
       title={building.name ?? strings.building.unnamed}
       subtitle={buildingKindLabel(building.kind)}
+      icon="place"
       onClose={clearSelection}
       routeTo={{ label: building.name ?? strings.building.unnamed, position: building.center }}
+      actions={
+        <>
+          {building.indoor && !indoorOpen && (
+            <button type="button" className="button-tonal" onClick={() => openIndoor(building.id, building.indoor!)}>
+              <Icon name="floor" size={20} />
+              {strings.indoor.open}
+            </button>
+          )}
+          <WebsiteLink url={building.website ?? institute?.website} />
+        </>
+      }
     >
-      {building.indoor && !indoorOpen && (
-        <button type="button" className="route-button" onClick={() => openIndoor(building.id, building.indoor!)}>
-          {strings.indoor.open}
-        </button>
-      )}
       {building.address && <p className="muted">{building.address}</p>}
       {institute && (
         <button
@@ -46,7 +54,6 @@ export function BuildingPanel({ id }: { id: string }) {
       ) : (
         institute?.wiki && <WikiSection wiki={institute.wiki} about={institute.sigla ?? institute.name} />
       )}
-      <WebsiteLink url={building.website ?? institute?.website} />
       <AccessSummary access={building.access} />
       {features.length > 0 && (
         <div>

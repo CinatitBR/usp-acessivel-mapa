@@ -47,6 +47,7 @@ function panelFor(selection: Selection, onClose: () => void) {
         <BottomSheet
           title={selection.label}
           subtitle={strings.place.offCampus}
+          icon="place"
           onClose={onClose}
           routeTo={{ label: selection.label, position: selection.position }}
         >

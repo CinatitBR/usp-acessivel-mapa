@@ -1,17 +1,21 @@
 import { type KeyboardEvent, type PointerEvent, type ReactNode, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { type RoutePoint, useAppStore } from '../state/store';
 import { strings } from '../strings/pt-BR';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 import { coverOf, settle, type Snap, snapHeights, step } from './sheetSnap';
 
 type Props = {
   title: string;
   subtitle?: string;
+  /** Shown before the subtitle: what kind of thing this is. */
+  icon?: IconName;
   onClose: () => void;
   /** When given, the sheet offers a route to this place. */
   routeTo?: RoutePoint;
   /** When given, a link above the title that leads back to where this sheet was opened from. */
   back?: { label: string; onClick: () => void };
+  /** Buttons that follow the route button in the row of actions. */
+  actions?: ReactNode;
   children?: ReactNode;
 };
 
@@ -39,7 +43,7 @@ type Sizes = { viewport: number; grip: number; content: number };
  * It tells the app how much of the map it covers, so the camera and the controls at the
  * bottom of the map stay clear of it. On wide screens it is a panel beside the map.
  */
-export function BottomSheet({ title, subtitle, onClose, routeTo, back, children }: Props) {
+export function BottomSheet({ title, subtitle, icon, onClose, routeTo, back, actions, children }: Props) {
   const startRoute = useAppStore((state) => state.startRoute);
   const setSheetCover = useAppStore((state) => state.setSheetCover);
   const wide = useWide();
@@ -216,7 +220,7 @@ export function BottomSheet({ title, subtitle, onClose, routeTo, back, children 
       scroll.removeEventListener('touchcancel', onEnd);
     };
     // The sheet's body appears with its first content.
-  }, [wide, children !== undefined || routeTo !== undefined]);
+  }, [wide, children !== undefined || routeTo !== undefined || actions !== undefined]);
 
   // Content that could be scrolled only at the highest rest starts from its beginning again below it.
   useEffect(() => {
@@ -263,14 +267,19 @@ export function BottomSheet({ title, subtitle, onClose, routeTo, back, children 
               </button>
             )}
             <h2 className="sheet-title">{title}</h2>
-            {subtitle && <p className="sheet-subtitle">{subtitle}</p>}
+            {subtitle && (
+              <p className="sheet-subtitle">
+                {icon && <Icon name={icon} size={18} />}
+                {subtitle}
+              </p>
+            )}
           </div>
           <button type="button" className="sheet-close" aria-label={strings.close} onClick={onClose}>
             <Icon name="close" />
           </button>
         </header>
       </div>
-      {(children || routeTo) && (
+      {(children || routeTo || actions) && (
         // A collapsed sheet shows only its header: what is under it is out of reach of the keyboard too.
         <div
           ref={scrollRef}
@@ -282,11 +291,16 @@ export function BottomSheet({ title, subtitle, onClose, routeTo, back, children 
           }}
         >
           <div ref={bodyRef} className="sheet-body">
-            {routeTo && (
-              <button type="button" className="route-button" onClick={() => startRoute(routeTo)}>
-                <Icon name="route" size={20} />
-                {strings.route.toHere}
-              </button>
+            {(routeTo || actions) && (
+              <div className="sheet-actions">
+                {routeTo && (
+                  <button type="button" className="button" onClick={() => startRoute(routeTo)}>
+                    <Icon name="route" size={20} />
+                    {strings.route.toHere}
+                  </button>
+                )}
+                {actions}
+              </div>
             )}
             {children}
           </div>

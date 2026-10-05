@@ -20,6 +20,8 @@ export function PoiPanel({ id }: { id: string }) {
     <BottomSheet
       title={poi.name ?? category}
       subtitle={poi.name ? category : undefined}
+      icon="place"
+      actions={<WebsiteLink url={poi.website} />}
       onClose={clearSelection}
       routeTo={{ label: poi.name ?? category, position: poi.position }}
     >
@@ -38,7 +40,6 @@ export function PoiPanel({ id }: { id: string }) {
         </p>
       )}
       <WikiSection wiki={poi.wiki} />
-      <WebsiteLink url={poi.website} />
       <AccessSummary access={poi.access} />
     </BottomSheet>
   );
