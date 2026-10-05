@@ -76,10 +76,18 @@ export function IndoorLayers() {
     const before = { zoom: map.getZoom(), pitch: map.getPitch(), bearing: map.getBearing() };
     // The building's panel has just changed the map's size.
     map.resize();
-    const { clientWidth, clientHeight } = map.getContainer();
-    const zoom = zoomToFit(plan.size, [clientWidth, clientHeight], plan.center[1]);
-    map.easeTo({ center: plan.center, zoom, bearing: plan.bearing, pitch: 0, duration: CAMERA_MS });
+    const fit = () => {
+      const { clientWidth, clientHeight } = map.getContainer();
+      // On a phone the sheet covers the bottom of the map; the plan has to fit above it.
+      const zoom = zoomToFit(plan.size, [clientWidth, clientHeight - (map.getPadding().bottom ?? 0)], plan.center[1]);
+      map.easeTo({ center: plan.center, zoom, bearing: plan.bearing, pitch: 0, duration: CAMERA_MS });
+    };
+    // Two frames later: the sheet collapses when the plan opens, and has by then said how much it still covers.
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(fit);
+    });
     return () => {
+      cancelAnimationFrame(frame);
       map.easeTo({ ...before, duration: CAMERA_MS });
     };
   }, [map, plan]);

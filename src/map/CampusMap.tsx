@@ -23,6 +23,7 @@ import { LiveBuses } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
 import { missingAnchors } from './anchors';
 import { mapLib } from './maplibre';
+import { SheetPadding } from './SheetPadding';
 import { MapSelection } from './MapSelection';
 import { Scene3D } from './Scene3D';
 
@@ -70,6 +71,8 @@ export function CampusMap() {
       <Scene3D />
       <FpsWatchdog />
       <AccessibilityLayers />
+      {/* Before anything that moves the camera, so the padding is in place first. */}
+      <SheetPadding />
       <MapSelection />
     </Map>
   );

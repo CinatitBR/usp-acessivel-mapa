@@ -102,6 +102,12 @@ type AppState = {
   busesUnavailable: boolean;
   setBusesUnavailable: (unavailable: boolean) => void;
 
+  /** Pixels of the map's bottom that the sheet covers on a phone, once it rests; 0 beside the map. */
+  sheetCover: number;
+  setSheetCover: (cover: number) => void;
+  /** Goes up by one each time the open sheet should get out of the way and show only its header. */
+  sheetCollapses: number;
+
   toast: Toast | null;
   showToast: (toast: Toast) => void;
   dismissToast: () => void;
@@ -138,7 +144,8 @@ export const useAppStore = create<AppState>((set) => ({
   setFollowBus: (followBus) => set({ followBus }),
 
   indoor: null,
-  openIndoor: (buildingId, plan) => set({ indoor: { buildingId, plan, level: null } }),
+  // The floor plan needs the map: the building's sheet steps aside.
+  openIndoor: (buildingId, plan) => set((state) => ({ indoor: { buildingId, plan, level: null }, sheetCollapses: state.sheetCollapses + 1 })),
   // A selected room belongs to the floor that was showing, so it goes with it.
   setIndoorLevel: (level) =>
     set(({ indoor, selection }) => (indoor ? { indoor: { ...indoor, level }, ...(selection?.kind === 'room' && { selection: null }) } : {})),
@@ -196,6 +203,10 @@ export const useAppStore = create<AppState>((set) => ({
   setBusesUnavailable: (busesUnavailable) => set({ busesUnavailable }),
 
   toast: null,
+  sheetCover: 0,
+  sheetCollapses: 0,
+  setSheetCover: (sheetCover) => set((state) => (state.sheetCover === sheetCover ? state : { sheetCover })),
+
   showToast: (toast) => set({ toast }),
   dismissToast: () => set({ toast: null }),
 }));

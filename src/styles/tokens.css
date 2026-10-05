@@ -72,6 +72,7 @@
   --border: var(--neutral-200);
   --control-off: var(--neutral-400);
   --skeleton: var(--neutral-100);
+  --handle: var(--neutral-300);
   --photo-backdrop: var(--neutral-200);
   --scrim: rgb(23 23 23 / 70%);
 
@@ -117,4 +118,9 @@
   --shadow-side: 2px 0 12px rgb(15 27 69 / 12%);
 
   --gap: 12px;
+
+  /* How a sheet, and what rides on it, comes to rest. */
+  --sheet-motion: 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Set by the open sheet on a phone: how much of the map's bottom it covers. */
+  --sheet-cover: 0px;
 }

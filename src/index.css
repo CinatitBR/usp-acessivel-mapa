@@ -84,7 +84,7 @@ input {
   box-shadow: var(--shadow);
 }
 
-/* Layout: the sheet takes its own space, so it never covers the map's attribution. */
+/* Layout: the map fills the screen. The sheet lies over its bottom on a phone and stands beside it on wide screens. */
 .app {
   display: flex;
   flex-direction: column;
@@ -99,7 +99,7 @@ input {
 
 .map-status {
   position: absolute;
-  bottom: 64px;
+  bottom: calc(var(--sheet-cover) + 64px);
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
@@ -133,8 +133,8 @@ input {
 /* Search */
 .search {
   position: absolute;
-  /* Results drop over the accessibility toggle below. */
-  z-index: 2;
+  /* Results drop over the accessibility toggle below, and over the sheet. */
+  z-index: 4;
   top: calc(env(safe-area-inset-top) + 10px);
   left: calc(env(safe-area-inset-left) + 10px);
   /* Leaves room for the map's zoom and compass buttons. */
@@ -242,16 +242,113 @@ input {
   text-transform: uppercase;
 }
 
-/* Detail sheet */
+/*
+ * Detail sheet. On a phone it lies over the bottom of the map; its height is set by
+ * BottomSheet.tsx, which also sets --sheet-cover for what must stay above it.
+ */
 .sheet {
-  flex: none;
+  position: fixed;
+  /* Over the map's own controls (2); under the search results, the layer menu and the toast. */
+  z-index: 3;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  /* Until the sheet has measured itself. */
   max-height: 45dvh;
-  overflow-y: auto;
-  padding: var(--gap) calc(env(safe-area-inset-right) + 16px)
-    calc(env(safe-area-inset-bottom) + var(--gap)) calc(env(safe-area-inset-left) + 16px);
+  overflow: hidden;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   background: var(--surface);
-  border-top: 1px solid var(--border);
   box-shadow: var(--shadow-sheet);
+  transition: height var(--sheet-motion);
+}
+
+.sheet[style] {
+  max-height: none;
+}
+
+.sheet.dragging {
+  transition: none;
+}
+
+/* Handle and header: the part the sheet is dragged by. */
+.sheet-grip {
+  flex: none;
+  padding: 0 calc(env(safe-area-inset-right) + 16px) 12px calc(env(safe-area-inset-left) + 16px);
+  touch-action: none;
+  cursor: grab;
+}
+
+.sheet-handle {
+  display: block;
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+}
+
+.sheet-handle::before {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: var(--radius-pill);
+  background: var(--handle);
+}
+
+.sheet-handle:focus-visible {
+  outline-offset: -6px;
+}
+
+/* Below its highest rest a vertical drag on the content moves the sheet; rows inside still swipe sideways. */
+.sheet-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-x;
+}
+
+.sheet.at-top .sheet-scroll {
+  overflow-y: auto;
+  touch-action: pan-x pan-y;
+}
+
+/* What sits at the bottom of the map rides on the sheet. */
+.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-bottom-left {
+  bottom: var(--sheet-cover);
+}
+
+.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-bottom-left,
+.map-status,
+.toast,
+.level-switcher {
+  transition: bottom var(--sheet-motion);
+}
+
+.sheet-dragging .maplibregl-ctrl-bottom-right,
+.sheet-dragging .maplibregl-ctrl-bottom-left,
+.sheet-dragging .map-status,
+.sheet-dragging .toast,
+.sheet-dragging .level-switcher {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .maplibregl-ctrl-bottom-right,
+  .maplibregl-ctrl-bottom-left,
+  .map-status,
+  .toast,
+  .level-switcher {
+    transition: none;
+  }
 }
 
 .sheet-header {
@@ -263,8 +360,10 @@ input {
 
 .sheet-title {
   margin: 0;
+  color: var(--heading);
   font-size: var(--size-title);
   line-height: var(--line-title);
+  font-weight: var(--weight-semibold);
 }
 
 .sheet-subtitle {
@@ -293,7 +392,8 @@ input {
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  margin-top: var(--gap);
+  padding: 4px calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 16px)
+    calc(env(safe-area-inset-left) + 16px);
 }
 
 .sheet-body p {
@@ -525,7 +625,7 @@ input {
 
 .layer-menu {
   position: absolute;
-  z-index: 3;
+  z-index: 5;
   top: calc(env(safe-area-inset-top) + 222px);
   right: calc(env(safe-area-inset-right) + 10px);
   display: flex;
@@ -609,8 +709,9 @@ input {
 
 .toast {
   position: absolute;
+  z-index: 4;
   left: 50%;
-  bottom: 108px;
+  bottom: calc(var(--sheet-cover) + 108px);
   transform: translateX(-50%);
   display: flex;
   align-items: center;
@@ -1053,12 +1154,25 @@ input {
     flex-direction: row-reverse;
   }
 
+  /* Beside the map: a panel as tall as the window, with nothing to drag. */
   .sheet {
+    position: static;
+    flex: none;
     width: 360px;
     max-height: none;
-    border-top: 0;
-    border-right: 1px solid var(--border);
+    border-radius: 0;
     box-shadow: var(--shadow-side);
+  }
+
+  .sheet-grip {
+    padding-top: 16px;
+    touch-action: auto;
+    cursor: auto;
+  }
+
+  .sheet .sheet-scroll {
+    overflow-y: auto;
+    touch-action: auto;
   }
 }
 
@@ -1224,7 +1338,7 @@ input {
 .level-switcher {
   position: absolute;
   left: calc(env(safe-area-inset-left) + 10px);
-  bottom: 62px;
+  bottom: calc(var(--sheet-cover) + 62px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1235,11 +1349,11 @@ input {
 
 /* The status line and the toast, which share that corner on phones, go above the floor buttons. */
 .level-switcher ~ .map-status {
-  bottom: 172px;
+  bottom: calc(var(--sheet-cover) + 172px);
 }
 
 .level-switcher ~ .toast {
-  bottom: 216px;
+  bottom: calc(var(--sheet-cover) + 216px);
 }
 
 .level-name {

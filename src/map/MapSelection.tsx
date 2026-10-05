@@ -89,11 +89,13 @@ export function MapSelection() {
 
   useEffect(() => {
     if (!map || !flyTarget) return;
-    // The sheet opening has just changed the map's size; without this the target lands off-centre.
+    // The sheet opening has just changed the map's size (beside it) or how much of it shows (over it);
+    // without this the target lands off-centre.
     map.resize();
     if (!flyTarget.keepZoom) {
-      map.flyTo({ center: flyTarget.position, zoom: Math.max(map.getZoom(), FLY_MIN_ZOOM) });
-      return;
+      // One frame later, so the sheet that opens with this selection has said how much it covers.
+      const frame = requestAnimationFrame(() => map.flyTo({ center: flyTarget.position, zoom: Math.max(map.getZoom(), FLY_MIN_ZOOM) }));
+      return () => cancelAnimationFrame(frame);
     }
     const center = () => map.easeTo({ center: flyTarget.position, duration: CENTER_MS });
     center();

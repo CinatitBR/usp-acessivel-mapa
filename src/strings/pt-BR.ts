@@ -20,6 +20,10 @@ export const strings = {
     offCampus: 'Fora do campus',
     institute: 'Unidade',
   },
+  sheet: {
+    expand: 'Expandir painel',
+    collapse: 'Recolher painel',
+  },
   indoor: {
     open: 'Ver planta interna',
     close: 'Fechar planta interna',

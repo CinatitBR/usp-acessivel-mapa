@@ -179,3 +179,19 @@ Each one ends working and is shown to the user before the next; commits only whe
 - "Rota até aqui" already has the route icon and the pill shape; the swap button in the route panel is a tonal round button. The rest of the sheet is U3 and U4.
 - Three tokens added: `--on-inverse-accent`, `--chip-off`, `--on-chip-off`; their pairs are in the contrast test.
 - Checked with screenshots of the eight screens at both sizes, no console errors. **Not done:** the keyboard pass over the map's controls listed in the plan; the ring is one global rule, but I did not tab through the page.
+
+### U3: the bottom sheet (2026-10-04)
+
+- On a phone the map now fills the screen and the sheet (`src/ui/BottomSheet.tsx`) lies over its bottom with 28 px top corners and a handle. It rests at three heights: header only, 45% of the screen, and the screen minus 88 px (the search box stays in reach). A sheet is never taller than its content, and it grows by itself as its content loads.
+- Dragging the handle or the header moves it; on release it goes to the nearest rest, or one rest further in the direction of a flick (0.4 px/ms or faster). The rules are in `src/ui/sheetSnap.ts` with unit tests. The handle is a button ("Expandir painel" / "Recolher painel"): a click raises the sheet one rest, or collapses it from the top; arrow up and down move it; `Esc` closes it. A collapsed sheet's content is `inert`.
+- `--sheet-cover` (set on the page as the sheet moves) lifts the attribution, the status line, the toast and the floor switcher, so they ride on the sheet. It stops at 60% of the screen: a full sheet covers them, except the toast, which stays on top.
+- The camera: `src/map/SheetPadding.tsx` gives MapLibre the covered height as bottom padding once the sheet rests, so a selected place, a route and a floor plan are centred in the part of the map that shows. When the user moves the sheet the map does not move; when the sheet grows within 1.5 s of the app moving the camera, the target is kept centred.
+- Sheet titles are Title 24/32 semibold in the heading colour. Wide screens keep the panel beside the map, with no handle and no behaviour change.
+- Checked in headless Chrome at 390 × 844: drag up and down between the three rests, handle click, arrow keys, close by tap and by `Esc`, with a building, the indoor map, a route and a stop; the attribution and the floor switcher measured above the sheet at every rest; no console errors. Screenshots at 1280 × 800 for the wide layout.
+- **Not verifiable here:** a real flick (the test's synthetic drags are too slow to count as one, so flicks are covered by the unit tests only), touch behaviour, and how the map's small shift feels when a sheet opens.
+
+### U3 additions after the user's review (2026-10-05)
+
+- **Dragging from the content**, with a finger. Below its highest rest the sheet follows any vertical drag on its content, and the content does not scroll. At its highest rest the content scrolls, and a drag down moves the sheet once the content is at its start. A sideways swipe is left to the row of chips or the photos under the finger. The mouse keeps the handle and header for dragging, so text can still be selected; turning the wheel over a sheet that is not at its highest rest raises it one rest.
+- **The sheet collapses to its header when a floor plan is opened** ("Ver planta interna"), and the plan is fitted to the map above it. Closing the plan leaves the sheet as it is; the handle raises it again.
+- Checked in headless Chrome with touch events at 390 × 844: content dragged up from half to full, scrolled at full and back, dragged down from its start to a lower rest, a tap on a button in the content still pressing it, and the collapse on opening the plan. No console errors.
