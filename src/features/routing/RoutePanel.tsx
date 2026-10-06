@@ -5,6 +5,7 @@ import { useOnline } from '../../lib/useOnline';
 import { type RouteEnd, type RoutePlan, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
+import { RouteWarnings } from '../reports/RouteWarnings';
 import { formatDistance, formatDuration } from './format';
 import { RouteEndField } from './RouteEndField';
 import { type RouteResult, useRoute } from './useRoute';
@@ -25,6 +26,7 @@ function Result({ result }: { result: RouteResult }) {
         ? <p className="route-warning">{strings.route.hasStairs}</p>
         : stepFree && <p className={route.stepFree === 'guaranteed' ? 'route-ok' : 'route-warning'}>{stepFree}</p>}
       {orsOverQuota && <p className="muted">{strings.route.quota}</p>}
+      <RouteWarnings />
       <div>
         <h3 className="list-title">{strings.route.steps}</h3>
         <ol className="route-steps">

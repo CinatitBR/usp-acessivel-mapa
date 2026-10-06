@@ -303,6 +303,11 @@ export const strings = {
         failed: 'Não foi possível enviar agora. Tente de novo.',
       },
     },
+    onRoute: {
+      title: (count: number) => (count === 1 ? '1 relato nesta rota' : `${count} relatos nesta rota`),
+      fromStart: (distance: string) => `a ${distance} do início`,
+      atDestination: 'no destino',
+    },
     since: 'Relatado em',
     until: 'vale até',
     gone: 'Este relato não está mais no mapa',

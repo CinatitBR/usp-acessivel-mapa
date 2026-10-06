@@ -1860,3 +1860,10 @@ html:has(.review) #root {
   padding-left: 28px;
   font-weight: var(--weight-regular);
 }
+
+/* Reports on the planned route, in the route panel */
+.route-reports {
+  padding: 4px 12px;
+  border-radius: var(--radius-card);
+  background: var(--accent-tonal);
+}

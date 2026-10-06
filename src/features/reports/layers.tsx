@@ -8,6 +8,7 @@ import { SELECTED_SUFFIX } from '../../map/badgeIcon';
 import { useAppStore } from '../../state/store';
 import { addReportIcons, PENDING_SUFFIX, reportIconId } from './icons';
 import { useReports } from './useReports';
+import { useRouteWarnings } from './useRouteWarnings';
 
 export const REPORTS_LAYER = 'reports';
 export const REPORTS_SELECTED_LAYER = 'reports-selected';
@@ -30,13 +31,25 @@ export const reportFeatures = (reports: readonly Report[]): FeatureCollection<Po
   })),
 });
 
-const layout: SymbolLayerSpecification['layout'] = {
+/** Reports on the planned route are drawn this much larger. */
+const ON_ROUTE_SCALE = 1.35;
+
+const baseLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['get', 'icon'],
-  'icon-size': ['interpolate', ['linear'], ['zoom'], MIN_ZOOM, 0.6, 18, 1],
   'symbol-sort-key': ['get', 'rank'],
   // Reports give way to one another, but never to other symbols, and never hide them.
   'icon-ignore-placement': true,
 };
+
+/** The layout with the symbols' size: growing with the zoom, and larger for the reports with these ids. */
+const sized = (layout: SymbolLayerSpecification['layout'], larger: readonly string[]): SymbolLayerSpecification['layout'] => ({
+  ...layout,
+  'icon-size': [
+    'interpolate', ['linear'], ['zoom'],
+    MIN_ZOOM, ['case', ['in', ['get', 'id'], ['literal', larger]], 0.6 * ON_ROUTE_SCALE, 0.6],
+    18, ['case', ['in', ['get', 'id'], ['literal', larger]], ON_ROUTE_SCALE, 1],
+  ],
+});
 
 const selectedLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['concat', ['get', 'icon'], SELECTED_SUFFIX],
@@ -46,7 +59,6 @@ const selectedLayout: SymbolLayerSpecification['layout'] = {
 
 const mineLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['concat', ['get', 'icon'], PENDING_SUFFIX],
-  'icon-size': ['interpolate', ['linear'], ['zoom'], MIN_ZOOM, 0.6, 18, 1],
   'icon-allow-overlap': true,
   'icon-ignore-placement': true,
 };
@@ -74,6 +86,10 @@ export function ReportLayers() {
   const data = useMemo(() => reportFeatures(reports), [reports]);
   const mineData = useMemo(() => reportFeatures(mine), [mine]);
   const any = reports.length + mine.length > 0;
+  const warnings = useRouteWarnings();
+  const onRoute = useMemo(() => warnings.map(({ report }) => report.id), [warnings]);
+  const layout = useMemo(() => sized(baseLayout, onRoute), [onRoute]);
+  const ownLayout = useMemo(() => sized(mineLayout, onRoute), [onRoute]);
 
   useEffect(() => {
     if (!map || !mapReady || !any) return;
@@ -84,7 +100,9 @@ export function ReportLayers() {
   if (!iconsReady || !any) return null;
 
   const isSelected: FilterSpecification = ['==', ['get', 'id'], selectedId];
-  const shown: FilterSpecification = ['case', ['get', 'temporary'], showTemporary, accessMode];
+  // What the route passes is drawn whatever the view: a step matters on a step-free route even with the accessibility view off.
+  const isOnRoute: FilterSpecification = ['in', ['get', 'id'], ['literal', onRoute]];
+  const shown: FilterSpecification = ['any', isOnRoute, ['case', ['get', 'temporary'], showTemporary, accessMode]];
   return (
     <>
       <Source id="reports" type="geojson" data={data}>
@@ -92,7 +110,7 @@ export function ReportLayers() {
         <Layer id={REPORTS_SELECTED_LAYER} type="symbol" beforeId={ANCHORS.labels} layout={selectedLayout} filter={isSelected} />
       </Source>
       <Source id="my-reports" type="geojson" data={mineData}>
-        <Layer id={MY_REPORTS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={MIN_ZOOM} layout={mineLayout} filter={['!', isSelected]} />
+        <Layer id={MY_REPORTS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={MIN_ZOOM} layout={ownLayout} filter={['!', isSelected]} />
         <Layer id={MY_REPORTS_SELECTED_LAYER} type="symbol" beforeId={ANCHORS.labels} layout={mineSelectedLayout} filter={isSelected} />
       </Source>
     </>
