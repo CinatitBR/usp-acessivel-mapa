@@ -11,10 +11,12 @@ import { RouteEndField } from './RouteEndField';
 import { type RouteResult, useRoute } from './useRoute';
 
 const ENDS: RouteEnd[] = ['from', 'to'];
+/** A way around that adds less than this, in metres, is not worth a number. */
+const DETOUR_WORTH_SAYING = 10;
 const PROFILES: RouteProfile[] = ['walk', 'wheelchair'];
 
 function Result({ result }: { result: RouteResult }) {
-  const { route, orsOverQuota } = result;
+  const { route, orsOverQuota, detour, noDetour } = result;
   const hasStairs = route.steps.some((step) => step.hasSteps);
   const stepFree = strings.route.stepFree[route.stepFree];
   return (
@@ -25,6 +27,8 @@ function Result({ result }: { result: RouteResult }) {
       {hasStairs
         ? <p className="route-warning">{strings.route.hasStairs}</p>
         : stepFree && <p className={route.stepFree === 'guaranteed' ? 'route-ok' : 'route-warning'}>{stepFree}</p>}
+      {detour && <p className="route-detour">{strings.route.detour(detour.avoided, detour.extra >= DETOUR_WORTH_SAYING ? formatDistance(detour.extra) : undefined)}</p>}
+      {noDetour && <p className="route-warning">{strings.route.noDetour}</p>}
       {orsOverQuota && <p className="muted">{strings.route.quota}</p>}
       <RouteWarnings />
       <div>

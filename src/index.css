@@ -1867,3 +1867,9 @@ html:has(.review) #root {
   border-radius: var(--radius-card);
   background: var(--accent-tonal);
 }
+
+/* The step-free route goes around a reported block */
+.route-detour {
+  color: var(--accent);
+  font-weight: var(--weight-semibold);
+}

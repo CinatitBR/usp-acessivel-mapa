@@ -73,10 +73,11 @@ const point = ([lng, lat]: LngLat) => `${lng.toFixed(5)},${lat.toFixed(5)}`;
 /** openrouteservice, reached through the Worker, which holds the API key. */
 export const orsRouting: RoutingProvider = {
   id: PROVIDER,
-  async route({ from, to, profile }, signal) {
+  async route({ from, to, profile, avoid = [] }, signal) {
     if (!API_BASE) throw new ProviderError(PROVIDER, 'network', 'no API base configured');
     const orsProfile = profile === 'wheelchair' ? 'wheelchair' : 'foot-walking';
-    const url = `${API_BASE}/ors/route?profile=${orsProfile}&from=${point(from)}&to=${point(to)}`;
+    const around = avoid.length > 0 ? `&avoid=${avoid.map(encodeURIComponent).join(',')}` : '';
+    const url = `${API_BASE}/ors/route?profile=${orsProfile}&from=${point(from)}&to=${point(to)}${around}`;
     return parseOrsRoute(await fetchJson(url, { provider: PROVIDER, signal, timeoutMs: 12_000 }), profile);
   },
 };

@@ -6,7 +6,7 @@ export type Route =
   /** Positions of several lines in one request, so a phone does not make one call per line and direction. */
   | { kind: 'positions'; codes: number[] }
   /** One walking route from openrouteservice. The points are `lng,lat` strings with 5 decimals. */
-  | { kind: 'ors'; profile: OrsProfile; from: string; to: string }
+  | { kind: 'ors'; profile: OrsProfile; from: string; to: string; avoid: string[] }
   /** The reports that reviewers have published. */
   | { kind: 'reports' }
   /** A new report, in the request's body, to add to the reviewers' queue. */
@@ -22,6 +22,7 @@ export type Route =
   | { kind: 'not-found' };
 
 const MAX_CODES = 20;
+const MAX_AVOID = 8;
 
 const ORS_PROFILES = ['foot-walking', 'wheelchair'] as const;
 export type OrsProfile = (typeof ORS_PROFILES)[number];
@@ -95,7 +96,12 @@ export function matchRoute(method: string, url: URL): Route {
       if (!profile) return { kind: 'bad-request', message: `profile must be one of ${ORS_PROFILES.join(', ')}` };
       if (!from || !to) return { kind: 'bad-request', message: 'from and to must be lng,lat inside Greater São Paulo' };
       if (from === to) return { kind: 'bad-request', message: 'from and to are the same point' };
-      return { kind: 'ors', profile, from, to };
+      // Ids of reports the route should go around; the Worker looks up where they are.
+      const avoid = [...new Set((url.searchParams.get('avoid') ?? '').split(',').filter(Boolean))].sort();
+      if (avoid.length > MAX_AVOID || avoid.some((id) => !/^[\w-]{1,40}$/.test(id))) {
+        return { kind: 'bad-request', message: `avoid must be at most ${MAX_AVOID} report ids` };
+      }
+      return { kind: 'ors', profile, from, to, avoid };
     }
 
     default:

@@ -148,3 +148,19 @@ export async function decideReport(d1: D1Database, id: string, { status, until, 
   if (changed.length > 0) await keepReport(d1, id, now);
   return changed.length > 0;
 }
+
+// --- For routing ---------------------------------------------------------------
+
+/**
+ * Where the given reports are, for a route to go around them: only those that are published
+ * and say one cannot get through a passage, a step or a sidewalk. In the order of their ids.
+ */
+export async function blockingPositions(d1: D1Database, ids: readonly string[]): Promise<{ id: string; at: [number, number] }[]> {
+  if (ids.length === 0) return [];
+  const rows = await drizzle(d1)
+    .select({ id: reports.id, lng: reports.lng, lat: reports.lat })
+    .from(reports)
+    .where(and(inArray(reports.id, [...ids]), eq(reports.status, 'published'), eq(reports.answer, 'no'), inArray(reports.type, ['blocked', 'step', 'narrow'])))
+    .orderBy(asc(reports.id));
+  return rows.map(({ id, lng, lat }) => ({ id, at: [lng, lat] }));
+}

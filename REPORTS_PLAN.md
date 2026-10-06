@@ -1,6 +1,6 @@
 # Reports plan: user reports on the campus map
 
-This is a plan of its own, separate from `PLAN.md`, `INDOOR_PLAN.md` and `UI_PLAN.md`. It records a brainstorm with the user on 2026-10-05. The user asked for it to be built on 2026-10-05, one milestone at a time. R1 and R2 are built, and on 2026-10-05 the store moved from a Google Sheet to a Cloudflare D1 database (see "Reports on D1" at the end, which replaces what the sections below say about the spreadsheet and the Form). R3 and R4 are built on that database; R5 is not built.
+This is a plan of its own, separate from `PLAN.md`, `INDOOR_PLAN.md` and `UI_PLAN.md`. It records a brainstorm with the user on 2026-10-05. The user asked for it to be built on 2026-10-05, one milestone at a time. R1 and R2 are built, and on 2026-10-05 the store moved from a Google Sheet to a Cloudflare D1 database (see "Reports on D1" at the end, which replaces what the sections below say about the spreadsheet and the Form). R3, R4 and R5 are built on that database, which completes the milestones of this plan.
 
 ## Context
 
@@ -190,3 +190,31 @@ Not in this plan: the two buttons on the existing accessibility symbols (static 
 - **Whose reports:** the published ones, and the person's own that wait for review, which warn only on their device.
 - **Checked** in headless Chrome against the local Worker and database with a real route (IME to the Vilanova Artigas building, step-free through openrouteservice and on foot through Valhalla) and three reports published along it: the step-free panel listed the step at 60 m, the blocked passage at 180 m and the elevator at the destination; on foot only the blocked passage; tapping a warning opened its sheet. A far-away report and another person's pending report being left out are covered by the unit tests only: the test's fourth and fifth reports were stopped by the Worker's own limit of three a minute.
 - **Not done:** pins are not snapped to the nearest path when published (the plan asked for it; the 12 m allowance stands in for it). The route is not changed; that is R5.
+
+### R5 trial: openrouteservice "avoid areas" with the wheelchair profile (2026-10-05)
+
+Twelve direct requests to openrouteservice, same settings as the Worker uses for a step-free route, with a small circle to avoid placed on the route it had just given:
+
+| Case (IME → FAU, 397 m) | Result |
+|---|---|
+| Block at 60% of the way, circle of 5, 8, 12 or 20 m | 469 m (+72 m) every time; the new route passes 110 m from the spot |
+| Block at 30%, 8 m | 397 m (+0 m), passing 12 m from the spot: a parallel path of the same length |
+| Block at the very start, 8 m | 392 m (−5 m): it starts from another point nearby |
+| Block at the very end, 8 m | 453 m (+56 m): it arrives from another side |
+| Two blocks at once (30% and 60%) | 469 m (+72 m) |
+| Block far from the route | 397 m, unchanged |
+| FEA → IME (384 m), block at 50%, 8 m | 525 m (+141 m), passing 26 m from the spot |
+
+- The option works with the wheelchair profile on campus paths, takes several areas at once, and leaves the route alone when the area is elsewhere.
+- No case gave "no route", so that answer was not seen; it still has to be handled.
+- The 30% case shows why the circle's size matters: a parallel path 12 m away stayed open with an 8 m circle. A circle as wide as the distance at which a report counts as "on the route" (12 m) is sure to cut the path that set off the warning, at the price of sometimes closing a parallel one too.
+- Each detour costs one more request to openrouteservice than a plain route.
+
+### R5: automatic detour (2026-10-05)
+
+- **Decision (user):** the route keeps 8 m away from a report, not the 12 m at which a report counts as on the route. A parallel sidewalk stays open more often; a pin placed 9 to 12 m from its path is warned about but not gone around.
+- **Worker:** `/ors/route` takes `avoid`, up to 8 report ids. For the step-free profile it looks them up in the database and keeps only those that are published and say one cannot get through a passage, a step or a sidewalk, then asks openrouteservice to stay out of a twelve-sided ring of 8 m around each (`avoidPolygons` in `worker/src/ors.ts`). The app never sends positions or areas, so a route cannot be bent with anything but published reports. "No route" from openrouteservice is answered as 404 `no_route`. The cache entry includes the reports gone around.
+- **App** (`src/features/routing/detour.ts` + test, `useRoute.ts`): the step-free route is asked for as before; if published blocking reports lie on it, it is asked for again going around them, and once more if the way around meets another one. The panel then says "Rota desviando de 1 bloqueio relatado (+130 m)"; the number is left out under 10 m. If there is no way around, the usual route is shown with "não encontramos um caminho sem degraus que desvie dele"; if going around changes nothing, the usual route is shown with its warnings as in R4. A route that came from the fallback service is left as it is, since only openrouteservice can keep out of an area. A new published report makes an open route be worked out again.
+- **Not changed:** the walking route, and reports that say "só com ajuda", which only warn.
+- **Checked** against the local Worker and database with real requests: for IME to the Vilanova Artigas building the usual step-free route is 310 m; with a blocked passage published at 60% of it, the Worker's answer for `avoid` with that id, a "só com ajuda" id and an unknown id was a 438 m route, and the app showed 440 m, "Rota desviando de 1 bloqueio relatado (+130 m)", on a different path; the walking route kept its usual path and listed the block as a warning. **Not seen in a real run:** "no way around" and the second round, which are covered by unit tests only.
+- **Cost:** one more request to openrouteservice per round, only when a blocking report is on the route; the Worker allows 10 route requests a minute per client.

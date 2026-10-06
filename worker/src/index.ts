@@ -12,7 +12,7 @@ import { decideReport, insertFeedback, insertReport, keepReport, publishedReport
 import { isReviewer, parseDecision } from './review';
 import { checkOrigin, matchRoute, type Route } from './routes';
 
-type ErrorCode = 'bad_request' | 'not_found' | 'forbidden' | 'unauthorized' | 'rate_limited' | 'auth' | 'upstream' | 'timeout';
+type ErrorCode = 'no_route' | 'bad_request' | 'not_found' | 'forbidden' | 'unauthorized' | 'rate_limited' | 'auth' | 'upstream' | 'timeout';
 
 const json = (body: unknown, status: number, headers: Record<string, string>) =>
   new Response(typeof body === 'string' ? body : JSON.stringify(body), {
@@ -89,7 +89,7 @@ async function respond(route: Route, request: Request, env: Env, ctx: ExecutionC
       return json(`[${route.codes.map((code, index) => `{"codigo":${code},"body":${bodies[index]}}`).join(',')}]`, 200, cached);
     }
     case 'ors':
-      return json(await orsRoute(route.profile, route.from, route.to, env, ctx), 200, {
+      return json(await orsRoute(route.profile, route.from, route.to, route.avoid, env, ctx), 200, {
         'Cache-Control': `public, max-age=${ORS_ROUTE_TTL_SECONDS}`,
         ...cors,
       });

@@ -192,6 +192,9 @@ export const strings = {
       no: '',
     },
     hasStairs: 'Atenção: esta rota passa por escadas.',
+    detour: (count: number, extra?: string) =>
+      `Rota desviando de ${count === 1 ? '1 bloqueio relatado' : `${count} bloqueios relatados`}${extra ? ` (+${extra})` : ''}.`,
+    noDetour: 'Há um bloqueio relatado nesta rota e não encontramos um caminho sem degraus que desvie dele.',
     quota: 'O serviço de rotas sem degraus atingiu o limite de uso; esta rota veio de outro serviço.',
     takeStairs: 'Suba ou desça a escada.',
     stairs: 'escada',

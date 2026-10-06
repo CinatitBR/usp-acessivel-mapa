@@ -35,6 +35,7 @@ describe('matchRoute', () => {
 
   it('accepts a route request and rounds its points', () => {
     expect(route('/ors/route?profile=wheelchair&from=-46.7273836,-23.560624&to=-46.72752,-23.56085')).toEqual({
+      avoid: [],
       kind: 'ors',
       profile: 'wheelchair',
       from: '-46.72738,-23.56062',
@@ -81,6 +82,14 @@ describe('checkOrigin', () => {
 
   it('lets requests without an Origin through, with no CORS headers', () => {
     expect(checkOrigin(null, allowed)).toEqual({ ok: true, headers: {} });
+  });
+
+  it('takes the reports a route should go around, by id, sorted and without repeats', () => {
+    const base = '/ors/route?profile=wheelchair&from=-46.72738,-23.56062&to=-46.72752,-23.56085';
+    expect(route(`${base}&avoid=r-b,r-a,r-b`)).toMatchObject({ kind: 'ors', avoid: ['r-a', 'r-b'] });
+    expect(route(`${base}&avoid=`)).toMatchObject({ kind: 'ors', avoid: [] });
+    expect(route(`${base}&avoid=r-1,<script>`)).toMatchObject({ kind: 'bad-request' });
+    expect(route(`${base}&avoid=${Array.from({ length: 9 }, (_, index) => `r-${index}`).join(',')}`)).toMatchObject({ kind: 'bad-request' });
   });
 
   it('knows the review routes', () => {

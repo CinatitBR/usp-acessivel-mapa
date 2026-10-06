@@ -289,6 +289,6 @@ Choose a long random one and share it only with reviewers. For local work it is 
 
 Under a published report anyone can say "Continua assim" or "Mudou". A confirmation keeps a temporary report on the map for its default days from that day; a "mudou" marks it "pode ter mudado" and lists it under "Mudanças relatadas" on the review page, but never removes it by itself.
 
-A planned route lists the reports it passes ("2 relatos nesta rota") and those about its destination, and draws them larger. A step-free route counts blocked passages, steps and narrow sidewalks; a walking route only passages that cannot be passed. The app never says a route is clear.
+A planned route lists the reports it passes ("2 relatos nesta rota") and those about its destination, and draws them larger. A step-free route counts blocked passages, steps and narrow sidewalks; a walking route only passages that cannot be passed. The app never says a route is clear. A step-free route also goes around published reports that say one cannot get through, keeping 8 m away from each, and says what the way around adds.
 
 The public note is the only note the map shows; the reporter's own note stays with the reviewers. "Vale até" is the last day a report shows. Without it a blocked passage shows for 7 days and an elevator or toilet out of service for 14; the others stay.
