@@ -3,7 +3,7 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { lastDay } from '../../domain/reports';
 import type { Building } from '../../domain/types';
 import { loadBuildings } from '../../map/staticData';
-import { formatDate, strings } from '../../strings/pt-BR';
+import { formatDate, formatTime, strings } from '../../strings/pt-BR';
 import { reportTitle } from '../reports/ReportPanel';
 import { type Decision, fetchReview, isWrongPassword, type ReviewReport, sendDecision, sendKeep } from './api';
 
@@ -53,6 +53,7 @@ type CardProps = { report: ReviewReport; buildings: Building[]; busy: boolean; d
 function Facts({ report, buildings }: Pick<CardProps, 'report' | 'buildings'>) {
   const building = buildings.find((candidate) => candidate.id === report.target);
   const passable = report.answer === 'yes' || report.answer === 'help' || report.answer === 'no';
+  const submitted = report.createdAt && formatTime(report.createdAt);
   return (
     <>
       <h3>{reportTitle(report)}</h3>
@@ -61,9 +62,10 @@ function Facts({ report, buildings }: Pick<CardProps, 'report' | 'buildings'>) {
         {building?.name ?? report.target ?? strings.reports.mapPoint}
       </p>
       <p className="muted">
-        {strings.reports.since} {formatDate(report.since)} ·{' '}
-        <a href={mapLink(report.position)} target="_blank" rel="noopener">{text.seeOnMap}</a>
+        {strings.reports.since} {formatDate(report.since)}
+        {submitted && ` ${text.at} ${submitted}`}
       </p>
+      <a className="button-tonal review-map-link" href={mapLink(report.position)} target="_blank" rel="noopener">{text.seeOnMap}</a>
       {report.reporterNote && (
         <p className="review-note">
           <span className="muted">{text.reporterNote}</span>

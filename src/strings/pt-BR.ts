@@ -217,6 +217,7 @@ export const strings = {
     nonePending: 'Nenhum relato aguardando revisão.',
     published: 'Publicados',
     seeOnMap: 'Ver no mapa',
+    at: 'às',
     reporterNote: 'Observação de quem relatou (não é pública)',
     publish: 'Publicar',
     confirmPublish: 'Confirmar publicação',
@@ -355,6 +356,14 @@ export const strings = {
 export function formatDate(iso: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   return match ? `${match[3]}/${match[2]}/${match[1]}` : iso;
+}
+
+const clock = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+
+/** `2026-10-05T12:00:00.000Z` → `09:00`, the time in São Paulo. Empty for anything that is not a moment. */
+export function formatTime(iso: string): string {
+  const time = Date.parse(iso);
+  return Number.isNaN(time) ? '' : clock.format(time);
 }
 
 export const buildingKindLabel = (kind: string) => strings.building.kinds[kind] ?? strings.building.kinds.yes!;

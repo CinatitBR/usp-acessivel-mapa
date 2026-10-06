@@ -1723,12 +1723,11 @@ input {
   padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 32px);
 }
 
-/* The map page never scrolls; this one must. */
+/* The map page never scrolls; this one must. The window scrolls it: a body that scrolled by itself would hold the wheel, with its `overscroll-behavior`. */
 html:has(.review),
 html:has(.review) body,
 html:has(.review) #root {
   height: auto;
-  overflow: auto;
 }
 
 .review-header {
@@ -1740,14 +1739,17 @@ html:has(.review) #root {
 
 .review h1 {
   margin: 0;
-  font-size: var(--size-title);
-  line-height: var(--line-title);
+  color: var(--heading);
+  font-size: var(--size-heading);
+  line-height: var(--line-heading);
 }
 
 .review h2 {
   margin: 24px 0 8px;
+  color: var(--on-chip);
   font-size: var(--size-subtitle);
   line-height: var(--line-subtitle);
+  font-weight: var(--weight-regular);
 }
 
 .review-list {
@@ -1769,6 +1771,17 @@ html:has(.review) #root {
 
 .review-login {
   margin-top: 24px;
+}
+
+.review-card {
+  border: 2px solid var(--handle);
+  box-shadow: none;
+}
+
+.review-map-link {
+  align-self: flex-start;
+  font-size: var(--size-body);
+  line-height: var(--line-body);
 }
 
 .review-card h3,
