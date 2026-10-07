@@ -300,3 +300,19 @@ Under a published report anyone can say "Continua assim" or "Mudou". A confirmat
 A planned route lists the reports it passes ("2 relatos nesta rota") and those about its destination, and draws them larger. A step-free route counts blocked passages, steps and narrow sidewalks; a walking route only passages that cannot be passed. The app never says a route is clear. A step-free route also goes around published reports that say one cannot get through, keeping 8 m away from each, and says what the way around adds.
 
 The public note is the only note the map shows; the reporter's own note stays with the reviewers. "Vale até" is the last day a report shows. Without it a blocked passage shows for 7 days and an elevator or toilet out of service for 14; the others stay.
+
+## Journey screenshots
+
+`docs/journey/journey.md` describes the app screen by screen, one slide for each screen and action, for a presentation. Its screenshots, in `docs/journey/screenshots/`, are taken by a Playwright suite in `scripts/journey/`, one test per slide:
+
+```sh
+npm run journey:screenshots               # all the slides
+npm run journey:screenshots -- -g s13     # one slide
+npm run journey:screenshots -- -g "s13|s14"
+```
+
+It uses the Google Chrome installed on the computer, as a 390×844 phone, and needs the three secrets in `worker/.dev.vars`. It starts its own app (port 5183) and Worker (port 8797) over a database of its own in `.wrangler/journey/`, made again on each run with the reports in `scripts/journey/seed.ts`, so `npm run dev`, `npm run worker:dev` and their database are left alone.
+
+The slides show live data: the bus slides (s13, s14) need buses running, the step-free route (s18) needs openrouteservice, and the visual routes (s11, s12) the campus backend. A slide whose state cannot be reached fails or is skipped; nothing is faked.
+
+When a screen changes, change its slide in `journey.md` and its test in `scripts/journey/slides.spec.ts` together. The places the tests use (a building, a stop, a spot on a sidewalk) are constants at the top of that file.
