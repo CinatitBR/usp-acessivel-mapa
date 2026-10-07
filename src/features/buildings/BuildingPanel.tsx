@@ -10,6 +10,8 @@ import { WebsiteLink } from '../../ui/WebsiteLink';
 import { ReportAction } from '../reports/ReportButton';
 import { reportDates, reportTitle } from '../reports/ReportPanel';
 import { useReports } from '../reports/useReports';
+import { unitOf } from '../visualRoutes/units';
+import { VisualRoutesSection } from '../visualRoutes/VisualRoutesSection';
 import { WikiSection } from '../wiki/WikiSection';
 
 export function BuildingPanel({ id }: { id: string }) {
@@ -85,6 +87,7 @@ export function BuildingPanel({ id }: { id: string }) {
         institute?.wiki && <WikiSection wiki={institute.wiki} about={institute.sigla ?? institute.name} />
       )}
       <AccessSummary access={building.access} />
+      <VisualRoutesSection unit={unitOf(building)} from={{ kind: 'building', id: building.id }} />
       {features.length > 0 && (
         <div>
           <h3 className="list-title">{strings.access.features}</h3>

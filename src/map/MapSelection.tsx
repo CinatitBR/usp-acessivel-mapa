@@ -85,7 +85,13 @@ export function MapSelection() {
     };
   }, [map]);
 
-  const buildingId = selection?.kind === 'building' ? selection.id : undefined;
+  // A visual route opened from a building keeps that building highlighted.
+  const buildingId =
+    selection?.kind === 'building'
+      ? selection.id
+      : selection?.kind === 'visualRoute' && selection.from.kind === 'building'
+        ? selection.from.id
+        : undefined;
   useEffect(() => {
     if (!map || !buildingId || !map.getSource(BUILDINGS_SOURCE)) return;
     const target = { source: BUILDINGS_SOURCE, id: buildingId };

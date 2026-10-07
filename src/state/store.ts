@@ -30,6 +30,8 @@ export type Selection =
   | { kind: 'bus'; id: string; fromStop?: string }
   /** A room of the open floor plan; it is highlighted in place. */
   | { kind: 'room'; id: string; buildingId: string }
+  /** A visual route of a university unit (`unit` is its id in the campus backend), and the panel it was opened from. */
+  | { kind: 'visualRoute'; id: string; unit: string; from: { kind: 'building' | 'institute'; id: string } }
   | { kind: 'place'; label: string; detail?: string; position: LngLat };
 
 export type RouteEnd = 'from' | 'to';

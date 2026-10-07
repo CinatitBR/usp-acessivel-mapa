@@ -82,6 +82,17 @@ export const strings = {
     next: 'Próxima foto',
     position: (current: number, total: number) => `${current}/${total}`,
   },
+  visualRoutes: {
+    title: 'Rotas visuais',
+    one: 'Rota visual',
+    stepCount: (count: number) => (count === 1 ? '1 passo' : `${count} passos`),
+    step: (number: number) => `Passo ${number}`,
+    photo: (number: number) => `Foto do passo ${number}`,
+    enlarge: (number: number) => `Ampliar a foto do passo ${number}`,
+    previousStep: 'Passo anterior',
+    nextStep: 'Próximo passo',
+    unavailable: 'Não foi possível abrir esta rota visual agora.',
+  },
   institute: {
     buildings: 'Prédios',
     noNamedBuildings: 'Nenhum prédio com nome cadastrado.',

@@ -1,11 +1,10 @@
-@import './styles/tokens.css';
+@import "./styles/tokens.css";
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
-
 
 html,
 body,
@@ -147,13 +146,13 @@ input {
 
 .chip::after,
 .toast button::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -4px 0;
 }
 
 .carousel-button::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -4px;
 }
@@ -163,7 +162,7 @@ input {
 }
 
 .sheet-handle::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -8px 0;
 }
@@ -182,7 +181,7 @@ input {
 }
 
 .sheet-back::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -6px 0;
 }
@@ -271,7 +270,7 @@ input {
   cursor: pointer;
 }
 
-.search-option[aria-selected='true'] {
+.search-option[aria-selected="true"] {
   background: var(--accent-soft);
 }
 
@@ -332,7 +331,8 @@ input {
 /* Handle and header: the part the sheet is dragged by. */
 .sheet-grip {
   flex: none;
-  padding: 0 calc(env(safe-area-inset-right) + 16px) 12px calc(env(safe-area-inset-left) + 16px);
+  padding: 0 calc(env(safe-area-inset-right) + 16px) 12px
+    calc(env(safe-area-inset-left) + 16px);
   touch-action: none;
   cursor: grab;
 }
@@ -348,7 +348,7 @@ input {
 }
 
 .sheet-handle::before {
-  content: '';
+  content: "";
   display: block;
   width: 48px;
   height: 4px;
@@ -452,7 +452,8 @@ input {
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  padding: 4px calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 16px)
+  padding: 4px calc(env(safe-area-inset-right) + 16px)
+    calc(env(safe-area-inset-bottom) + 16px)
     calc(env(safe-area-inset-left) + 16px);
 }
 
@@ -614,7 +615,7 @@ input {
   cursor: pointer;
 }
 
-.access-toggle[aria-pressed='true'] {
+.access-toggle[aria-pressed="true"] {
   background: var(--accent);
   color: var(--on-accent);
 }
@@ -692,13 +693,13 @@ input {
   cursor: pointer;
 }
 
-.chip[aria-pressed='true'] {
+.chip[aria-pressed="true"] {
   background: var(--accent-tonal);
   color: var(--on-accent-tonal);
   font-weight: var(--weight-semibold);
 }
 
-.chip[aria-pressed='false'] {
+.chip[aria-pressed="false"] {
   background: var(--chip-off);
   color: var(--on-chip-off);
   text-decoration: line-through;
@@ -733,12 +734,12 @@ input {
   outline-offset: 2px;
 }
 
-.map-button[aria-pressed='true'] {
+.map-button[aria-pressed="true"] {
   background: var(--accent);
   color: var(--on-accent);
 }
 
-.map-button[aria-expanded='true'] {
+.map-button[aria-expanded="true"] {
   background: var(--accent-tonal);
 }
 
@@ -815,7 +816,7 @@ input {
 }
 
 .switch::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 3px;
   left: 3px;
@@ -825,11 +826,11 @@ input {
   background: var(--surface);
 }
 
-.switch-row[aria-checked='true'] .switch {
+.switch-row[aria-checked="true"] .switch {
   background: var(--accent);
 }
 
-.switch-row[aria-checked='true'] .switch::after {
+.switch-row[aria-checked="true"] .switch::after {
   left: 21px;
 }
 
@@ -907,7 +908,6 @@ input {
 .wiki a {
   color: var(--accent);
 }
-
 
 .carousel {
   margin: 0;
@@ -1155,7 +1155,7 @@ input {
 .timeline-stop::before,
 .timeline-bus::before,
 .timeline-more::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   bottom: 0;
@@ -1170,7 +1170,10 @@ input {
 
 /* Stops are folded away here, so the rail is dashed. */
 .timeline-more::before {
-  background: repeating-linear-gradient(var(--line-color) 0 4px, transparent 4px 8px);
+  background: repeating-linear-gradient(
+    var(--line-color) 0 4px,
+    transparent 4px 8px
+  );
 }
 
 .timeline > :last-child::before {
@@ -1178,7 +1181,7 @@ input {
 }
 
 .timeline-stop::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 0;
@@ -1265,7 +1268,7 @@ input {
 
 /* The bus sits on the rail between two stops. */
 .timeline-bus::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 1px;
@@ -1317,7 +1320,6 @@ input {
   top: calc(env(safe-area-inset-top) + 206px);
   padding: 0;
 }
-
 
 /* From and to in one card, with the swap button beside them. */
 .route-ends {
@@ -1437,12 +1439,12 @@ input {
   padding: 0 20px;
 }
 
-.chip-choice[aria-pressed='true'] {
+.chip-choice[aria-pressed="true"] {
   background: var(--accent);
   color: var(--on-accent);
 }
 
-.chip-choice[aria-pressed='false'] {
+.chip-choice[aria-pressed="false"] {
   background: var(--accent-tonal);
   color: var(--on-accent-tonal);
   text-decoration: none;
@@ -1586,7 +1588,7 @@ input {
   cursor: pointer;
 }
 
-.level-button[aria-pressed='true'] {
+.level-button[aria-pressed="true"] {
   background: var(--accent);
   color: var(--on-accent);
   font-weight: var(--weight-semibold);
@@ -1624,7 +1626,6 @@ input {
   .level-switcher ~ .toast {
     bottom: 108px;
   }
-
 }
 
 /* A report in a building's panel: what it says, and its dates on a second line */
@@ -1720,7 +1721,8 @@ input {
 .review {
   max-width: 720px;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 32px);
+  padding: calc(env(safe-area-inset-top) + 16px) 16px
+    calc(env(safe-area-inset-bottom) + 32px);
 }
 
 /* The map page never scrolls; this one must. The window scrolls it: a body that scrolled by itself would hold the wheel, with its `overscroll-behavior`. */
@@ -1885,4 +1887,164 @@ html:has(.review) #root {
 .route-detour {
   color: var(--accent);
   font-weight: var(--weight-semibold);
+}
+
+/* Visual routes: ways shown as a sequence of photos */
+.visual-routes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.visual-route-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.visual-route-card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.visual-route-card img {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: var(--border);
+  object-fit: cover;
+}
+
+.visual-route-card > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.visual-route-card strong {
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.visual-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.visual-steps p {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+
+.visual-step-number {
+  flex: none;
+  min-width: 1.5em;
+  color: var(--heading);
+  font-weight: var(--weight-semibold);
+}
+
+.visual-step-number::after {
+  content: ".";
+}
+
+.visual-steps img {
+  display: block;
+  border-radius: var(--radius-card);
+  background: var(--border);
+
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover; /* Ensures the image fills the square without distorting */
+}
+
+/* The photo of a step is a button that opens it over the whole screen. */
+.visual-step-photo {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.visual-step-photo:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A step's photo over the whole screen, with its instruction under it */
+.step-viewer {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--surface-inverse);
+  color: var(--on-inverse);
+}
+
+.step-viewer figure {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+}
+
+.step-viewer img {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  object-fit: contain;
+}
+
+.step-viewer figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  max-height: 35dvh;
+  overflow-y: auto;
+  padding: 16px 20px calc(env(safe-area-inset-bottom) + 20px);
+  font-size: var(--size-subtitle);
+  line-height: var(--line-subtitle);
+  overflow-wrap: anywhere;
+}
+
+.step-viewer .visual-step-number {
+  color: inherit;
+}
+
+.step-viewer .carousel-button {
+  width: 44px;
+  height: 44px;
+}
+
+.step-viewer-close {
+  top: calc(env(safe-area-inset-top) + 12px);
+  right: calc(env(safe-area-inset-right) + 12px);
+  transform: none;
 }

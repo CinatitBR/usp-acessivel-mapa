@@ -9,6 +9,7 @@ import { ReportPanel } from '../features/reports/ReportPanel';
 import { RoutePanel } from '../features/routing/RoutePanel';
 import { BusPanel } from '../features/transit/BusPanel';
 import { StopPanel } from '../features/transit/StopPanel';
+import { VisualRoutePanel } from '../features/visualRoutes/VisualRoutePanel';
 import { type Selection, useAppStore } from '../state/store';
 import { strings } from '../strings/pt-BR';
 import { BottomSheet } from './BottomSheet';
@@ -46,6 +47,8 @@ function panelFor(selection: Selection, onClose: () => void) {
       return <RoomPanel id={selection.id} buildingId={selection.buildingId} />;
     case 'bus':
       return <BusPanel id={selection.id} {...(selection.fromStop !== undefined && { fromStop: selection.fromStop })} />;
+    case 'visualRoute':
+      return <VisualRoutePanel id={selection.id} unit={selection.unit} from={selection.from} />;
     case 'place':
       return (
         <BottomSheet

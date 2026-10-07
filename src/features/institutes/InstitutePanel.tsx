@@ -4,6 +4,8 @@ import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { WebsiteLink } from '../../ui/WebsiteLink';
+import { unitOfInstitute } from '../visualRoutes/units';
+import { VisualRoutesSection } from '../visualRoutes/VisualRoutesSection';
 import { WikiSection } from '../wiki/WikiSection';
 
 export function InstitutePanel({ id }: { id: string }) {
@@ -27,6 +29,7 @@ export function InstitutePanel({ id }: { id: string }) {
       actions={<WebsiteLink url={institute.website} />}
     >
       <WikiSection wiki={institute.wiki} />
+      <VisualRoutesSection unit={unitOfInstitute(institute.id)} from={{ kind: 'institute', id: institute.id }} />
       <h3 className="list-title">{strings.institute.buildings}</h3>
       {named.length === 0 ? (
         <p className="muted">{strings.institute.noNamedBuildings}</p>

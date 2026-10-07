@@ -107,6 +107,12 @@ With the token in place, run `npm run data:transit` once more: it also looks up 
 
 Olho Vivo does not predict the tracked lines everywhere: some campus stops get no prediction, and a bus that still has to turn round at the end of its line is left out. A stop's list therefore adds the tracked buses that are on the map and heading to it, with a time estimated from their distance along the route (`src/features/transit/trackedArrivals.ts`). These rows are marked with ≈. The tracked lines come first in the list, before the other lines.
 
+## Visual routes
+
+A building's or an institute's panel lists the "rotas visuais" of its university unit: ways shown as a sequence of photos, sent in by people through the campus backend (`usp-acessivel-backend`). The app reads them from `GET /buildings/{unit}/accessibility` and loads each photo from the backend's public storage. Both addresses are in `src/config.ts` (`CAMPUS_API_BASE`, `CAMPUS_STORAGE_BASE`) and can be changed with `VITE_CAMPUS_API_BASE` and `VITE_CAMPUS_STORAGE_BASE`.
+
+The backend names units by its own ids (`ime`, `poli`, ...), while here an institute is an OSM area. `src/features/visualRoutes/units.ts` says which is which; a unit that is not in it shows no routes. `iea`, `ieb` and `cepeusp` are not in it yet.
+
 ## Walking routes
 
 The round arrow button (or "Rota até aqui" in any detail panel) opens the route panel. Each end is a field in the panel: type in it and pick one of the places listed under it, or "Usar minha localização", which is always the first of them. The panel opens with the cursor in the end that is still missing. There are two kinds of route:

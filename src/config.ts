@@ -33,3 +33,13 @@ export const INITIAL_ZOOM = 15.5;
 export const INITIAL_PITCH = 50;
 export const MIN_ZOOM = 13;
 export const MAX_PITCH = 70;
+
+/**
+ * Base URL of the campus backend, which holds the visual routes people sent in, and of the
+ * public storage their photos are served from. Both are public addresses, without a trailing slash.
+ */
+export const CAMPUS_API_BASE =
+  (import.meta.env.VITE_CAMPUS_API_BASE as string | undefined)?.replace(/\/+$/, '') || 'https://meu-campus-backend.rochinha.workers.dev';
+export const CAMPUS_STORAGE_BASE =
+  (import.meta.env.VITE_CAMPUS_STORAGE_BASE as string | undefined)?.replace(/\/+$/, '')
+  || 'https://pub-8b8b80176c954365bde513dd3fb34299.r2.dev';
