@@ -126,6 +126,11 @@ export interface LineDirection {
   color: string;
   /** Olho Vivo line code for this direction; without it the direction has no live positions. */
   code?: number;
+  /**
+   * A loop line is one direction in the GTFS but two codes in Olho Vivo, and its
+   * buses change from one to the other on the way round. This is the second one.
+   */
+  loopCode?: number;
   /** Ids of the stops the line calls at, in order. A loop line may list a stop twice. */
   stopIds: string[];
   shape: LngLat[];
@@ -150,8 +155,11 @@ export interface Arrival {
   headsign: string;
   /** Epoch milliseconds. */
   time: number;
-  /** `live` is a prediction from a tracked bus; `scheduled` is the timetable. */
-  source: 'live' | 'scheduled';
+  /**
+   * `live` is a prediction from SPTrans; `scheduled` is the timetable; `estimated`
+   * is worked out here from the position of a tracked bus, when SPTrans predicts nothing for it.
+   */
+  source: 'live' | 'scheduled' | 'estimated';
   vehicleId?: string;
   /** The bus itself is wheelchair accessible. */
   accessible?: boolean;

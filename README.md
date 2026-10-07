@@ -103,7 +103,9 @@ npm run dev -- --host                          # in another terminal
 
 In dev the app reaches the Worker through Vite's `/api` proxy, so nothing else needs configuring and it also works from a phone on the same Wi-Fi. A production build takes the Worker's URL from `VITE_API_BASE` in `.env.production`; without it the app skips live data and shows timetable times.
 
-With the token in place, run `npm run data:transit` once more: it also looks up each line's Olho Vivo code, needed for live bus positions.
+With the token in place, run `npm run data:transit` once more: it also looks up each line's Olho Vivo code, needed for live bus positions. A loop line (8084, 8085) is one direction in the GTFS but two codes in Olho Vivo, and its buses change code on the way round, so both are stored (`code` and `loopCode`) and polled.
+
+Olho Vivo does not predict the tracked lines everywhere: some campus stops get no prediction, and a bus that still has to turn round at the end of its line is left out. A stop's list therefore adds the tracked buses that are on the map and heading to it, with a time estimated from their distance along the route (`src/features/transit/trackedArrivals.ts`). These rows are marked with ≈. The tracked lines come first in the list, before the other lines.
 
 ## Walking routes
 

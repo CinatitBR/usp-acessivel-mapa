@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { Icon } from '../../ui/Icon';
 import type { Arrival, BusStop } from '../../domain/types';
 import { useOnline } from '../../lib/useOnline';
@@ -8,13 +8,14 @@ import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { busTracker } from './busTracker';
 import { arrivalLabels } from './time';
+import { estimateTrackedArrivals, mergeArrivals } from './trackedArrivals';
 import { useArrivals } from './useArrivals';
 
-/** Re-renders every 20 s so "3 min" keeps counting down between refreshes. */
+/** Re-renders every 10 s so "3 min" keeps counting down, and estimates follow the buses, between refreshes. */
 function useNow(): number {
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 20_000);
+    const timer = setInterval(() => setNow(Date.now()), 10_000);
     return () => clearInterval(timer);
   }, []);
   return now;
@@ -31,14 +32,14 @@ function ArrivalRow({ arrival, now, stopId }: { arrival: Arrival; now: number; s
         {arrival.accessible && <span className="arrival-tag">{strings.transit.accessibleBus}</span>}
       </span>
       <span className="arrival-time">
-        <strong>{primary}</strong>
+        <strong>{arrival.source === 'estimated' ? strings.transit.estimate(primary) : primary}</strong>
         <span>{secondary}</span>
       </span>
     </>
   );
 
-  // Only a bus that is on the map can be followed: a live prediction of one of the tracked lines.
-  const busId = arrival.source === 'live' && arrival.vehicleId && busTracker.has(arrival.vehicleId) ? arrival.vehicleId : undefined;
+  // Only a bus that is on the map can be followed: one of the tracked lines, predicted or estimated.
+  const busId = arrival.source !== 'scheduled' && arrival.vehicleId && busTracker.has(arrival.vehicleId) ? arrival.vehicleId : undefined;
   if (!busId) return <li className="arrival">{content}</li>;
   return (
     <li>
@@ -59,30 +60,48 @@ function Arrivals({ stop }: { stop: BusStop }) {
   const { data, isPending, isError } = useArrivals(stop);
   const now = useNow();
   const online = useOnline();
+  const stops = use(loadStops());
+  const positions = useMemo(() => new Map(stops.map((candidate) => [candidate.id, candidate.position])), [stops]);
 
   // Offline, the request is paused rather than failed, and old predictions would mislead.
   if (!online) return <p className="muted">{strings.offline.arrivals}</p>;
   if (isPending) return <p className="muted">{strings.loading}</p>;
-  if (isError) return <p className="muted">{strings.transit.unavailable}</p>;
-  if (data.arrivals.length === 0) {
+
+  // SPTrans leaves campus buses out at some stops, so the buses on the map fill the list in.
+  // Their positions are a separate request: they can be there when the predictions are not.
+  const estimated = estimateTrackedArrivals(
+    stop,
+    busTracker.poses(now),
+    (lineId, direction) => busTracker.route(lineId, direction),
+    (stopId) => positions.get(stopId),
+    now,
+  );
+  const arrivals = mergeArrivals(
+    data?.arrivals ?? [],
+    estimated,
+    (lineId) => busTracker.route(lineId, 0) !== undefined || busTracker.route(lineId, 1) !== undefined,
+  );
+  if (arrivals.length === 0) {
+    if (isError) return <p className="muted">{strings.transit.unavailable}</p>;
     return <p className="muted">{data.liveReachable ? strings.transit.none : strings.transit.noneNoLive}</p>;
   }
 
-  const scheduled = data.arrivals.every((arrival) => arrival.source === 'scheduled');
+  const scheduled = arrivals.every((arrival) => arrival.source === 'scheduled');
   return (
     <>
       <p className={scheduled ? 'arrivals-source scheduled' : 'arrivals-source'}>
         {!scheduled
           ? strings.transit.live
-          : data.liveReachable
+          : data?.liveReachable
             ? strings.transit.scheduledNoBuses
             : strings.transit.scheduledNoLive}
       </p>
       <ul className="arrivals">
-        {data.arrivals.map((arrival, index) => (
+        {arrivals.map((arrival, index) => (
           <ArrivalRow key={`${arrival.lineId}-${arrival.time}-${index}`} arrival={arrival} now={now} stopId={stop.id} />
         ))}
       </ul>
+      {arrivals.some((arrival) => arrival.source === 'estimated') && <p className="muted">{strings.transit.estimatedNote}</p>}
     </>
   );
 }

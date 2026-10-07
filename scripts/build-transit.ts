@@ -156,9 +156,10 @@ function previousCodes(): Map<string, number> {
   if (!existsSync(LINES_FILE)) return new Map();
   const previous = JSON.parse(readFileSync(LINES_FILE, 'utf8')) as FeatureCollection<Geometry, BusLineProperties>;
   return new Map(
-    previous.features.flatMap(({ properties }) =>
-      properties.code === undefined ? [] : [[`${properties.id}:${properties.dir}`, properties.code] as const],
-    ),
+    previous.features.flatMap(({ properties }) => [
+      ...(properties.code === undefined ? [] : [[`${properties.id}:${properties.dir}`, properties.code] as const]),
+      ...(properties.loopCode === undefined ? [] : [[`${properties.id}:${1 - properties.dir}`, properties.loopCode] as const]),
+    ]),
   );
 }
 const codes = (await resolveLineCodes(Object.keys(FULL_LINES))) ?? previousCodes();
@@ -170,12 +171,17 @@ const stopPositions = new Map(
 const STOP_OFFSET_WARN_METERS = 40;
 const farStops: string[] = [];
 
+const directionOf = (trip: (typeof fullTrips)[number]) => (Number(trip.direction_id) === 1 ? 1 : 0);
+const directionKeys = new Set(fullTrips.map((trip) => `${trip.route_id}:${directionOf(trip)}`));
+
 const lines = fullTrips.map((trip): Feature => {
   const id = trip.route_id!;
-  const dir = Number(trip.direction_id) === 1 ? 1 : 0;
+  const dir = directionOf(trip);
   const points = (shapePoints.get(trip.shape_id!) ?? []).sort((a, b) => a.sequence - b.sequence).map((entry) => entry.point);
   if (points.length < 2) throw new Error(`No shape for ${trip.trip_id}`);
   const code = codes.get(`${id}:${dir}`);
+  // A loop line has one direction in the GTFS, but Olho Vivo reports its buses under two codes.
+  const loopCode = directionKeys.has(`${id}:${1 - dir}`) ? undefined : codes.get(`${id}:${1 - dir}`);
   const stopIds = (tripStops.get(trip.trip_id!) ?? []).sort((a, b) => a.sequence - b.sequence).map((call) => call.stopId);
   const unknown = stopIds.filter((stopId) => !stopPositions.has(stopId));
   if (stopIds.length < 2 || unknown.length > 0) throw new Error(`Stops of ${trip.trip_id} missing from stops.geojson: ${unknown.join(', ') || 'none listed'}`);
@@ -186,6 +192,7 @@ const lines = fullTrips.map((trip): Feature => {
     name: routes.get(id)!.route_long_name!.trim(),
     color: FULL_LINES[id]!,
     ...(code !== undefined && { code }),
+    ...(loopCode !== undefined && { loopCode }),
     stops: stopIds.join(','),
   };
   const coordinates = simplifyLine(points, SHAPE_TOLERANCE_METERS).map(([lng, lat]): LngLat => [round6(lng), round6(lat)]);

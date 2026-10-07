@@ -126,6 +126,16 @@ describe('parseOlhoVivoVehicles', () => {
     ).toEqual([]);
   });
 
+  it('reads a loop line under both of its codes', () => {
+    const loop = { ...line('8084-10', 0, 2607), loopCode: 35375 };
+    const fix = (p: string) => ({ p, px: -46.73, py: -23.56, ta: '2026-10-04T09:53:02Z', a: true });
+    const vehicles = parseOlhoVivoVehicles(
+      [{ codigo: 2607, body: { vs: [fix('1')] } }, { codigo: 35375, body: { vs: [fix('2')] } }],
+      [loop],
+    );
+    expect(vehicles.map((vehicle) => [vehicle.id, vehicle.lineId, vehicle.direction])).toEqual([['1', '8084-10', 0], ['2', '8084-10', 0]]);
+  });
+
   it('tolerates empty and malformed responses', () => {
     expect(parseOlhoVivoVehicles([{ codigo: 2023, body: { hr: '06:53', vs: [] } }], lines)).toEqual([]);
     expect(parseOlhoVivoVehicles([{ codigo: 2023, body: null }], lines)).toEqual([]);

@@ -12,7 +12,7 @@ export function useVehicles(lines: LineDirection[]) {
   return useQuery({
     queryKey: ['vehicles'],
     queryFn: ({ signal }) => olhoVivoVehicles.getVehicles(lines, signal),
-    enabled: lines.some((line) => line.code !== undefined),
+    enabled: lines.some((line) => line.code !== undefined || line.loopCode !== undefined),
     refetchInterval: POLL_MS,
     refetchIntervalInBackground: false,
     staleTime: POLL_MS / 2,

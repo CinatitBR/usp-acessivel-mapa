@@ -145,6 +145,7 @@ export const strings = {
     busHere: 'Ônibus aqui',
     estimate: (label: string) => `≈ ${label}`,
     estimatesNote: 'Horários com ≈ são estimativas pela distância; o do seu ponto é a previsão da SPTrans.',
+    estimatedNote: 'Horários com ≈ são estimativas pela posição do ônibus no mapa.',
     busesUnavailable: 'Ônibus ao vivo indisponíveis',
   },
   lite: {

@@ -30,6 +30,8 @@ export type BusLineProperties = {
   color: string;
   /** Olho Vivo line code (`cl`) for this direction; absent until resolved with a token. */
   code?: number;
+  /** The other Olho Vivo code of a loop line, which has a single direction here. */
+  loopCode?: number;
   /** Comma-separated stop ids in calling order; every one is in stops.geojson. */
   stops: string;
 };
@@ -47,6 +49,7 @@ export function parseLineDirection(feature: {
     name: optionalString(properties.name) ?? properties.id,
     color: optionalString(properties.color) ?? PALETTE.neutral800,
     ...(typeof properties.code === 'number' && { code: properties.code }),
+    ...(typeof properties.loopCode === 'number' && { loopCode: properties.loopCode }),
     stopIds: typeof properties.stops === 'string' && properties.stops ? properties.stops.split(',') : [],
     shape: feature.geometry.coordinates as LngLat[],
   };

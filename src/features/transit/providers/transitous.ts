@@ -35,7 +35,7 @@ export function parseTransitousArrivals(json: unknown, now: number): Arrival[] {
       source: stopTime.realTime === true ? 'live' : 'scheduled',
     });
   }
-  return arrivals.sort((a, b) => a.time - b.time).slice(0, MAX_ARRIVALS);
+  return arrivals.sort((a, b) => a.time - b.time);
 }
 
 /** Scheduled departures from Transitous: the fallback when Olho Vivo or the Worker is unavailable. */

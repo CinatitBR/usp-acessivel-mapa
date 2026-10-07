@@ -12,5 +12,5 @@ export interface VehiclesProvider {
   getVehicles(lines: LineDirection[], signal: AbortSignal): Promise<BusVehicle[]>;
 }
 
-/** How many arrivals a stop panel shows. */
+/** How many arrivals a stop panel shows, before the tracked lines are given their place (see `mergeArrivals`). */
 export const MAX_ARRIVALS = 12;

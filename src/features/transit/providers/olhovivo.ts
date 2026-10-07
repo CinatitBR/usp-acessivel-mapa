@@ -1,7 +1,7 @@
 import { API_BASE } from '../../../config';
 import type { Arrival, BusVehicle, LineDirection } from '../../../domain/types';
 import { fetchJson, ProviderError } from '../../../lib/http';
-import { type ArrivalsProvider, MAX_ARRIVALS, type VehiclesProvider } from './types';
+import type { ArrivalsProvider, VehiclesProvider } from './types';
 
 const PROVIDER = 'olhovivo';
 
@@ -66,7 +66,7 @@ export function parseOlhoVivoArrivals(json: unknown, now: number): Arrival[] {
       });
     }
   }
-  return arrivals.sort((a, b) => a.time - b.time).slice(0, MAX_ARRIVALS);
+  return arrivals.sort((a, b) => a.time - b.time);
 }
 
 /** Live predictions from SPTrans Olho Vivo, through the Worker that holds the token. */
@@ -79,6 +79,9 @@ export const olhoVivoArrivals: ArrivalsProvider = {
   },
 };
 
+/** The Olho Vivo codes of a line direction: one, or two for a loop line. */
+const codesOf = (line: LineDirection) => [line.code, line.loopCode].filter((code) => code !== undefined);
+
 type OlhoVivoPosition = { p?: unknown; a?: unknown; ta?: unknown; py?: unknown; px?: unknown };
 type OlhoVivoLinePositions = { codigo?: unknown; body?: { vs?: OlhoVivoPosition[] } | null };
 
@@ -88,7 +91,7 @@ type OlhoVivoLinePositions = { codigo?: unknown; body?: { vs?: OlhoVivoPosition[
  */
 export function parseOlhoVivoVehicles(json: unknown, lines: LineDirection[]): BusVehicle[] {
   if (!Array.isArray(json)) return [];
-  const byCode = new Map(lines.flatMap((line) => (line.code === undefined ? [] : [[line.code, line] as const])));
+  const byCode = new Map(lines.flatMap((line) => codesOf(line).map((code) => [code, line] as const)));
 
   const vehicles: BusVehicle[] = [];
   for (const entry of json as OlhoVivoLinePositions[]) {
@@ -119,7 +122,7 @@ export function parseOlhoVivoVehicles(json: unknown, lines: LineDirection[]): Bu
 export const olhoVivoVehicles: VehiclesProvider = {
   id: PROVIDER,
   async getVehicles(lines, signal) {
-    const codes = lines.flatMap((line) => (line.code === undefined ? [] : [line.code]));
+    const codes = lines.flatMap(codesOf);
     if (!API_BASE) throw new ProviderError(PROVIDER, 'network', 'VITE_API_BASE is not set');
     if (codes.length === 0) return [];
     const url = `${API_BASE}/olhovivo/Posicao/Linhas?codigos=${codes.join(',')}`;
