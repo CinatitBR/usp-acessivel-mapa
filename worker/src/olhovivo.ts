@@ -14,6 +14,9 @@ const SESSION_KEY = 'https://olhovivo.internal/session';
 const LOGIN_REFUSED_KEY = 'https://olhovivo.internal/login-refused';
 const LOGIN_REFUSED_TTL_SECONDS = 60;
 const dataKey = (path: string) => `https://olhovivo.internal/data${path}`;
+/** The last good answer for a path, kept a little longer to cover an upstream failure. */
+const STALE_TTL_SECONDS = 90;
+const staleKey = (path: string) => `https://olhovivo.internal/stale${path}`;
 
 export class UpstreamError extends Error {
   constructor(
@@ -59,10 +62,15 @@ async function session(env: Env, ctx: ExecutionContext): Promise<string> {
 const get = (path: string, cookie: string) =>
   fetch(`${API}${path}`, { headers: { Cookie: cookie }, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
 
+const cachedJson = (body: string, maxAge: number) =>
+  new Response(body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': `max-age=${maxAge}` } });
+
 /**
  * Fetches one Olho Vivo path (already validated by matchRoute) and returns its
  * JSON text unchanged. Results are cached briefly; an expired session is
- * renewed once.
+ * renewed once. When Olho Vivo fails, the last good answer is returned while
+ * it is still recent: positions carry their own time and predictions are clock
+ * times, so the app still shows how old they are.
  */
 export async function olhoVivo(path: string, env: Env, ctx: ExecutionContext): Promise<string> {
   const key = dataKey(path);
@@ -77,17 +85,31 @@ export async function olhoVivo(path: string, env: Env, ctx: ExecutionContext): P
     // Small, bounded JSON documents (one stop or one line), so buffering is fine.
     const body = await response.text();
     ctx.waitUntil(
-      caches.default.put(
-        key,
-        new Response(body, {
-          headers: { 'Content-Type': 'application/json', 'Cache-Control': `max-age=${DATA_TTL_SECONDS}` },
-        }),
-      ),
+      Promise.all([
+        caches.default.put(key, cachedJson(body, DATA_TTL_SECONDS)),
+        caches.default.put(staleKey(path), cachedJson(body, STALE_TTL_SECONDS)),
+      ]),
     );
     return body;
   } catch (error) {
+    const stale = await caches.default.match(staleKey(path));
+    if (stale) return stale.text();
     if (error instanceof UpstreamError) throw error;
     const timedOut = error instanceof DOMException && error.name === 'TimeoutError';
     throw new UpstreamError(timedOut ? 'timeout' : 'upstream', timedOut ? 504 : 502);
   }
+}
+
+/**
+ * The answer of `/Posicao/Linhas`: one raw Olho Vivo body per line code. A code
+ * whose call failed gets a null body, which the app skips, so one slow line does
+ * not hide the buses of the others. Returns undefined when no call succeeded.
+ */
+export function positionsBody(codes: number[], settled: PromiseSettledResult<string>[]): { body: string; partial: boolean } | undefined {
+  if (!settled.some((result) => result.status === 'fulfilled')) return undefined;
+  const entries = codes.map((code, index) => {
+    const result = settled[index];
+    return `{"codigo":${code},"body":${result?.status === 'fulfilled' ? result.value : 'null'}}`;
+  });
+  return { body: `[${entries.join(',')}]`, partial: settled.some((result) => result.status === 'rejected') };
 }

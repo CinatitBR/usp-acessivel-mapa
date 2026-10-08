@@ -136,6 +136,12 @@ describe('parseOlhoVivoVehicles', () => {
     expect(vehicles.map((vehicle) => [vehicle.id, vehicle.lineId, vehicle.direction])).toEqual([['1', '8084-10', 0], ['2', '8084-10', 0]]);
   });
 
+  it('keeps the other lines when the Worker could not read one of them', () => {
+    const fix = { p: '7', px: -46.73, py: -23.56, ta: '2026-10-04T09:53:02Z', a: true };
+    const vehicles = parseOlhoVivoVehicles([{ codigo: 2023, body: null }, { codigo: 2085, body: { vs: [fix] } }], lines);
+    expect(vehicles.map((vehicle) => [vehicle.id, vehicle.lineId])).toEqual([['7', '8022-10']]);
+  });
+
   it('tolerates empty and malformed responses', () => {
     expect(parseOlhoVivoVehicles([{ codigo: 2023, body: { hr: '06:53', vs: [] } }], lines)).toEqual([]);
     expect(parseOlhoVivoVehicles([{ codigo: 2023, body: null }], lines)).toEqual([]);

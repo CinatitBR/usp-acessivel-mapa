@@ -105,6 +105,8 @@ In dev the app reaches the Worker through Vite's `/api` proxy, so nothing else n
 
 With the token in place, run `npm run data:transit` once more: it also looks up each line's Olho Vivo code, needed for live bus positions. A loop line (8084, 8085) is one direction in the GTFS but two codes in Olho Vivo, and its buses change code on the way round, so both are stored (`code` and `loopCode`) and polled.
 
+Live data is kept through short failures. The Worker asks Olho Vivo for each line code separately and answers with the ones that worked (a failed code gets a `null` body), and when Olho Vivo fails altogether it returns its last good answer for up to 90 seconds. In the app, a failed request for bus positions is tried once more and the buses stay where they were last seen; "Ônibus ao vivo indisponíveis" only shows after a minute without a good answer (`feedLost` in `src/features/transit/useVehicles.ts`). The Worker allows each address 300 requests a minute on these routes.
+
 Olho Vivo does not predict the tracked lines everywhere: some campus stops get no prediction, and a bus that still has to turn round at the end of its line is left out. A stop's list therefore adds the tracked buses that are on the map and heading to it, with a time estimated from their distance along the route (`src/features/transit/trackedArrivals.ts`). These rows are marked with ≈. The tracked lines come first in the list, before the other lines.
 
 ## Visual routes

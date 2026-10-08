@@ -9,7 +9,7 @@ import { useOnline } from '../../lib/useOnline';
 import { loadLines } from '../../map/staticData';
 import { useAppStore } from '../../state/store';
 import { busTracker } from './busTracker';
-import { useVehicles } from './useVehicles';
+import { feedLost, useVehicles } from './useVehicles';
 import { MAP_HALO, MAP_TEXT } from '../../styles/palette';
 
 /** Invisible tap targets, one per bus. This is the layer selection queries. */
@@ -55,14 +55,17 @@ export function LiveBuses() {
     );
   }, [setBusesUnavailable]);
 
-  const { data, isError } = useVehicles(lines);
+  const { data, isError, dataUpdatedAt, errorUpdatedAt } = useVehicles(lines);
   // Offline, polling pauses and the last positions would stay frozen on the map.
   const online = useOnline();
   useEffect(() => {
-    if (isError || !online) busTracker.clear();
-    else if (data) busTracker.ingest(data, Date.now());
-    setBusesUnavailable(isError);
-  }, [data, isError, online, setBusesUnavailable]);
+    // A missed poll or two keeps the buses where they were last seen; only a longer gap removes them.
+    const lost = feedLost({ isError, dataUpdatedAt, now: Date.now() });
+    if (lost || !online) busTracker.clear();
+    else if (data && !isError) busTracker.ingest(data, Date.now());
+    setBusesUnavailable(lost);
+    // `errorUpdatedAt` changes on every failed poll, so the gap is measured again each time.
+  }, [data, isError, dataUpdatedAt, errorUpdatedAt, online, setBusesUnavailable]);
 
   useEffect(() => {
     const timer = setInterval(() => {

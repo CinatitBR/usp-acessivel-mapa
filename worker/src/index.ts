@@ -5,7 +5,7 @@
  * happens in the app's adapters. Reports are the exception: they are this Worker's own data,
  * kept in a D1 database (see reports.ts and reportsDb.ts).
  */
-import { DATA_TTL_SECONDS, olhoVivo, UpstreamError } from './olhovivo';
+import { DATA_TTL_SECONDS, olhoVivo, positionsBody, UpstreamError } from './olhovivo';
 import { ORS_ROUTE_TTL_SECONDS, orsRoute } from './ors';
 import { MAX_BODY_BYTES, newReportId, parseFeedback, parseSubmission, todayInSaoPaulo } from './reports';
 import { decideReport, insertFeedback, insertReport, keepReport, publishedReports, REPORTS_TTL_SECONDS, reviewReports } from './reportsDb';
@@ -83,10 +83,13 @@ async function respond(route: Route, request: Request, env: Env, ctx: ExecutionC
       return json(await olhoVivo(route.upstream, env, ctx), 200, cached);
     case 'positions': {
       // Fan-out only: each body is the raw Olho Vivo response for that line code.
-      const bodies = await Promise.all(
+      const settled = await Promise.allSettled(
         route.codes.map((code) => olhoVivo(`/Posicao/Linha?codigoLinha=${code}`, env, ctx)),
       );
-      return json(`[${route.codes.map((code, index) => `{"codigo":${code},"body":${bodies[index]}}`).join(',')}]`, 200, cached);
+      const positions = positionsBody(route.codes, settled);
+      if (!positions) throw (settled.find((result) => result.status === 'rejected')?.reason ?? new UpstreamError('upstream', 502));
+      // An answer with lines missing is not kept by the browser: the next poll may have them all.
+      return json(positions.body, 200, positions.partial ? { 'Cache-Control': 'no-store', ...cors } : cached);
     }
     case 'ors':
       return json(await orsRoute(route.profile, route.from, route.to, route.avoid, env, ctx), 200, {

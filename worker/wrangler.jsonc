@@ -26,12 +26,13 @@
     },
   ],
 
-  // Per-client limits: 60 requests per minute on the Olho Vivo routes and on reading reports, 10 on routing.
+  // Per-client limits: 300 requests per minute on the Olho Vivo routes and on reading reports (people on
+  // the campus Wi-Fi can share one address, and one phone makes about 10), 10 on routing.
   "ratelimits": [
     {
       "name": "OLHOVIVO_LIMITER",
       "namespace_id": "1001",
-      "simple": { "limit": 60, "period": 60 },
+      "simple": { "limit": 300, "period": 60 },
     },
     {
       "name": "ORS_LIMITER",
