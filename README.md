@@ -133,7 +133,7 @@ The clock button beside the tabs opens the choice of when to travel: "Sair agora
 
 When the bus of a ride is one of the tracked ones, the details offer "Seguir ônibus" with the live time at the stop where one boards. It is found through that stop's arrivals: the tracked bus of the same line that reaches it within 8 minutes of the timetable. It opens the bus's panel, following it, with "Detalhes da viagem" as the way back.
 
-Going back from a bus's panel, to the stop's arrivals or to the journey, puts the camera exactly where it was when the bus was opened (`src/features/transit/FollowCamera.tsx`). Closing the panel leaves the camera where it is.
+The camera flies to a bus that starts being followed: it rises and comes down by as much as the bus is far, and only then keeps it centred. Going back from a bus's panel, to the stop's arrivals or to the journey, puts the camera exactly where it was when the bus was opened (`src/features/transit/FollowCamera.tsx`). Closing the panel leaves the camera where it is.
 
 A route or a journey is framed on the map when it arrives (`src/features/routing/frame.ts`). The camera is not kept to the campus, since either may end anywhere in the city. MapLibre fits bounds as if the map were seen from above, which cuts off the near end of a route on a tilted map, so the fit is corrected by measuring the path on the screen before the camera moves.
 

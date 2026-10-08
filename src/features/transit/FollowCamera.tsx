@@ -7,11 +7,11 @@ import { busTracker } from './busTracker';
 const STEP_MS = 500;
 /** Following starts at least this close, so the bus and the stops around it can be told apart. */
 const FOLLOW_MIN_ZOOM = 16.5;
-const START_MS = 800;
 const RETURN_MS = 600;
 
 /**
- * Keeps the selected bus in the centre of the map while `followBus` is on.
+ * Keeps the selected bus in the centre of the map while `followBus` is on. It flies to the bus
+ * first, rising and coming down by as much as the bus is far, and then stays on it.
  * Zoom, bearing and pitch stay the user's. Dragging the map pauses following.
  * It also remembers where the camera was when a bus was opened, and puts it back
  * there when the panel's back link asks for it (`cameraReturn`).
@@ -34,17 +34,23 @@ export function FollowCamera() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // While the user zooms or rotates, the camera is theirs: moving it would fight the gesture.
     let userMoving = false;
-    let startedAt = 0;
+    let started = false;
+    // The flight to the bus takes as long as the bus is far: the steps wait for it to land.
+    let flying = false;
 
     const step = () => {
       const pose = busTracker.get(busId, Date.now());
-      if (!pose || userMoving) return;
-      if (startedAt === 0) {
+      if (!pose || userMoving || flying) return;
+      if (!started) {
         // The panel opening has just changed the map's size.
         map.resize();
-        startedAt = Date.now();
-        map.easeTo({ center: pose.position, zoom: Math.max(map.getZoom(), FOLLOW_MIN_ZOOM), duration: reduced ? 0 : START_MS });
-      } else if (Date.now() - startedAt >= START_MS) {
+        started = true;
+        const target = { center: pose.position, zoom: Math.max(map.getZoom(), FOLLOW_MIN_ZOOM) };
+        if (reduced) return map.jumpTo(target);
+        map.flyTo(target);
+        // Set after the call: starting a flight ends whatever move was under way, and that is not this one landing.
+        flying = map.isMoving();
+      } else {
         map.easeTo({ center: pose.position, duration: reduced ? 0 : STEP_MS, easing: (t) => t });
       }
     };
@@ -56,6 +62,7 @@ export function FollowCamera() {
     };
     const onMoveEnd = () => {
       userMoving = false;
+      flying = false;
     };
     const onDragStart = (event: MapLibreEvent<unknown>) => {
       if (byUser(event)) useAppStore.getState().setFollowBus(false);
