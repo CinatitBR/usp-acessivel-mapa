@@ -6,7 +6,7 @@
 @font-face {
   font-family: Manrope;
   /* Latin subset of the variable font (SIL Open Font License), every weight in one file. */
-  src: url('../assets/fonts/manrope-latin.woff2') format('woff2');
+  src: url("../assets/fonts/manrope-latin.woff2") format("woff2");
   font-weight: 200 800;
   font-style: normal;
   font-display: swap;
@@ -85,7 +85,7 @@
   --info: var(--info-500);
 
   /* Text styles: size and line height, in rem so the browser's text size still applies. */
-  --font: Manrope, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --size-display: 2.5rem;
   --line-display: 3rem;
   --size-heading: 2rem;
@@ -113,7 +113,7 @@
   --radius-photo: 12px;
   --radius-small: 8px;
   /* For what floats over the map: search box, map buttons, menus. */
-  --shadow: 0 2px 12px rgb(15 27 69 / 16%);
+  --shadow: 0 0 0px 2px rgb(15 27 69 / 12%);
   --shadow-sheet: 0 -2px 12px rgb(15 27 69 / 12%);
   --shadow-side: 2px 0 12px rgb(15 27 69 / 12%);
 
