@@ -20,11 +20,12 @@ function TimelineToStop({ progress, stop, now }: { progress: BusProgress; stop: 
   return <StopTimeline progress={progress} now={now} {...(arrival && { targetTime: arrival.time })} />;
 }
 
-export function BusPanel({ id, fromStop }: { id: string; fromStop?: string }) {
+export function BusPanel({ id, fromStop, fromJourney = false }: { id: string; fromStop?: string; fromJourney?: boolean }) {
   const select = useAppStore((state) => state.select);
   const clearSelection = useAppStore((state) => state.clearSelection);
   const following = useAppStore((state) => state.followBus);
   const setFollowBus = useAppStore((state) => state.setFollowBus);
+  const returnCamera = useAppStore((state) => state.returnCamera);
   const online = useOnline();
   const progress = useBusProgress(id, fromStop, REFRESH_MS);
   // The countdowns and "seen N s ago" keep moving between position updates.
@@ -41,10 +42,21 @@ export function BusPanel({ id, fromStop }: { id: string; fromStop?: string }) {
     if (gone) setFollowBus(false);
   }, [gone, setFollowBus]);
 
-  const back = fromStop
+  // Going back also puts the camera back where it was before it went after the bus.
+  const back = fromJourney
+    ? {
+        // The journey's details are under this panel: the route is still being planned.
+        label: strings.route.journeys.details,
+        onClick: () => {
+          returnCamera();
+          clearSelection();
+        },
+      }
+    : fromStop
     ? {
         label: strings.transit.allArrivals,
         onClick: () => {
+          returnCamera();
           void loadStops().then((stops) => {
             const stop = stops.find((candidate) => candidate.id === fromStop);
             if (stop) select({ kind: 'stop', id: stop.id, position: stop.position });

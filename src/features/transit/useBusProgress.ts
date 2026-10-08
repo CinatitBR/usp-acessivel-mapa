@@ -18,7 +18,7 @@ export type BusProgress = {
 };
 
 /** All stops by id, loaded once. Empty until the file arrives (or if it fails: the timeline is then empty). */
-function useStopsById(): Map<string, BusStop> | undefined {
+export function useStopsById(): Map<string, BusStop> | undefined {
   const [stops, setStops] = useState<Map<string, BusStop>>();
   useEffect(() => {
     let cancelled = false;

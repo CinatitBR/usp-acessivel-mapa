@@ -5,7 +5,7 @@ import { type ArrivalsProvider, MAX_ARRIVALS } from './types';
 const PROVIDER = 'transitous';
 const ENDPOINT = 'https://api.transitous.org/api/v1/stoptimes';
 /** Transitous prefixes each feed's stop ids; the SPTrans GTFS is `br-sao-paulo`. */
-const FEED_PREFIX = 'br-sao-paulo_';
+export const FEED_PREFIX = 'br-sao-paulo_';
 
 type StopTime = {
   place?: { departure?: unknown; scheduledDeparture?: unknown; arrival?: unknown };

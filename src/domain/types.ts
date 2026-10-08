@@ -183,6 +183,8 @@ export type RouteMode = RouteProfile | 'transit';
 /** A point of a journey. An empty `name` is the journey's own start or end, which the plan names. */
 export interface JourneyPlace {
   name: string;
+  /** For a stop of the SPTrans feed: its id, the one the campus stops and the live arrivals go by. */
+  stopId?: string;
   position: LngLat;
   /** When the leg leaves or reaches it, epoch milliseconds. */
   time: number;

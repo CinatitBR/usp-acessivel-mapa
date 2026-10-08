@@ -1,5 +1,6 @@
 import type { Journey, JourneyLeg, JourneyPlace, LngLat } from '../../../domain/types';
 import { fetchJson } from '../../../lib/http';
+import { FEED_PREFIX } from '../../transit/providers/transitous';
 import { decodePolyline } from '../polyline';
 
 const PROVIDER = 'transitous';
@@ -33,7 +34,8 @@ const color = (value: unknown): string | undefined => (typeof value === 'string'
 function place(raw: Place | undefined, at: unknown, name = text(raw?.name)): JourneyPlace | null {
   const when = time(at);
   if (typeof raw?.lat !== 'number' || typeof raw.lon !== 'number' || !Number.isFinite(when)) return null;
-  return { name, position: [raw.lon, raw.lat], time: when };
+  const stopId = typeof raw.stopId === 'string' && raw.stopId.startsWith(FEED_PREFIX) ? raw.stopId.slice(FEED_PREFIX.length) : undefined;
+  return { name, ...(stopId && { stopId }), position: [raw.lon, raw.lat], time: when };
 }
 
 function geometry(raw: Leg['legGeometry'], from: LngLat, to: LngLat): LngLat[] {

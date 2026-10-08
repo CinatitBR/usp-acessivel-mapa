@@ -4,6 +4,7 @@ import type { AccessibilityFeature, Building, BusStop, Institute, LineDirection,
 import { parseAccessFeature } from '../features/accessibility/parse';
 import { parseBuilding } from '../features/buildings/parse';
 import { parsePoi } from '../features/pois/parse';
+import type { LineColor } from '../features/transit/LineBadge';
 import { parseLineDirection, parseStop } from '../features/transit/parse';
 
 export const dataUrl = (file: string) => `${import.meta.env.BASE_URL}data/${file}`;
@@ -56,6 +57,17 @@ export const loadLines = () =>
   loadOnce('lines.geojson', (json) =>
     (json as FeatureCollection).features.map(parseLineDirection).filter(defined),
   ) satisfies Promise<LineDirection[]>;
+
+/** `{ "8084-10": ["ff671f", "000000"] }`: each line's colour and, when it has one, its text colour. */
+export const loadLineColors = () =>
+  loadOnce('line-colors.json', (json) =>
+    new Map(
+      Object.entries(json as Record<string, [string, string?]>).map(([line, [color, text]]) => [
+        line,
+        { color: `#${color}`, ...(text && { textColor: `#${text}` }) },
+      ]),
+    ),
+  ) satisfies Promise<Map<string, LineColor>>;
 
 /** institutes.json is already in domain shape. */
 export const loadInstitutes = () => loadOnce('institutes.json', (json) => json as Institute[]);

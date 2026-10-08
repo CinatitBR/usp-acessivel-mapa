@@ -23,7 +23,7 @@ describe('parseTransitousPlan', () => {
       headsign: 'Cid. Universitária',
       color: '#ff671f',
       textColor: '#000000',
-      from: { name: 'Letras', time: Date.parse('2026-10-08T20:24:00Z') },
+      from: { name: 'Letras', stopId: '120010353', time: Date.parse('2026-10-08T20:24:00Z') },
       to: { name: 'Av. Dr. Vital Brasil, 569', time: Date.parse('2026-10-08T20:34:00Z') },
     });
     if (ride.kind !== 'transit') throw new Error('not a ride');

@@ -93,6 +93,8 @@ npm run data:transit -- --refresh # downloads the GTFS again
 
 The lines drawn on the map (and tracked live) are listed in `FULL_LINES` at the top of `scripts/build-transit.ts`. Every other line that stops inside the campus still shows up in the arrivals of its stops.
 
+The same script writes `line-colors.json`: the colour and text colour the feed gives each line that calls at these stops (`route_color`, `route_text_color`). A line's badge in a stop's arrivals uses them, and so does the badge in a journey by public transport, which gets the same colours from Transitous. They are the colours on the buses, and most lines share one (orange for the 8xxx lines), so the lines drawn on the map keep the distinct colours of `FULL_LINES`.
+
 Live arrivals come from SPTrans Olho Vivo through the Cloudflare Worker in `worker/`, which keeps the token secret. When the Worker or Olho Vivo is unavailable, the app shows timetable times from Transitous, labelled "Horário programado".
 
 ```sh
@@ -128,6 +130,10 @@ The round arrow button (or "Rota até aqui" in any detail panel) opens the route
 The clock button beside the tabs opens the choice of when to travel: "Sair agora", "Sair às" or "Chegar às" with a date and time, read on the São Paulo clock. It decides which journeys are listed; for the two walking kinds it only adds when the walk starts and ends.
 
 "Transporte" lists the journeys Transitous finds (`src/features/routing/providers/transitousPlan.ts`): when each leaves and arrives, how long it takes, whether one changes vehicle, and its legs in a row with each line in its own colour from the timetable feed. A journey opens its details: every place where something changes, with its time, on a rail that is dashed where one walks and in the line's colour where one rides, and the stops a ride passes folded under it. The journey is drawn on the map the same way while its details are open. Transitous has no realtime feed for São Paulo, so these are timetable times, and the panel says so. Journeys are not yet filtered for step-free access.
+
+When the bus of a ride is one of the tracked ones, the details offer "Seguir ônibus" with the live time at the stop where one boards. It is found through that stop's arrivals: the tracked bus of the same line that reaches it within 8 minutes of the timetable. It opens the bus's panel, following it, with "Detalhes da viagem" as the way back.
+
+Going back from a bus's panel, to the stop's arrivals or to the journey, puts the camera exactly where it was when the bus was opened (`src/features/transit/FollowCamera.tsx`). Closing the panel leaves the camera where it is.
 
 A route or a journey is framed on the map when it arrives (`src/features/routing/frame.ts`). The camera is not kept to the campus, since either may end anywhere in the city. MapLibre fits bounds as if the map were seen from above, which cuts off the near end of a route on a tilted map, so the fit is corrected by measuring the path on the screen before the camera moves.
 

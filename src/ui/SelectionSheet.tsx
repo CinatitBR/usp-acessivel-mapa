@@ -46,7 +46,7 @@ function panelFor(selection: Selection, onClose: () => void) {
     case 'room':
       return <RoomPanel id={selection.id} buildingId={selection.buildingId} />;
     case 'bus':
-      return <BusPanel id={selection.id} {...(selection.fromStop !== undefined && { fromStop: selection.fromStop })} />;
+      return <BusPanel id={selection.id} {...(selection.fromStop !== undefined && { fromStop: selection.fromStop })} fromJourney={selection.fromJourney === true} />;
     case 'visualRoute':
       return <VisualRoutePanel id={selection.id} unit={selection.unit} from={selection.from} />;
     case 'place':

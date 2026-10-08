@@ -214,7 +214,8 @@ Rotas enviadas por pessoas do campus e guardadas por unidade: uma sequência de 
 ### S14 · Painel do ônibus
 - **Etapa/Objetivo:** acompanhar um ônibus no mapa e saber quanto falta para ele chegar ao ponto.
 - **Ações e pontos de interação:**
-  - "Todas as chegadas" (link de volta; quando o ônibus foi aberto a partir de um ponto) → S13
+  - "Todas as chegadas" (link de volta; quando o ônibus foi aberto a partir de um ponto) → S13, com a câmera de volta exatamente onde estava antes de seguir o ônibus
+  - "Detalhes da viagem" (link de volta; quando o ônibus foi aberto por "Seguir ônibus" nos detalhes de uma viagem de transporte público) → os detalhes da viagem (S15), com a câmera de volta onde estava
   - "Seguir veículo" (botão; aparece quando o acompanhamento está pausado) → a câmera volta a seguir o ônibus
   - Estado do acompanhamento (só leitura): "Posição ao vivo · seguindo" ou "Posição ao vivo · acompanhamento pausado"
   - Mover o mapa → pausa o acompanhamento
@@ -237,7 +238,7 @@ Rotas enviadas por pessoas do campus e guardadas por unidade: uma sequência de 
   - "Inverter origem e destino" (botão) → troca as duas pontas
   - "A pé" / "Sem degraus" / "Transporte" (abas, "Tipo de rota") → escolhem o tipo; "Sem degraus" já vem marcado se a visão de acessibilidade estiver ligada
   - Relógio (botão redondo ao lado das abas) → abre a escolha do horário: "Sair agora", "Sair às" ou "Chegar às", com data e hora
-  - "Transporte" (aba) → lista as viagens de transporte público ("Escolha uma viagem"); um cartão abre "Detalhes da viagem", com a linha do tempo da viagem e o trajeto no mapa; "Todas as viagens" volta à lista
+  - "Transporte" (aba) → lista as viagens de transporte público ("Escolha uma viagem"); um cartão abre "Detalhes da viagem", com a linha do tempo da viagem e o trajeto no mapa; "Seguir ônibus" (quando o ônibus da viagem está ao vivo no mapa) → S14; "Todas as viagens" volta à lista
   - "Fechar" (×) ou "Traçar rota" de novo → fecha a rota e volta a S01
   - Com as duas pontas escolhidas, a rota é calculada sozinha → S17 ou S18
   - Vindo de "Rota até aqui", o campo "Para" já chega preenchido e o painel abre com o campo "De" em edição, já oferecendo "Usar minha localização"

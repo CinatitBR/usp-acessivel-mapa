@@ -1712,7 +1712,7 @@ input {
 }
 
 /* A line's badge: its own colours come from the timetable, set on the element. */
-.journey-line {
+.line-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -1858,6 +1858,15 @@ input {
   color: var(--muted);
   font-size: var(--size-body-small);
   line-height: var(--line-body-small);
+}
+
+/* The live bus of a ride: the button that follows it, and when it reaches the stop. */
+.journey-follow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 4px 0;
 }
 
 .journey-toggle {

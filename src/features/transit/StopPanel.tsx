@@ -1,4 +1,4 @@
-import { use, useEffect, useMemo, useState } from 'react';
+import { use, useMemo } from 'react';
 import { Icon } from '../../ui/Icon';
 import type { Arrival, BusStop } from '../../domain/types';
 import { useOnline } from '../../lib/useOnline';
@@ -7,26 +7,21 @@ import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { busTracker } from './busTracker';
+import { type LineColor, lineStyle, useLineColors } from './LineBadge';
 import { arrivalLabels } from './time';
 import { estimateTrackedArrivals, mergeArrivals } from './trackedArrivals';
 import { useArrivals } from './useArrivals';
+import { useNow } from './useNow';
 
-/** Re-renders every 10 s so "3 min" keeps counting down, and estimates follow the buses, between refreshes. */
-function useNow(): number {
-  const [now, setNow] = useState(Date.now);
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 10_000);
-    return () => clearInterval(timer);
-  }, []);
-  return now;
-}
+type RowProps = { arrival: Arrival; now: number; stopId: string; colors: LineColor | undefined };
 
-function ArrivalRow({ arrival, now, stopId }: { arrival: Arrival; now: number; stopId: string }) {
+function ArrivalRow({ arrival, now, stopId, colors }: RowProps) {
   const select = useAppStore((state) => state.select);
   const { primary, secondary } = arrivalLabels(arrival.time, now);
   const content = (
     <>
-      <span className="arrival-line">{arrival.lineId}</span>
+      {/* In the line's own colours, the ones on the bus, when the timetable has them. */}
+      <span className="arrival-line" style={lineStyle(colors)}>{arrival.lineId}</span>
       <span className="arrival-head">
         {arrival.headsign}
         {arrival.accessible && <span className="arrival-tag">{strings.transit.accessibleBus}</span>}
@@ -61,6 +56,7 @@ function Arrivals({ stop }: { stop: BusStop }) {
   const now = useNow();
   const online = useOnline();
   const stops = use(loadStops());
+  const lineColors = useLineColors();
   const positions = useMemo(() => new Map(stops.map((candidate) => [candidate.id, candidate.position])), [stops]);
 
   // Offline, the request is paused rather than failed, and old predictions would mislead.
@@ -98,7 +94,7 @@ function Arrivals({ stop }: { stop: BusStop }) {
       </p>
       <ul className="arrivals">
         {arrivals.map((arrival, index) => (
-          <ArrivalRow key={`${arrival.lineId}-${arrival.time}-${index}`} arrival={arrival} now={now} stopId={stop.id} />
+          <ArrivalRow key={`${arrival.lineId}-${arrival.time}-${index}`} arrival={arrival} now={now} stopId={stop.id} colors={lineColors.get(arrival.lineId)} />
         ))}
       </ul>
       {arrivals.some((arrival) => arrival.source === 'estimated') && <p className="muted">{strings.transit.estimatedNote}</p>}

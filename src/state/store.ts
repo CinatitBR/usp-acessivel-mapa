@@ -26,8 +26,11 @@ export type Selection =
   | { kind: 'stop'; id: string; position: LngLat }
   /** A report published on the map. */
   | { kind: 'report'; id: string; position: LngLat }
-  /** A moving bus: no fixed position, so no marker. `fromStop` is the stop whose arrivals it was opened from. */
-  | { kind: 'bus'; id: string; fromStop?: string }
+  /**
+   * A moving bus: no fixed position, so no marker. `fromStop` is the stop whose arrivals it was opened from,
+   * or where a journey boards it; `fromJourney` says it was opened from the details of that journey.
+   */
+  | { kind: 'bus'; id: string; fromStop?: string; fromJourney?: boolean }
   /** A room of the open floor plan; it is highlighted in place. */
   | { kind: 'room'; id: string; buildingId: string }
   /** A visual route of a university unit (`unit` is its id in the campus backend), and the panel it was opened from. */
@@ -66,6 +69,9 @@ type AppState = {
   /** The camera keeps the selected bus centred. Starts on when the bus was opened from a stop's arrivals. */
   followBus: boolean;
   setFollowBus: (follow: boolean) => void;
+  /** Asks the map to put the camera back where it was when the bus was opened. A new object on every request. */
+  cameraReturn: object | null;
+  returnCamera: () => void;
 
   /**
    * The building whose floor plan is drawn in place of its 3D block. `level` is null until
@@ -181,6 +187,8 @@ export const useAppStore = create<AppState>((set) => ({
   flyTo: (position) => set({ flyTarget: { position }, followBus: false }),
   followBus: false,
   setFollowBus: (followBus) => set({ followBus }),
+  cameraReturn: null,
+  returnCamera: () => set({ cameraReturn: {}, followBus: false }),
 
   indoor: null,
   // The floor plan needs the map: the building's sheet steps aside.

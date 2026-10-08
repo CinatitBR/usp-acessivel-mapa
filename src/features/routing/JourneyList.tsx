@@ -4,6 +4,7 @@ import { useOnline } from '../../lib/useOnline';
 import { type RoutePlan, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { Icon } from '../../ui/Icon';
+import { LineBadge } from '../transit/LineBadge';
 import { formatClock } from '../transit/time';
 import { formatDuration } from './format';
 import { useJourneys } from './useJourneys';
@@ -22,21 +23,10 @@ export const legSeconds = (leg: JourneyLeg): number => (leg.to.time - leg.from.t
 
 export const transfersLabel = (journey: Journey): string => (journey.transfers === 0 ? text.direct : text.transfers(journey.transfers));
 
-/** Dark or light text for a line colour that came without a text colour of its own. */
-function readableOn(color: string): string {
-  const [red, green, blue] = [1, 3, 5].map((start) => parseInt(color.slice(start, start + 2), 16));
-  return (red! * 299 + green! * 587 + blue! * 114) / 1000 > 150 ? 'var(--text)' : 'var(--on-inverse)';
-}
-
-/** The line of a ride as riders know it, on the line's own colour when the timetable gives one. */
-export function LineBadge({ ride }: { ride: Ride }) {
-  return (
-    <span className="journey-line" style={ride.color ? { background: ride.color, color: ride.textColor ?? readableOn(ride.color) } : undefined}>
-      <Icon name={ride.vehicle === 'bus' ? 'bus' : 'train'} size={16} />
-      <span className="visually-hidden">{text.vehicles[ride.vehicle]} </span>
-      {ride.line}
-    </span>
-  );
+/** The badge of a ride's line, in the colours the journey came with. */
+export function RideBadge({ ride }: { ride: Ride }) {
+  const colors = ride.color ? { color: ride.color, ...(ride.textColor && { textColor: ride.textColor }) } : undefined;
+  return <LineBadge line={ride.line} vehicle={ride.vehicle} colors={colors} />;
 }
 
 /** One journey of the list: when it leaves and arrives, how long it takes, and its legs in a row. */
@@ -60,7 +50,7 @@ function JourneyCard({ journey, onOpen }: { journey: Journey; onOpen: () => void
               </span>
             )}
             {leg.kind === 'transit' ? (
-              <LineBadge ride={leg} />
+              <RideBadge ride={leg} />
             ) : (
               <span className="journey-walk">
                 <Icon name="walk" size={18} />

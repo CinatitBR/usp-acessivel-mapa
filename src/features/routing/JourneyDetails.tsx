@@ -1,15 +1,22 @@
 import { type CSSProperties, Fragment, useState } from 'react';
-import type { Journey, JourneyLeg, JourneyPlace } from '../../domain/types';
+import type { BusStop, Journey, JourneyLeg, JourneyPlace } from '../../domain/types';
 import { type RoutePlan, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { Icon } from '../../ui/Icon';
-import { formatClock } from '../transit/time';
+import { busTracker } from '../transit/busTracker';
+import { arrivalLabels, formatClock } from '../transit/time';
+import { estimateTrackedArrivals } from '../transit/trackedArrivals';
+import { useArrivals } from '../transit/useArrivals';
+import { useStopsById } from '../transit/useBusProgress';
+import { useNow } from '../transit/useNow';
 import { formatDistance, formatDuration } from './format';
-import { legSeconds, LineBadge, shownLegs, transfersLabel } from './JourneyList';
+import { legSeconds, RideBadge, shownLegs, transfersLabel } from './JourneyList';
 
 const text = strings.route.journeys;
 const MINUTE_MS = 60_000;
+/** A live bus is taken to be the journey's when it reaches the boarding stop within this of the timetable. */
+const SAME_BUS_MS = 8 * MINUTE_MS;
 
 type Ride = Extract<JourneyLeg, { kind: 'transit' }>;
 
@@ -17,16 +24,51 @@ type Ride = Extract<JourneyLeg, { kind: 'transit' }>;
 const railOf = (leg: JourneyLeg | undefined) => (leg ? (leg.kind === 'walk' ? 'walk' : 'ride') : 'none');
 const colorOf = (leg: JourneyLeg | undefined) => (leg?.kind === 'transit' ? leg.color : undefined);
 
+/**
+ * Offers to follow the bus of a ride on the map, when that bus is one of the live ones: the same
+ * buses a stop's arrivals offer, found through the arrivals at the stop where the ride is boarded.
+ * Nothing shows for a line that is not tracked, or while the bus has not set out.
+ */
+function FollowRide({ ride, stop, stops }: { ride: Ride; stop: BusStop; stops: Map<string, BusStop> }) {
+  const select = useAppStore((state) => state.select);
+  // The same request as the stop's own panel.
+  const { data } = useArrivals(stop);
+  const now = useNow();
+  const estimated = estimateTrackedArrivals(stop, busTracker.poses(now), (lineId, direction) => busTracker.route(lineId, direction), (id) => stops.get(id)?.position, now);
+  const off = (time: number) => Math.abs(time - ride.from.time);
+  // A prediction from SPTrans is preferred to an estimate for the same closeness: it comes first.
+  const live = [...(data?.arrivals ?? []), ...estimated]
+    .filter((arrival) => arrival.lineId === ride.line && arrival.source !== 'scheduled' && arrival.vehicleId !== undefined && busTracker.has(arrival.vehicleId) && off(arrival.time) <= SAME_BUS_MS)
+    .sort((a, b) => off(a.time) - off(b.time))[0];
+  if (!live?.vehicleId) return null;
+  const busId = live.vehicleId;
+  const { primary } = arrivalLabels(live.time, now);
+  return (
+    <span className="journey-follow">
+      <button type="button" className="button-tonal" onClick={() => select({ kind: 'bus', id: busId, fromStop: stop.id, fromJourney: true })}>
+        {text.follow}
+      </button>
+      <span className="bus-live">
+        <span className="live-dot" aria-hidden="true" />
+        {text.liveAt(stop.name, live.source === 'estimated' ? strings.transit.estimate(primary) : primary)}
+      </span>
+    </span>
+  );
+}
+
 /** A ride: its line and direction, and the stops it passes, folded away until asked for. */
 function RideBody({ ride, onStop }: { ride: Ride; onStop: (place: JourneyPlace) => void }) {
   const [open, setOpen] = useState(false);
+  const stops = useStopsById();
+  const boarding = ride.from.stopId === undefined ? undefined : stops?.get(ride.from.stopId);
   const duration = formatDuration(legSeconds(ride));
   return (
     <div className="journey-body">
       <span className="journey-ride">
-        <LineBadge ride={ride} />
+        <RideBadge ride={ride} />
         {ride.headsign && <span>{text.towards(ride.headsign)}</span>}
       </span>
+      {stops && boarding && <FollowRide ride={ride} stop={boarding} stops={stops} />}
       {ride.stops.length === 0 ? (
         <span className="muted">{text.nonStop(duration)}</span>
       ) : (

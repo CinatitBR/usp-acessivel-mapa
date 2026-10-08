@@ -205,11 +205,32 @@ lines.sort((a, b) => `${a.properties!.id}:${a.properties!.dir}`.localeCompare(`$
 
 // --- Write and report -------------------------------------------------------
 
+// --- Line colours -----------------------------------------------------------
+
+/**
+ * The colours SPTrans gives each line in the feed, for every line that calls at one of the stops:
+ * `[route_color, route_text_color]` as `rrggbb`. They colour a line's badge in the lists; they are
+ * the colours riders see on the buses, and several lines share one, so the map keeps its own.
+ */
+const hex = (value: string | undefined) => (value && /^[0-9a-f]{6}$/i.test(value.trim()) ? value.trim().toLowerCase() : undefined);
+const lineColors = Object.fromEntries(
+  [...new Set(stops.flatMap((stop) => String(stop.properties!.lines).split(',')))].sort().flatMap((id) => {
+    const color = hex(routes.get(id)?.route_color);
+    const text = hex(routes.get(id)?.route_text_color);
+    return color ? [[id, text ? [color, text] : [color]] as const] : [];
+  }),
+);
+
+// --- Write and report -------------------------------------------------------
+
 mkdirSync(OUT_DIR, { recursive: true });
 writeFeatures('stops.geojson', stops);
 writeFeatures('lines.geojson', lines);
+const colorsJson = JSON.stringify(lineColors);
+writeFileSync(`${OUT_DIR}/line-colors.json`, colorsJson);
+console.log(`line-colors.json: ${Object.keys(lineColors).length} entries, ${(colorsJson.length / 1024).toFixed(0)} KB`);
 
-const otherLines = new Set(stops.flatMap((stop) => String(stop.properties!.lines).split(',')).filter((id) => !(id in FULL_LINES)));
+const otherLines =new Set(stops.flatMap((stop) => String(stop.properties!.lines).split(',')).filter((id) => !(id in FULL_LINES)));
 const withCode = lines.filter((line) => line.properties!.code !== undefined).length;
 console.log('\nTransit');
 console.log(`  full lines:                 ${Object.keys(FULL_LINES).join(', ')}`);
