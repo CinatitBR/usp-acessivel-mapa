@@ -6,6 +6,7 @@ import type { Journey, LngLat, Route } from '../../domain/types';
 import { ANCHORS } from '../../map/anchors';
 import { type RouteEnd, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
+import { framePath } from './frame';
 import { useJourneys } from './useJourneys';
 import { useRoute } from './useRoute';
 import { MAP_HALO, MAP_ROUTE, MAP_TEXT } from '../../styles/palette';
@@ -63,18 +64,9 @@ export function RouteLayers() {
 
   useEffect(() => {
     if (!map || !path?.length) return;
-    let [west, south] = path[0]!;
-    let [east, north] = [west, south];
-    for (const [lng, lat] of path) {
-      west = Math.min(west, lng);
-      east = Math.max(east, lng);
-      south = Math.min(south, lat);
-      north = Math.max(north, lat);
-    }
     // The sheet has just changed size (see MapSelection).
     map.resize();
-    // Extra room at the top and right keeps the route clear of the search box and the map buttons.
-    map.fitBounds([west, south, east, north], { padding: { top: 120, right: 70, bottom: 50, left: 40 }, maxZoom: 18 });
+    framePath(map.getMap(), path);
   }, [map, path]);
 
   if (!plan) return null;

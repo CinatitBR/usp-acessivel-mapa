@@ -5,7 +5,6 @@ import {
   CAMPUS_CENTER,
   INITIAL_PITCH,
   INITIAL_ZOOM,
-  MAP_MAX_BOUNDS,
   MAX_PITCH,
   MIN_ZOOM,
   STYLE_URL,
@@ -47,7 +46,6 @@ export function CampusMap() {
       mapLib={mapLib}
       initialViewState={{ ...CAMPUS_CENTER, zoom: INITIAL_ZOOM, pitch: INITIAL_PITCH }}
       mapStyle={STYLE_URL}
-      maxBounds={MAP_MAX_BOUNDS}
       minZoom={MIN_ZOOM}
       maxPitch={MAX_PITCH}
       attributionControl={false}

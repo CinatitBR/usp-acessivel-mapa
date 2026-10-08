@@ -6,11 +6,6 @@ export const CAMPUS_CENTER = { longitude: -46.7283, latitude: -23.5611 };
 /** Bounding box of the campus boundary relation: [west, south, east, north]. */
 export const CAMPUS_BBOX = [-46.7441, -23.5728, -46.7125, -23.5494] as const;
 
-/** Camera limits: the campus plus Metrô Butantã, where the circular lines end. */
-export const MAP_MAX_BOUNDS: [west: number, south: number, east: number, north: number] = [
-  -46.775, -23.592, -46.688, -23.532,
-];
-
 /**
  * Base URL of the Cloudflare Worker, without a trailing slash. In dev it
  * defaults to `/api`, which Vite proxies to the local Worker (vite.config.ts).
@@ -31,7 +26,11 @@ export const TREE_MIN_ZOOM = 15;
 export const INITIAL_ZOOM = 15.5;
 /** Tilted by default so building extrusions read as 3D. */
 export const INITIAL_PITCH = 50;
-export const MIN_ZOOM = 13;
+/**
+ * The camera is not kept to the campus: a route or a journey by public transport may end anywhere
+ * in the city, and the map frames all of it. This is far enough out for the whole metropolitan area.
+ */
+export const MIN_ZOOM = 9;
 export const MAX_PITCH = 70;
 
 /**

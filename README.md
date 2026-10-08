@@ -129,6 +129,8 @@ The clock button beside the tabs opens the choice of when to travel: "Sair agora
 
 "Transporte" lists the journeys Transitous finds (`src/features/routing/providers/transitousPlan.ts`): when each leaves and arrives, how long it takes, whether one changes vehicle, and its legs in a row with each line in its own colour from the timetable feed. A journey opens its details: every place where something changes, with its time, on a rail that is dashed where one walks and in the line's colour where one rides, and the stops a ride passes folded under it. The journey is drawn on the map the same way while its details are open. Transitous has no realtime feed for São Paulo, so these are timetable times, and the panel says so. Journeys are not yet filtered for step-free access.
 
+A route or a journey is framed on the map when it arrives (`src/features/routing/frame.ts`). The camera is not kept to the campus, since either may end anywhere in the city. MapLibre fits bounds as if the map were seen from above, which cuts off the near end of a route on a tilted map, so the fit is corrected by measuring the path on the screen before the camera moves.
+
 Stairs on a route are drawn dashed in orange and flagged in the step list. openrouteservice is reached through the Worker (`GET /ors/route?profile=&from=&to=`), which holds the key, builds the request itself, caches each answer for 5 minutes and allows 10 requests a minute per client. Put the key in `worker/.dev.vars` as `ORS_API_KEY=...` for local use and upload it with `npx wrangler secret put ORS_API_KEY -c worker/wrangler.jsonc` before the next `npm run deploy:worker`. Without a key the app still routes, through Valhalla alone.
 
 ## 3D and lite mode

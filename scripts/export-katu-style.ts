@@ -55,7 +55,10 @@ const raw = JSON.parse(rawJson) as Style;
 // --- Prune -------------------------------------------------------------------
 
 const SOURCE = 'openfreemap';
-/** The app's camera never goes below this zoom (MIN_ZOOM in src/config.ts). */
+/**
+ * The style is pruned for street scale: layers that only show from this zoom out are dropped.
+ * The camera does go further out, to frame a route across the city (MIN_ZOOM in src/config.ts).
+ */
 const APP_MIN_ZOOM = 13;
 const DROPPED_SOURCE_LAYERS = new Set(['aeroway', 'aerodrome_label', 'mountain_peak']);
 const DROPPED_IDS = new Set([
