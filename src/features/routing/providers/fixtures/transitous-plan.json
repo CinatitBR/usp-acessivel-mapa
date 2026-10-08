@@ -1,0 +1,640 @@
+{
+ "from": {
+  "name": "START",
+  "lat": -23.5587,
+  "lon": -46.7253,
+  "level": 0.0,
+  "vertexType": "NORMAL"
+ },
+ "to": {
+  "name": "END",
+  "lat": -23.5718,
+  "lon": -46.7081,
+  "level": 0.0,
+  "vertexType": "NORMAL"
+ },
+ "direct": [],
+ "itineraries": [
+  {
+   "duration": 1380,
+   "startTime": "2026-10-08T20:16:00Z",
+   "endTime": "2026-10-08T20:39:00Z",
+   "transfers": 0,
+   "id": "ClAhdEaU9gaPN8Ap9+RhodZcR8AyFmJyLXNhby1wYXVsb18xMjAwMTAzNTM55Xyx9+KPN8BB6kMX1LdcR8BIgPSf1gZQ4Pef1gZaBFdBTEtgAQqVAQoHODA4NC0xMBIlMjAyNjEwMDhfMTc6MDBfYnItc2FvLXBhdWxvXzgwODQtMTAtMBoWYnItc2FvLXBhdWxvXzEyMDAxMDM1MyHlfLH34o83wCnqQxfUt1xHwDIUYnItc2FvLXBhdWxvXzEyMTEzNjQ5DormASySN8BBwqONI9ZaR8BI4Pef1gZQuPyf1gZaA0JVU2ABCk4aFGJyLXNhby1wYXVsb18xMjExMzY0IQ6K5gEskjfAKcKjjSPWWkfAOVHaG3xhkjfAQRgmUwWjWkfASLj8n9YGUOT+n9YGWgRXQUxLYAE=",
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": -23.5587,
+      "lon": -46.7253,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "departure": "2026-10-08T20:16:00Z",
+      "scheduledDeparture": "2026-10-08T20:16:00Z",
+      "vertexType": "NORMAL"
+     },
+     "to": {
+      "name": "Letras",
+      "stopId": "br-sao-paulo_120010353",
+      "importance": 6.138249591458589e-05,
+      "lat": -23.562057,
+      "lon": -46.724360000000004,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:24:00Z",
+      "scheduledArrival": "2026-10-08T20:24:00Z",
+      "description": "Av. Prof. Luciano Gualberto, 315 Ref.: Av Professor Lucio Martins Rodrigues/ R Do Anfiteatro",
+      "vertexType": "TRANSIT",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "duration": 480,
+     "startTime": "2026-10-08T20:16:00Z",
+     "endTime": "2026-10-08T20:24:00Z",
+     "scheduledStartTime": "2026-10-08T20:16:00Z",
+     "scheduledEndTime": "2026-10-08T20:24:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 474.0,
+     "legGeometry": {
+      "points": "bc||k@jg{bxAfGrC??dJvE??nF|B??pAsD??lLk_@??zIcU??fZU??~wAn@??bBH`A\\??tE`B??dKnD??rBhA??|IyU??LY",
+      "precision": 6,
+      "length": 29
+     }
+    },
+    {
+     "mode": "BUS",
+     "from": {
+      "name": "Letras",
+      "stopId": "br-sao-paulo_120010353",
+      "importance": 6.138249591458589e-05,
+      "lat": -23.562057,
+      "lon": -46.724360000000004,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "departure": "2026-10-08T20:24:00Z",
+      "scheduledDeparture": "2026-10-08T20:24:00Z",
+      "description": "Av. Prof. Luciano Gualberto, 315 Ref.: Av Professor Lucio Martins Rodrigues/ R Do Anfiteatro",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "Av. Dr. Vital Brasil, 569",
+      "stopId": "br-sao-paulo_1211364",
+      "importance": 0.0003379416302777827,
+      "lat": -23.570984000000003,
+      "lon": -46.70966,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:34:00Z",
+      "scheduledArrival": "2026-10-08T20:34:00Z",
+      "description": "Ref.: Rua Camargo",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "duration": 600,
+     "startTime": "2026-10-08T20:24:00Z",
+     "endTime": "2026-10-08T20:34:00Z",
+     "scheduledStartTime": "2026-10-08T20:24:00Z",
+     "scheduledEndTime": "2026-10-08T20:34:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "interlineWithPreviousLeg": false,
+     "headsign": "Cid. Universitária",
+     "routeId": "br-sao-paulo_8084-10",
+     "routeUrl": "",
+     "directionId": "0",
+     "routeColor": "ff671f",
+     "routeTextColor": "000000",
+     "routeType": 3,
+     "agencyName": "SPTRANS",
+     "agencyUrl": "http://www.sptrans.com.br/?versao=061026",
+     "agencyFareUrl": "",
+     "agencyId": "1",
+     "tripId": "20261008_17:00_br-sao-paulo_8084-10-0",
+     "routeShortName": "8084-10",
+     "routeLongName": "Metrô Butantã - Cid. Universitária",
+     "tripShortName": "",
+     "displayName": "8084-10",
+     "cancelled": false,
+     "source": "br_sao-paulo.gtfs.zip/stop_times.txt:49325:49344",
+     "intermediateStops": [
+      {
+       "name": "Cultura Japonesa",
+       "stopId": "br-sao-paulo_1207032",
+       "importance": 8.825275290291756e-05,
+       "lat": -23.562835999999997,
+       "lon": -46.719543,
+       "level": 0.0,
+       "tz": "America/Sao_Paulo",
+       "arrival": "2026-10-08T20:26:00Z",
+       "departure": "2026-10-08T20:26:00Z",
+       "scheduledArrival": "2026-10-08T20:26:00Z",
+       "scheduledDeparture": "2026-10-08T20:26:00Z",
+       "description": "Av. Prof. Lineu Prestes, 159 Ref.: Av. Da Universidade",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "Administração Instituto Butantã",
+       "stopId": "br-sao-paulo_120010330",
+       "importance": 8.825275290291756e-05,
+       "lat": -23.563601999999996,
+       "lon": -46.716266999999995,
+       "level": 0.0,
+       "tz": "America/Sao_Paulo",
+       "arrival": "2026-10-08T20:28:00Z",
+       "departure": "2026-10-08T20:28:00Z",
+       "scheduledArrival": "2026-10-08T20:28:00Z",
+       "scheduledDeparture": "2026-10-08T20:28:00Z",
+       "description": "Av. Da Universidade Ref.: Pc Professor Rubiao Meira/ Pc Professor Reinaldo Porchart",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "Academia De Polícia",
+       "stopId": "br-sao-paulo_120010331",
+       "importance": 0.00010476932948222384,
+       "lat": -23.565429999999996,
+       "lon": -46.7132,
+       "level": 0.0,
+       "tz": "America/Sao_Paulo",
+       "arrival": "2026-10-08T20:30:00Z",
+       "departure": "2026-10-08T20:30:00Z",
+       "scheduledArrival": "2026-10-08T20:30:00Z",
+       "scheduledDeparture": "2026-10-08T20:30:00Z",
+       "description": "Pça. Prof. Reinaldo Porchat Ref.: Av Da Universidade/ Av Afranio Peixoto",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "R. Alvarenga, 1676",
+       "stopId": "br-sao-paulo_1211429",
+       "importance": 0.00012263884127605706,
+       "lat": -23.567183,
+       "lon": -46.71167,
+       "level": 0.0,
+       "tz": "America/Sao_Paulo",
+       "arrival": "2026-10-08T20:32:00Z",
+       "departure": "2026-10-08T20:32:00Z",
+       "scheduledArrival": "2026-10-08T20:32:00Z",
+       "scheduledDeparture": "2026-10-08T20:32:00Z",
+       "description": "Ref.: R. Moura Brasil",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "modes": [
+        "BUS"
+       ]
+      }
+     ],
+     "legGeometry": {
+      "points": "psb}k@noybxAwg@jiAn`B_fElWqp@nETrEUbKuFvBuCf@qC|@wD^_Ha@mEkHuJ}FqCwFu@sFVkp@mxAiByLvAuDh@oDLaEe@cEi@oCw@wB\\aE`Mc[|Oie@x[wy@xHwQ`l@w|An]{|@nA_DfGKfBGhGiBfCeCrBgEbA_EL}@b@sEOkBYeDaAsD{@oAcBkCjBcFtAmEjVum@tHWlzAkBti@s@pGM`_@e@nuAsBpHEvFMlXunAbUafAcFz[",
+      "precision": 6,
+      "length": 59
+     },
+     "bikesAllowed": false,
+     "wheelchairAccessible": "NOT_ACCESSIBLE",
+     "reservation": "NONE"
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "Av. Dr. Vital Brasil, 569",
+      "stopId": "br-sao-paulo_1211364",
+      "importance": 0.0003379416302777827,
+      "lat": -23.570984000000003,
+      "lon": -46.70966,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:34:00Z",
+      "departure": "2026-10-08T20:34:00Z",
+      "scheduledArrival": "2026-10-08T20:34:00Z",
+      "scheduledDeparture": "2026-10-08T20:34:00Z",
+      "description": "Ref.: Rua Camargo",
+      "vertexType": "TRANSIT",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "END",
+      "lat": -23.5718,
+      "lon": -46.7081,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:39:00Z",
+      "scheduledArrival": "2026-10-08T20:39:00Z",
+      "vertexType": "NORMAL"
+     },
+     "duration": 300,
+     "startTime": "2026-10-08T20:34:00Z",
+     "endTime": "2026-10-08T20:39:00Z",
+     "scheduledStartTime": "2026-10-08T20:34:00Z",
+     "scheduledEndTime": "2026-10-08T20:39:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 254.0,
+     "legGeometry": {
+      "points": "z_t}k@bx|axA?AH]??`D{NRaA??|AgH??pAcG??FS|Pww@??jBoIFW??~AqH??dD~@lMtD",
+      "precision": 6,
+      "length": 21
+     }
+    }
+   ]
+  },
+  {
+   "duration": 1440,
+   "startTime": "2026-10-08T20:26:00Z",
+   "endTime": "2026-10-08T20:50:00Z",
+   "transfers": 1,
+   "id": "ClAhdEaU9gaPN8Ap9+RhodZcR8AyFmJyLXNhby1wYXVsb18xMjAwMTAzNTM55Xyx9+KPN8BB6kMX1LdcR8BI2Pif1gZQuPyf1gZaBFdBTEtgAQqXAQoHODA4Ni0xMBIlMjAyNjEwMDhfMTc6MDBfYnItc2FvLXBhdWxvXzgwODYtMTAtMBoWYnItc2FvLXBhdWxvXzEyMDAxMDM1MyHlfLH34o83wCnqQxfUt1xHwDIWYnItc2FvLXBhdWxvXzEyMDAxMDMzMTlhLT4FwJA3wEHswDkjSltHwEi4/J/WBlDk/p/WBloDQlVTYAEKaBoWYnItc2FvLXBhdWxvXzEyMDAxMDMzMSFhLT4FwJA3wCnswDkjSltHwDIWYnItc2FvLXBhdWxvXzEyMDAxMDMzMTlhLT4FwJA3wEHswDkjSltHwEjk/p/WBlDc/5/WBloEV0FMS2ABCpUBCgc4MDgzLTEwEiUyMDI2MTAwOF8xNzoxNV9ici1zYW8tcGF1bG9fODA4My0xMC0wGhZici1zYW8tcGF1bG9fMTIwMDEwMzMxIWEtPgXAkDfAKezAOSNKW0fAMhRici1zYW8tcGF1bG9fMTIxMTM2NDkOiuYBLJI3wEHCo40j1lpHwEjc/5/WBlDMgaDWBloDQlVTYAEKThoUYnItc2FvLXBhdWxvXzEyMTEzNjQhDormASySN8ApwqONI9ZaR8A5UdobfGGSN8BBGCZTBaNaR8BIzIGg1gZQ+IOg1gZaBFdBTEtgAQ==",
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": -23.5587,
+      "lon": -46.7253,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "departure": "2026-10-08T20:26:00Z",
+      "scheduledDeparture": "2026-10-08T20:26:00Z",
+      "vertexType": "NORMAL"
+     },
+     "to": {
+      "name": "Letras",
+      "stopId": "br-sao-paulo_120010353",
+      "importance": 6.138249591458589e-05,
+      "lat": -23.562057,
+      "lon": -46.724360000000004,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:34:00Z",
+      "scheduledArrival": "2026-10-08T20:34:00Z",
+      "description": "Av. Prof. Luciano Gualberto, 315 Ref.: Av Professor Lucio Martins Rodrigues/ R Do Anfiteatro",
+      "vertexType": "TRANSIT",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "duration": 480,
+     "startTime": "2026-10-08T20:26:00Z",
+     "endTime": "2026-10-08T20:34:00Z",
+     "scheduledStartTime": "2026-10-08T20:26:00Z",
+     "scheduledEndTime": "2026-10-08T20:34:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 474.0,
+     "legGeometry": {
+      "points": "bc||k@jg{bxAfGrC??dJvE??nF|B??pAsD??lLk_@??zIcU??fZU??~wAn@??bBH`A\\??tE`B??dKnD??rBhA??|IyU??LY",
+      "precision": 6,
+      "length": 29
+     }
+    },
+    {
+     "mode": "BUS",
+     "from": {
+      "name": "Letras",
+      "stopId": "br-sao-paulo_120010353",
+      "importance": 6.138249591458589e-05,
+      "lat": -23.562057,
+      "lon": -46.724360000000004,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "departure": "2026-10-08T20:34:00Z",
+      "scheduledDeparture": "2026-10-08T20:34:00Z",
+      "description": "Av. Prof. Luciano Gualberto, 315 Ref.: Av Professor Lucio Martins Rodrigues/ R Do Anfiteatro",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "Academia De Polícia",
+      "stopId": "br-sao-paulo_120010331",
+      "importance": 0.00010476932948222384,
+      "lat": -23.565429999999996,
+      "lon": -46.7132,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:39:00Z",
+      "scheduledArrival": "2026-10-08T20:39:00Z",
+      "description": "Pça. Prof. Reinaldo Porchat Ref.: Av Da Universidade/ Av Afranio Peixoto",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "duration": 300,
+     "startTime": "2026-10-08T20:34:00Z",
+     "endTime": "2026-10-08T20:39:00Z",
+     "scheduledStartTime": "2026-10-08T20:34:00Z",
+     "scheduledEndTime": "2026-10-08T20:39:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "interlineWithPreviousLeg": false,
+     "headsign": "Pinheiros",
+     "routeId": "br-sao-paulo_8086-10",
+     "routeUrl": "",
+     "directionId": "0",
+     "routeColor": "ff671f",
+     "routeTextColor": "000000",
+     "routeType": 3,
+     "agencyName": "SPTRANS",
+     "agencyUrl": "http://www.sptrans.com.br/?versao=061026",
+     "agencyFareUrl": "",
+     "agencyId": "1",
+     "tripId": "20261008_17:00_br-sao-paulo_8086-10-0",
+     "routeShortName": "8086-10",
+     "routeLongName": "Jaguaré - Pinheiros",
+     "tripShortName": "",
+     "displayName": "8086-10",
+     "cancelled": false,
+     "source": "br_sao-paulo.gtfs.zip/stop_times.txt:19424:19489",
+     "intermediateStops": [
+      {
+       "name": "Cultura Japonesa",
+       "stopId": "br-sao-paulo_1207032",
+       "importance": 8.825275290291756e-05,
+       "lat": -23.562835999999997,
+       "lon": -46.719543,
+       "level": 0.0,
+       "tz": "America/Sao_Paulo",
+       "arrival": "2026-10-08T20:35:00Z",
+       "departure": "2026-10-08T20:35:00Z",
+       "scheduledArrival": "2026-10-08T20:35:00Z",
+       "scheduledDeparture": "2026-10-08T20:35:00Z",
+       "description": "Av. Prof. Lineu Prestes, 159 Ref.: Av. Da Universidade",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "Administração Instituto Butantã",
+       "stopId": "br-sao-paulo_120010330",
+       "importance": 8.825275290291756e-05,
+       "lat": -23.563601999999996,
+       "lon": -46.716266999999995,
+       "level": 0.0,
+       "tz": "America/Sao_Paulo",
+       "arrival": "2026-10-08T20:37:00Z",
+       "departure": "2026-10-08T20:37:00Z",
+       "scheduledArrival": "2026-10-08T20:37:00Z",
+       "scheduledDeparture": "2026-10-08T20:37:00Z",
+       "description": "Av. Da Universidade Ref.: Pc Professor Rubiao Meira/ Pc Professor Reinaldo Porchart",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "modes": [
+        "BUS"
+       ]
+      }
+     ],
+     "legGeometry": {
+      "points": "psb}k@noybxAwg@jiAn`B_fElWqp@nETrEUbKuFvBuCf@qC|@wD^_Ha@mEkHuJ}FqCwFu@sFVkp@mxAiByLvAuDh@oDLaEe@cEi@oCw@wB\\aE`Mc[|Oie@x[wy@xHwQ`l@w|An]{|@nA_DfGKfBGhGiBfCeCrBgEbA_EL}@vBE",
+      "precision": 6,
+      "length": 40
+     },
+     "bikesAllowed": false,
+     "wheelchairAccessible": "NOT_ACCESSIBLE",
+     "reservation": "NONE"
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "Academia De Polícia",
+      "stopId": "br-sao-paulo_120010331",
+      "importance": 0.00010476932948222384,
+      "lat": -23.565429999999996,
+      "lon": -46.7132,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:39:00Z",
+      "departure": "2026-10-08T20:39:00Z",
+      "scheduledArrival": "2026-10-08T20:39:00Z",
+      "scheduledDeparture": "2026-10-08T20:39:00Z",
+      "description": "Pça. Prof. Reinaldo Porchat Ref.: Av Da Universidade/ Av Afranio Peixoto",
+      "vertexType": "TRANSIT",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "Academia De Polícia",
+      "stopId": "br-sao-paulo_120010331",
+      "importance": 0.00010476932948222384,
+      "lat": -23.565429999999996,
+      "lon": -46.7132,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:41:00Z",
+      "scheduledArrival": "2026-10-08T20:41:00Z",
+      "description": "Pça. Prof. Reinaldo Porchat Ref.: Av Da Universidade/ Av Afranio Peixoto",
+      "vertexType": "TRANSIT",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "duration": 120,
+     "startTime": "2026-10-08T20:39:00Z",
+     "endTime": "2026-10-08T20:41:00Z",
+     "scheduledStartTime": "2026-10-08T20:39:00Z",
+     "scheduledEndTime": "2026-10-08T20:41:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 0.0,
+     "legGeometry": {
+      "points": "jfi}k@~ucbxA??",
+      "precision": 6,
+      "length": 2
+     }
+    },
+    {
+     "mode": "BUS",
+     "from": {
+      "name": "Academia De Polícia",
+      "stopId": "br-sao-paulo_120010331",
+      "importance": 0.00010476932948222384,
+      "lat": -23.565429999999996,
+      "lon": -46.7132,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "departure": "2026-10-08T20:41:00Z",
+      "scheduledDeparture": "2026-10-08T20:41:00Z",
+      "description": "Pça. Prof. Reinaldo Porchat Ref.: Av Da Universidade/ Av Afranio Peixoto",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "Av. Dr. Vital Brasil, 569",
+      "stopId": "br-sao-paulo_1211364",
+      "importance": 0.0003379416302777827,
+      "lat": -23.570984000000003,
+      "lon": -46.70966,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:45:00Z",
+      "scheduledArrival": "2026-10-08T20:45:00Z",
+      "description": "Ref.: Rua Camargo",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "duration": 240,
+     "startTime": "2026-10-08T20:41:00Z",
+     "endTime": "2026-10-08T20:45:00Z",
+     "scheduledStartTime": "2026-10-08T20:41:00Z",
+     "scheduledEndTime": "2026-10-08T20:45:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "interlineWithPreviousLeg": false,
+     "headsign": "Metrô Butantã",
+     "routeId": "br-sao-paulo_8083-10",
+     "routeUrl": "",
+     "directionId": "0",
+     "routeColor": "ff671f",
+     "routeTextColor": "000000",
+     "routeType": 3,
+     "agencyName": "SPTRANS",
+     "agencyUrl": "http://www.sptrans.com.br/?versao=061026",
+     "agencyFareUrl": "",
+     "agencyId": "1",
+     "tripId": "20261008_17:15_br-sao-paulo_8083-10-0",
+     "routeShortName": "8083-10",
+     "routeLongName": "Cid. Universitária - Metrô Butantã",
+     "tripShortName": "",
+     "displayName": "8083-10",
+     "cancelled": false,
+     "source": "br_sao-paulo.gtfs.zip/stop_times.txt:7511:7526",
+     "intermediateStops": [
+      {
+       "name": "R. Alvarenga, 1676",
+       "stopId": "br-sao-paulo_1211429",
+       "importance": 0.00012263884127605706,
+       "lat": -23.567183,
+       "lon": -46.71167,
+       "level": 0.0,
+       "tz": "America/Sao_Paulo",
+       "arrival": "2026-10-08T20:43:00Z",
+       "departure": "2026-10-08T20:43:00Z",
+       "scheduledArrival": "2026-10-08T20:43:00Z",
+       "scheduledDeparture": "2026-10-08T20:43:00Z",
+       "description": "Ref.: R. Moura Brasil",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "modes": [
+        "BUS"
+       ]
+      }
+     ],
+     "legGeometry": {
+      "points": "jfi}k@~ucbxAwBDb@sEOkBYeDaAsD{@oAcBkCjBcFtAmEjVum@tHWlzAkBti@s@pGM`_@e@nuAsBpHEvFMlXunAbUafAcFz[",
+      "precision": 6,
+      "length": 22
+     },
+     "bikesAllowed": false,
+     "wheelchairAccessible": "NOT_ACCESSIBLE",
+     "reservation": "NONE"
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "Av. Dr. Vital Brasil, 569",
+      "stopId": "br-sao-paulo_1211364",
+      "importance": 0.0003379416302777827,
+      "lat": -23.570984000000003,
+      "lon": -46.70966,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:45:00Z",
+      "departure": "2026-10-08T20:45:00Z",
+      "scheduledArrival": "2026-10-08T20:45:00Z",
+      "scheduledDeparture": "2026-10-08T20:45:00Z",
+      "description": "Ref.: Rua Camargo",
+      "vertexType": "TRANSIT",
+      "cancelled": false,
+      "modes": [
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "END",
+      "lat": -23.5718,
+      "lon": -46.7081,
+      "level": 0.0,
+      "tz": "America/Sao_Paulo",
+      "arrival": "2026-10-08T20:50:00Z",
+      "scheduledArrival": "2026-10-08T20:50:00Z",
+      "vertexType": "NORMAL"
+     },
+     "duration": 300,
+     "startTime": "2026-10-08T20:45:00Z",
+     "endTime": "2026-10-08T20:50:00Z",
+     "scheduledStartTime": "2026-10-08T20:45:00Z",
+     "scheduledEndTime": "2026-10-08T20:50:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 254.0,
+     "legGeometry": {
+      "points": "z_t}k@bx|axA?AH]??`D{NRaA??|AgH??pAcG??FS|Pww@??jBoIFW??~AqH??dD~@lMtD",
+      "precision": 6,
+      "length": 21
+     }
+    }
+   ]
+  }
+ ]
+}

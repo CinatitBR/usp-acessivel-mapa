@@ -235,11 +235,13 @@ Rotas enviadas por pessoas do campus e guardadas por unidade: uma sequência de 
 - **Ações e pontos de interação:**
   - Campo "De" e campo "Para" (campos de texto) → S16
   - "Inverter origem e destino" (botão) → troca as duas pontas
-  - "A pé" / "Sem degraus" (botões de escolha, "Tipo de rota") → escolhem o tipo; "Sem degraus" já vem marcado se a visão de acessibilidade estiver ligada
+  - "A pé" / "Sem degraus" / "Transporte" (abas, "Tipo de rota") → escolhem o tipo; "Sem degraus" já vem marcado se a visão de acessibilidade estiver ligada
+  - Relógio (botão redondo ao lado das abas) → abre a escolha do horário: "Sair agora", "Sair às" ou "Chegar às", com data e hora
+  - "Transporte" (aba) → lista as viagens de transporte público ("Escolha uma viagem"); um cartão abre "Detalhes da viagem", com a linha do tempo da viagem e o trajeto no mapa; "Todas as viagens" volta à lista
   - "Fechar" (×) ou "Traçar rota" de novo → fecha a rota e volta a S01
   - Com as duas pontas escolhidas, a rota é calculada sozinha → S17 ou S18
   - Vindo de "Rota até aqui", o campo "Para" já chega preenchido e o painel abre com o campo "De" em edição, já oferecendo "Usar minha localização"
-- **Estado a capturar:** o painel "Rota a pé" recém-aberto por "Rota até aqui" no S03, com "Para" preenchido, o campo "De" já em edição mostrando "Usar minha localização", e os dois tipos de rota.
+- **Estado a capturar:** o painel "Rota" recém-aberto por "Rota até aqui" no S03, com "Para" preenchido, o campo "De" já em edição mostrando "Usar minha localização", e as abas dos tipos de rota.
 - **Captura:** `screenshots/s15-rota-vazia.png`
 
 ### S16 · Escolha de uma ponta da rota
@@ -257,7 +259,7 @@ Rotas enviadas por pessoas do campus e guardadas por unidade: uma sequência de 
 - **Ações e pontos de interação:**
   - Resumo (só leitura): tempo e distância; a rota desenhada no mapa
   - Aviso "Atenção: esta rota passa por escadas." (só leitura; quando há escadas)
-  - "Sem degraus" (botão de escolha) → recalcula sem escadas → S18
+  - "Sem degraus" (aba) → recalcula sem escadas → S18
   - "Passo a passo" (lista, só leitura): as instruções, com a marca "escada" nos trechos com degraus
   - Campos "De" / "Para" e "Inverter origem e destino" → mudam a rota (S16)
   - Item de "N relatos nesta rota" (linha clicável; quando há) → S23
@@ -272,7 +274,7 @@ Rotas enviadas por pessoas do campus e guardadas por unidade: uma sequência de 
   - Desvio (só leitura): "Rota desviando de 1 bloqueio relatado (+…)." — a rota contorna os relatos publicados que dizem que não dá para passar, e diz quanto o desvio acrescenta
   - Sem desvio possível (só leitura): "Há um bloqueio relatado nesta rota e não encontramos um caminho sem degraus que desvie dele."
   - Item de "N relatos nesta rota" (linha clicável) → S23; cada item diz o tipo, se dá para passar e a que distância do início fica (ou "no destino"); os relatos da rota aparecem maiores no mapa. Fechar o relato volta a esta tela. Um bloqueio do qual a rota já desviou não entra nesta lista
-  - "A pé" (botão de escolha) → S17
+  - "A pé" (aba) → S17
   - "Passo a passo" (lista, só leitura)
   - "Fechar" (×) → S01
 - **Estado a capturar:** a mesma rota em "Sem degraus", com um relato de "Passagem bloqueada" publicado no caminho habitual pela Praça do Relógio: o trajeto contorna o aviso no mapa e o painel mostra "Rota sem degraus." e "Rota desviando de 1 bloqueio relatado (+50 m).".

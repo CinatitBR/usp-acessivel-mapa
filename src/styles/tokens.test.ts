@@ -34,8 +34,9 @@ describe('design tokens', () => {
 
   it('are all defined where the stylesheet uses them', () => {
     const used = new Set([...styles.matchAll(/var\((--[\w-]+)/g)].map(([, name]) => name!));
-    // These two are set by components on the element: an access status and a bus line have their own colours.
-    const perElement = ['--status-color', '--line-color'];
+    // These are set by components on the element: an access status and a bus line have their own colours,
+    // and so does the rail of a journey beside a ride and on either side of a place.
+    const perElement = ['--status-color', '--line-color', '--rail-color', '--rail-before', '--rail-after'];
     const undefinedTokens = [...used].filter((name) => !declared.has(name) && !perElement.includes(name));
     expect(undefinedTokens).toEqual([]);
   });

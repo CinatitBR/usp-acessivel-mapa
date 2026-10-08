@@ -61,7 +61,7 @@ const openRoute = async (page: Page, profile: 'A pé' | 'Sem degraus') => {
   await page.getByRole('button', { name: 'Traçar rota' }).click();
   await chooseEnd(page, 'Destino da rota', ROUTE_TO);
   await chooseEnd(page, 'Origem da rota', ROUTE_FROM);
-  if (profile === 'Sem degraus') await page.getByRole('button', { name: 'Sem degraus' }).click();
+  if (profile === 'Sem degraus') await page.getByRole('tab', { name: 'Sem degraus' }).click();
   await expect(page.getByRole('heading', { name: 'Passo a passo' })).toBeVisible({ timeout: 45_000 });
   await settle(page);
 };
@@ -224,7 +224,7 @@ test('s14 painel do ônibus', async ({ page }) => {
 test('s15 painel de rota vazio', async ({ page }) => {
   await openBuilding(page);
   await page.getByRole('button', { name: 'Rota até aqui' }).click();
-  await expect(sheet(page, 'Rota a pé')).toBeVisible();
+  await expect(sheet(page, 'Rota')).toBeVisible();
   await settle(page);
   await shot(page, 's15-rota-vazia');
 });

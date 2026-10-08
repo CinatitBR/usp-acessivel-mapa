@@ -177,6 +177,49 @@ export interface GeocodeResult {
 
 export type RouteProfile = 'walk' | 'wheelchair';
 
+/** How to get there: one of the walking profiles, or public transport. */
+export type RouteMode = RouteProfile | 'transit';
+
+/** A point of a journey. An empty `name` is the journey's own start or end, which the plan names. */
+export interface JourneyPlace {
+  name: string;
+  position: LngLat;
+  /** When the leg leaves or reaches it, epoch milliseconds. */
+  time: number;
+}
+
+type JourneyLegBase = {
+  from: JourneyPlace;
+  to: JourneyPlace;
+  geometry: LngLat[];
+};
+
+export type JourneyLeg =
+  /** `distance` in metres; close to zero when it is only a change of vehicle at one stop. */
+  | (JourneyLegBase & { kind: 'walk'; distance: number })
+  | (JourneyLegBase & {
+      kind: 'transit';
+      vehicle: 'bus' | 'rail';
+      /** The line as riders know it: `8084-10`. */
+      line: string;
+      headsign: string;
+      /** The line's own colours from its timetable feed, as `#rrggbb`, when it has them. */
+      color?: string;
+      textColor?: string;
+      /** The stops passed between boarding and alighting. */
+      stops: JourneyPlace[];
+    });
+
+/** One way of making a trip by public transport: walking and riding legs in order. */
+export interface Journey {
+  id: string;
+  /** Epoch milliseconds. */
+  start: number;
+  end: number;
+  transfers: number;
+  legs: JourneyLeg[];
+}
+
 export interface RouteStep {
   instruction: string;
   /** Metres. */

@@ -2,12 +2,13 @@ import { Layer, Marker, Source, useMap } from '@vis.gl/react-maplibre';
 import type { FeatureCollection } from 'geojson';
 import type { LineLayerSpecification } from 'maplibre-gl';
 import { useEffect, useMemo } from 'react';
-import type { Route } from '../../domain/types';
+import type { Journey, LngLat, Route } from '../../domain/types';
 import { ANCHORS } from '../../map/anchors';
 import { type RouteEnd, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
+import { useJourneys } from './useJourneys';
 import { useRoute } from './useRoute';
-import { MAP_HALO, MAP_ROUTE } from '../../styles/palette';
+import { MAP_HALO, MAP_ROUTE, MAP_TEXT } from '../../styles/palette';
 
 const ROUTE_COLOR = MAP_ROUTE;
 const STAIRS_COLOR = '#d9480f';
@@ -36,18 +37,35 @@ function routeFeatures(route: Route): FeatureCollection {
   };
 }
 
-/** Draws the planned route and its two ends, and frames the route when it arrives. */
+/** One line per leg of a journey, and a point where each ride is boarded and left. */
+function journeyFeatures(journey: Journey): FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: journey.legs.flatMap((leg) => {
+      const ride = leg.kind === 'transit';
+      const line = { type: 'Feature' as const, properties: { ride, color: ride ? leg.color : undefined }, geometry: { type: 'LineString' as const, coordinates: leg.geometry } };
+      const stops = ride ? [leg.from, leg.to].map(({ position }) => ({ type: 'Feature' as const, properties: {}, geometry: { type: 'Point' as const, coordinates: position } })) : [];
+      return [line, ...stops];
+    }),
+  };
+}
+
+/** Draws the planned route, or the journey whose details are open, with its two ends, and frames it when it arrives. */
 export function RouteLayers() {
   const { current: map } = useMap();
   const plan = useAppStore((state) => state.routePlan);
   const route = useRoute(plan).data?.route;
+  const journeys = useJourneys(plan).data;
+  const journey = plan?.mode === 'transit' && plan.journey ? journeys?.find(({ id }) => id === plan.journey) : undefined;
   const features = useMemo(() => route && routeFeatures(route), [route]);
+  const journeyLines = useMemo(() => journey && journeyFeatures(journey), [journey]);
+  const path = useMemo<LngLat[] | undefined>(() => route?.geometry ?? journey?.legs.flatMap((leg) => leg.geometry), [route, journey]);
 
   useEffect(() => {
-    if (!map || !route) return;
-    let [west, south] = route.geometry[0]!;
+    if (!map || !path?.length) return;
+    let [west, south] = path[0]!;
     let [east, north] = [west, south];
-    for (const [lng, lat] of route.geometry) {
+    for (const [lng, lat] of path) {
       west = Math.min(west, lng);
       east = Math.max(east, lng);
       south = Math.min(south, lat);
@@ -57,7 +75,7 @@ export function RouteLayers() {
     map.resize();
     // Extra room at the top and right keeps the route clear of the search box and the map buttons.
     map.fitBounds([west, south, east, north], { padding: { top: 120, right: 70, bottom: 50, left: 40 }, maxZoom: 18 });
-  }, [map, route]);
+  }, [map, path]);
 
   if (!plan) return null;
   return (
@@ -80,6 +98,42 @@ export function RouteLayers() {
             beforeId={ANCHORS.features}
             filter={['get', 'stairs']}
             paint={{ ...width(6), 'line-color': STAIRS_COLOR, 'line-dasharray': [0.6, 0.6] }}
+          />
+        </Source>
+      )}
+      {journeyLines && (
+        <Source id="journey" type="geojson" data={journeyLines}>
+          <Layer
+            id="journey-casing"
+            type="line"
+            beforeId={ANCHORS.features}
+            filter={['==', ['geometry-type'], 'LineString']}
+            layout={lineLayout}
+            paint={{ ...width(9), 'line-color': MAP_HALO }}
+          />
+          {/* A ride is in its line's own colour; a walk is dotted, so the two differ by pattern as well. */}
+          <Layer
+            id="journey-ride"
+            type="line"
+            beforeId={ANCHORS.features}
+            filter={['all', ['==', ['geometry-type'], 'LineString'], ['get', 'ride']]}
+            layout={lineLayout}
+            paint={{ ...width(5), 'line-color': ['coalesce', ['get', 'color'], ROUTE_COLOR] }}
+          />
+          <Layer
+            id="journey-walk"
+            type="line"
+            beforeId={ANCHORS.features}
+            filter={['all', ['==', ['geometry-type'], 'LineString'], ['!', ['get', 'ride']]]}
+            layout={lineLayout}
+            paint={{ ...width(5), 'line-color': ROUTE_COLOR, 'line-dasharray': [0.1, 1.8] }}
+          />
+          <Layer
+            id="journey-stops"
+            type="circle"
+            beforeId={ANCHORS.features}
+            filter={['==', ['geometry-type'], 'Point']}
+            paint={{ 'circle-radius': 5, 'circle-color': MAP_HALO, 'circle-stroke-color': MAP_TEXT, 'circle-stroke-width': 2 }}
           />
         </Source>
       )}

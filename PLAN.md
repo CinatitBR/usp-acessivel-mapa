@@ -530,7 +530,7 @@ Commands used throughout: `npm run dev -- --host` (open the LAN URL on a phone),
 
 | Item | What the MVP already provides |
 |---|---|
-| Transit trip planning to/from campus | Transitous adapter and Photon endpoint picking exist; add a `plan` capability and a results panel |
+| Transit trip planning to/from campus | Done: the "Transporte" tab of the route panel lists journeys from the Transitous `plan` endpoint and shows the details of the one chosen (README, "Routes"). Still to do: step-free journeys |
 | Dark basemap (`campus-dark.json`) | Anchors and runtime `light` reading make a style swap code-free; colors for app layers live in one theme module |
 | WCAG 2.2 AA and a non-map list view | Domain models are independent of the map, so a list/detail view can reuse them; strings are centralized |
 | Bandejão menus, events, opening hours | New feature folder with its own adapter; `Poi.openingHours` already exists |

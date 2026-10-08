@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AccessFeatureKind, LngLat, PoiCategory, RouteProfile } from '../domain/types';
+import type { AccessFeatureKind, LngLat, PoiCategory, RouteMode } from '../domain/types';
 import {
   type LiteChoice,
   readDeviceHints,
@@ -40,8 +40,13 @@ export type RoutePoint = { label: string; position: LngLat };
 export type RoutePlan = {
   from: RoutePoint | null;
   to: RoutePoint | null;
-  profile: RouteProfile;
+  mode: RouteMode;
+  time: RouteTime;
+  /** The journey by public transport whose details are open; null while the list of journeys shows. */
+  journey: string | null;
 };
+/** When to travel: leaving now, leaving at a moment or arriving by it (`at`, epoch milliseconds). */
+export type RouteTime = { kind: 'now' } | { kind: 'depart' | 'arrive'; at: number };
 
 type AppState = {
   mapStatus: MapStatus;
@@ -75,7 +80,10 @@ type AppState = {
   /** Opens the route panel, optionally with a destination. Starts step-free when the accessibility view is on. */
   startRoute: (to?: RoutePoint) => void;
   setRouteEnd: (end: RouteEnd, point: RoutePoint) => void;
-  setRouteProfile: (profile: RouteProfile) => void;
+  setRouteMode: (mode: RouteMode) => void;
+  setRouteTime: (time: RouteTime) => void;
+  /** Opens the details of a journey, or goes back to the list with null. */
+  openJourney: (id: string | null) => void;
   swapRouteEnds: () => void;
   closeRoute: () => void;
 
@@ -190,14 +198,19 @@ export const useAppStore = create<AppState>((set) => ({
       routePlan: {
         from: state.routePlan?.from ?? null,
         to: to ?? state.routePlan?.to ?? null,
-        profile: state.routePlan?.profile ?? (state.accessMode ? 'wheelchair' : 'walk'),
+        mode: state.routePlan?.mode ?? (state.accessMode ? 'wheelchair' : 'walk'),
+        time: state.routePlan?.time ?? { kind: 'now' },
+        // The journeys of another destination are other journeys.
+        journey: to ? null : (state.routePlan?.journey ?? null),
       },
     })),
   setRouteEnd: (end, point) =>
-    set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, [end]: point } } : {})),
-  setRouteProfile: (profile) => set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, profile } } : {})),
+    set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, [end]: point, journey: null } } : {})),
+  setRouteMode: (mode) => set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, mode, journey: null } } : {})),
+  setRouteTime: (time) => set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, time, journey: null } } : {})),
+  openJourney: (journey) => set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, journey } } : {})),
   swapRouteEnds: () =>
-    set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, from: routePlan.to, to: routePlan.from } } : {})),
+    set(({ routePlan }) => (routePlan ? { routePlan: { ...routePlan, from: routePlan.to, to: routePlan.from, journey: null } } : {})),
   closeRoute: () => set({ routePlan: null }),
 
   accessMode: false,

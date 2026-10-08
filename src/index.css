@@ -1524,6 +1524,385 @@ input {
   background: var(--surface-inverse);
 }
 
+/* Read out, not shown: the words an icon stands for. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The kinds of route as tabs, with the clock button beside them */
+.route-modes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-modes .segmented {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Exactly one of these is chosen: a track with the choice filled in. */
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-tonal);
+}
+
+.segmented button {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--on-accent-tonal);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* A taller place to touch: 44 px in all. */
+.segmented button::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.segmented button[aria-selected="true"],
+.segmented button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: var(--weight-semibold);
+}
+
+.route-time-button {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent-tonal);
+  color: var(--on-accent-tonal);
+  cursor: pointer;
+}
+
+/* A time other than "now" is chosen. */
+.route-time-button.set {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.route-time-button[aria-expanded="true"] {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+}
+
+/* When to travel, opened by the clock button */
+.route-time {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.route-time-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.route-time-field input {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+}
+
+.route-time-chosen {
+  color: var(--accent);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  font-weight: var(--weight-semibold);
+}
+
+/* Journeys by public transport: one card each */
+.journeys {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journey-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 8px 12px 16px;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: left;
+  cursor: pointer;
+}
+
+.journey-card-head {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.journey-card-head strong {
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.journey-card-legs {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.journey-card-open {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  color: var(--accent);
+}
+
+.journey-then {
+  display: flex;
+  color: var(--muted);
+}
+
+.journey-walk {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--muted);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  font-weight: var(--weight-medium);
+}
+
+/* A line's badge: its own colours come from the timetable, set on the element. */
+.journey-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-small);
+  background: var(--surface-inverse);
+  color: var(--on-inverse);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/*
+ * Details of a journey: time, rail, and what happens there. The rail is dashed where one walks
+ * and in the line's colour where one rides; each place carries the two halves that meet at it.
+ */
+.journey-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journey-row {
+  display: grid;
+  grid-template-columns: 3.75rem 20px 1fr;
+  column-gap: 10px;
+}
+
+.journey-place {
+  min-height: 44px;
+}
+
+.journey-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.journey-time span {
+  color: var(--muted);
+  font-size: var(--size-label);
+  line-height: var(--line-label);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.journey-mark {
+  position: relative;
+}
+
+.journey-mark::before,
+.journey-place .journey-mark::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  width: 4px;
+}
+
+.journey-place .journey-mark::before {
+  bottom: 50%;
+}
+
+.journey-place .journey-mark::after {
+  top: 50%;
+}
+
+.journey-leg.ride .journey-mark::before {
+  background: var(--rail-color, var(--accent));
+}
+
+.before-ride .journey-mark::before {
+  background: var(--rail-before, var(--accent));
+}
+
+.after-ride .journey-mark::after {
+  background: var(--rail-after, var(--accent));
+}
+
+.journey-leg.walk .journey-mark::before,
+.before-walk .journey-mark::before,
+.after-walk .journey-mark::after {
+  background: repeating-linear-gradient(
+    var(--control-off) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+.journey-dot {
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--text);
+  border-radius: 50%;
+  background: var(--surface);
+  transform: translateY(-50%);
+}
+
+.journey-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  font-weight: var(--weight-bold);
+  text-align: left;
+  cursor: pointer;
+}
+
+.journey-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 0;
+}
+
+.journey-body.journey-walk {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.journey-ride {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: var(--muted);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+}
+
+.journey-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -4px;
+}
+
+.journey-toggle[aria-expanded="true"] .icon {
+  transform: rotate(180deg);
+}
+
+.journey-stops {
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journey-stops li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.journey-stop-time {
+  color: var(--muted);
+  font-size: var(--size-label);
+  line-height: var(--line-label);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.journey-stop-name {
+  min-height: 36px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  text-align: left;
+  cursor: pointer;
+}
+
 /* Indoor map: floor buttons in a row at the bottom left on phones, above the attribution */
 .level-switcher {
   position: absolute;

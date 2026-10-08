@@ -1,21 +1,31 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Icon } from '../../ui/Icon';
-import type { RouteProfile } from '../../domain/types';
 import { useOnline } from '../../lib/useOnline';
-import { type RouteEnd, type RoutePlan, useAppStore } from '../../state/store';
+import { type RouteEnd, type RoutePlan, type RouteTime, useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { RouteWarnings } from '../reports/RouteWarnings';
+import { dayClock } from '../transit/time';
 import { formatDistance, formatDuration } from './format';
+import { JourneyDetails } from './JourneyDetails';
+import { JourneyList } from './JourneyList';
 import { RouteEndField } from './RouteEndField';
+import { RouteModeBar } from './RouteModeBar';
+import { useJourneys } from './useJourneys';
 import { type RouteResult, useRoute } from './useRoute';
 
 const ENDS: RouteEnd[] = ['from', 'to'];
 /** A way around that adds less than this, in metres, is not worth a number. */
 const DETOUR_WORTH_SAYING = 10;
-const PROFILES: RouteProfile[] = ['walk', 'wheelchair'];
 
-function Result({ result }: { result: RouteResult }) {
+/** When a walk of `seconds` starts and ends, for a plan that leaves at a time or arrives by one. */
+function walkTimes(time: Exclude<RouteTime, { kind: 'now' }>, seconds: number): string {
+  const start = time.kind === 'depart' ? time.at : time.at - seconds * 1000;
+  const now = Date.now();
+  return strings.route.time.walk(dayClock(start, now), dayClock(start + seconds * 1000, now));
+}
+
+function Result({ result, time }: { result: RouteResult; time: RouteTime }) {
   const { route, orsOverQuota, detour, noDetour } = result;
   const hasStairs = route.steps.some((step) => step.hasSteps);
   const stepFree = strings.route.stepFree[route.stepFree];
@@ -24,6 +34,7 @@ function Result({ result }: { result: RouteResult }) {
       <p className="route-summary">
         <strong>{formatDuration(route.duration)}</strong> · {formatDistance(route.distance)}
       </p>
+      {time.kind !== 'now' && <p className="muted">{walkTimes(time, route.duration)}</p>}
       {hasStairs
         ? <p className="route-warning">{strings.route.hasStairs}</p>
         : stepFree && <p className={route.stepFree === 'guaranteed' ? 'route-ok' : 'route-warning'}>{stepFree}</p>}
@@ -52,15 +63,20 @@ function Result({ result }: { result: RouteResult }) {
   );
 }
 
-/** Plans a walking route: two ends, a profile, and the result. */
+/**
+ * Plans a route: two ends, the kind of route, when to travel, and the result. On foot the
+ * result is one route; by public transport it is a list of journeys, and the one chosen
+ * takes the panel with its details.
+ */
 export function RoutePanel({ plan }: { plan: RoutePlan }) {
   const setRouteEnd = useAppStore((state) => state.setRouteEnd);
-  const setRouteProfile = useAppStore((state) => state.setRouteProfile);
   const swapRouteEnds = useAppStore((state) => state.swapRouteEnds);
   const closeRoute = useAppStore((state) => state.closeRoute);
   const [locationFailed, setLocationFailed] = useState(false);
   const online = useOnline();
+  const resultId = useId();
   const { data, isFetching, isError } = useRoute(plan);
+  const journeys = useJourneys(plan).data;
 
   const useMyLocation = (end: RouteEnd) => {
     setLocationFailed(false);
@@ -87,6 +103,10 @@ export function RoutePanel({ plan }: { plan: RoutePlan }) {
     else fields[other].current?.focus();
   };
 
+  // A journey that is no longer among the answers gives the panel back to the list.
+  const journey = plan.mode === 'transit' && plan.journey ? journeys?.find(({ id }) => id === plan.journey) : undefined;
+  if (journey) return <JourneyDetails plan={plan} journey={journey} />;
+
   const ready = plan.from && plan.to;
   return (
     <BottomSheet title={strings.route.title} onClose={closeRoute}>
@@ -106,24 +126,18 @@ export function RoutePanel({ plan }: { plan: RoutePlan }) {
         </button>
       </div>
       {locationFailed && <p className="route-warning">{strings.route.locationError}</p>}
-      <div className="chips chips-wrap" role="group" aria-label={strings.route.profile}>
-        {PROFILES.map((profile) => (
-          <button
-            key={profile}
-            type="button"
-            className="chip chip-choice"
-            aria-pressed={plan.profile === profile}
-            onClick={() => setRouteProfile(profile)}
-          >
-            {strings.route.profiles[profile]}
-          </button>
-        ))}
-      </div>
-      <div aria-live="polite" className="route-result">
-        {ready && !online && !data && <p className="muted">{strings.route.offline}</p>}
-        {ready && online && isFetching && <p className="muted">{strings.route.calculating}</p>}
-        {ready && online && isError && !isFetching && <p className="route-warning">{strings.route.error}</p>}
-        {ready && data && !isFetching && <Result result={data} />}
+      <RouteModeBar plan={plan} panelId={resultId} />
+      <div id={resultId} role="tabpanel" aria-labelledby={`${resultId}-${plan.mode}`} aria-live="polite" className="route-result">
+        {plan.mode === 'transit' ? (
+          <JourneyList plan={plan} />
+        ) : (
+          <>
+            {ready && !online && !data && <p className="muted">{strings.route.offline}</p>}
+            {ready && online && isFetching && <p className="muted">{strings.route.calculating}</p>}
+            {ready && online && isError && !isFetching && <p className="route-warning">{strings.route.error}</p>}
+            {ready && data && !isFetching && <Result result={data} time={plan.time} />}
+          </>
+        )}
       </div>
     </BottomSheet>
   );
