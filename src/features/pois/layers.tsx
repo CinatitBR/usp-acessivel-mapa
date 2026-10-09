@@ -18,7 +18,7 @@ const POIS_URL = dataUrl('pois.geojson');
 export const POIS_GROUPS_LAYER = 'pois-groups';
 const ICON_PREFIX = 'poi-';
 const GROUP_ICON_PREFIX = 'poi-group-';
-const GROUP_COLOR = '#343a40';
+const GROUP_COLOR = '#8c7f6d';
 const MIN_ZOOM = Math.min(...POI_CATEGORIES.map((category) => POI_STYLES[category].minZoom));
 const LABEL_MIN_ZOOM = 17;
 /** The places of a building are a count from this zoom, and are drawn one by one from the next. */
@@ -64,6 +64,9 @@ const groupLayout: SymbolLayerSpecification['layout'] = {
   // A count never gives way: it stands for several places at once.
   'icon-allow-overlap': true,
 };
+
+/** A count is slightly see-through, so it sits on the roof rather than on top of the map. */
+const groupPaint: SymbolLayerSpecification['paint'] = { 'icon-opacity': 0.85 };
 
 const paint: SymbolLayerSpecification['paint'] = {
   'text-color': MAP_TEXT,
@@ -123,7 +126,7 @@ export function PoiLayers() {
       </Source>
       {shown && (
         <Source id={POIS_GROUPS_LAYER} type="geojson" data={groups.badges}>
-          <Layer id={POIS_GROUPS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={GROUP_MIN_ZOOM} maxzoom={GROUP_MAX_ZOOM} layout={groupLayout} />
+          <Layer id={POIS_GROUPS_LAYER} type="symbol" beforeId={ANCHORS.labels} minzoom={GROUP_MIN_ZOOM} maxzoom={GROUP_MAX_ZOOM} layout={groupLayout} paint={groupPaint} />
         </Source>
       )}
     </>
