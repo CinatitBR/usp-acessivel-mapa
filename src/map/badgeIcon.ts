@@ -44,8 +44,18 @@ const TRIANGLE_DROP = 4.5;
  * leaves the pictogram as much room as the size allows.
  */
 const PIN = { width: 42, height: 51, centerX: 21, centerY: 21, radius: 18, tipY: 48, tipAngle: (38 * Math.PI) / 180 };
+/** Room around a pin: at each side for the rim of the selected one, and below for the shadow under its tip. */
+const PIN_SHADOW_ROOM = { side: 4, below: 5 };
+/** The shadow a pin casts on the ground: a soft, flat oval centred on its tip. */
+const PIN_SHADOW = { radiusX: 11.5, radiusY: 4.1, opacity: 0.26 };
 /** The selected pin: this much larger, with a rim in the ring's colour. */
 const SELECTED_PIN_SCALE = 1.3;
+/**
+ * How far the tip of a pin is above the bottom of its image. A layer anchors a pin by its bottom
+ * and moves it down by this much (`icon-offset`), so that the tip, not the shadow, is on the spot.
+ */
+export const PIN_TIP_GAP = PIN.height + PIN_SHADOW_ROOM.below - PIN.tipY;
+export const SELECTED_PIN_TIP_GAP = PIN_TIP_GAP * SELECTED_PIN_SCALE;
 const PIN_RIM_WIDTH = 6;
 
 /** The box a badge is painted in, and the middle of its pictogram. */
@@ -90,18 +100,32 @@ function traceShape(context: CanvasRenderingContext2D, shape: BadgeShape) {
   }
 }
 
+/**
+ * Paints the shadow under the tip of a pin: it says the pin stands on that spot. A gradient
+ * and not a blur, which not every browser's canvas has.
+ */
+function paintPinShadow(context: CanvasRenderingContext2D) {
+  const { radiusX, radiusY, opacity } = PIN_SHADOW;
+  context.save();
+  context.translate(PIN.centerX, PIN.tipY);
+  context.scale(1, radiusY / radiusX);
+  const fade = context.createRadialGradient(0, 0, 0, 0, 0, radiusX);
+  fade.addColorStop(0, `rgba(0, 0, 0, ${opacity})`);
+  fade.addColorStop(0.55, `rgba(0, 0, 0, ${opacity * 0.9})`);
+  fade.addColorStop(0.8, `rgba(0, 0, 0, ${opacity * 0.45})`);
+  fade.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  context.fillStyle = fade;
+  context.beginPath();
+  context.arc(0, 0, radiusX, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
+}
+
 /** Paints a badge in its box (see `boxOf`) at the context's origin. */
 function paintBadge(context: CanvasRenderingContext2D, { shape, fill, outline, outlineWidth, ink, glyph, glyphScale, glyphOpacity, dashed }: Badge) {
   traceShape(context, shape);
   context.fillStyle = fill;
-  if (shape === 'pin') {
-    // A pin stands on the map: it casts a soft shadow.
-    context.shadowColor = 'rgba(0, 0, 0, 0.35)';
-    context.shadowBlur = 3 * BADGE_PIXEL_RATIO;
-    context.shadowOffsetY = BADGE_PIXEL_RATIO;
-  }
   context.fill();
-  context.shadowColor = 'transparent';
   const { centerX, centerY } = boxOf(shape);
   if ('scene' in glyph) {
     // Under the outline, which then covers the edge the scene is cut at. In a pin the scene stays in the head.
@@ -179,8 +203,13 @@ const imageOf = (context: CanvasRenderingContext2D) => context.getImageData(0, 0
 /** Draws a small map icon: a coloured shape with a pictogram. Pass the result to `map.addImage`. */
 export function drawBadge(badge: Badge): ImageData | undefined {
   const { width, height } = boxOf(badge.shape);
-  const context = canvasContext(width, height);
+  const pin = badge.shape === 'pin';
+  const context = pin ? canvasContext(width + 2 * PIN_SHADOW_ROOM.side, height + PIN_SHADOW_ROOM.below) : canvasContext(width, height);
   if (!context) return undefined;
+  if (pin) {
+    context.translate(PIN_SHADOW_ROOM.side, 0);
+    paintPinShadow(context);
+  }
   paintBadge(context, badge);
   return imageOf(context);
 }
@@ -191,9 +220,11 @@ export function drawBadge(badge: Badge): ImageData | undefined {
  */
 export function drawSelectedBadge(badge: Badge, ringColor: string): ImageData | undefined {
   if (badge.shape === 'pin') {
-    const pin = canvasContext(PIN.width * SELECTED_PIN_SCALE, PIN.height * SELECTED_PIN_SCALE);
+    const pin = canvasContext((PIN.width + 2 * PIN_SHADOW_ROOM.side) * SELECTED_PIN_SCALE, (PIN.height + PIN_SHADOW_ROOM.below) * SELECTED_PIN_SCALE);
     if (!pin) return undefined;
     pin.scale(SELECTED_PIN_SCALE, SELECTED_PIN_SCALE);
+    pin.translate(PIN_SHADOW_ROOM.side, 0);
+    paintPinShadow(pin);
     traceShape(pin, 'pin');
     pin.lineWidth = PIN_RIM_WIDTH;
     pin.strokeStyle = ringColor;

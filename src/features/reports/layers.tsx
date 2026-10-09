@@ -4,7 +4,7 @@ import type { FilterSpecification, SymbolLayerSpecification } from 'maplibre-gl'
 import { useEffect, useMemo, useState } from 'react';
 import { isTemporary, type Report } from '../../domain/reports';
 import { ANCHORS } from '../../map/anchors';
-import { SELECTED_SUFFIX } from '../../map/badgeIcon';
+import { PIN_TIP_GAP, SELECTED_PIN_TIP_GAP, SELECTED_SUFFIX } from '../../map/badgeIcon';
 import { useAppStore } from '../../state/store';
 import { addReportIcons, PENDING_SUFFIX, reportIconId } from './icons';
 import { useReports } from './useReports';
@@ -36,8 +36,9 @@ const ON_ROUTE_SCALE = 1.35;
 
 const baseLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['get', 'icon'],
-  // The tip of the pin is on the spot.
+  // The tip of the pin is on the spot; below it the image only holds the shadow under the tip.
   'icon-anchor': 'bottom',
+  'icon-offset': [0, PIN_TIP_GAP],
   // The worse of two reports on one spot is drawn on top.
   'symbol-sort-key': ['-', ['get', 'rank']],
   // Reports are never hidden, by one another or by other symbols, and never hide those.
@@ -58,6 +59,7 @@ const sized = (layout: SymbolLayerSpecification['layout'], larger: readonly stri
 const selectedLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['concat', ['get', 'icon'], SELECTED_SUFFIX],
   'icon-anchor': 'bottom',
+  'icon-offset': [0, SELECTED_PIN_TIP_GAP],
   'icon-allow-overlap': true,
   'icon-ignore-placement': true,
 };
@@ -65,6 +67,7 @@ const selectedLayout: SymbolLayerSpecification['layout'] = {
 const mineLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['concat', ['get', 'icon'], PENDING_SUFFIX],
   'icon-anchor': 'bottom',
+  'icon-offset': [0, PIN_TIP_GAP],
   'icon-allow-overlap': true,
   'icon-ignore-placement': true,
 };
