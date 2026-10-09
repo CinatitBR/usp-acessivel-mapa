@@ -15,12 +15,12 @@ const BUILDINGS_URL = dataUrl('buildings.geojson');
 const COLOR_BY_KIND: ExpressionSpecification = [
   'match',
   ['get', 'kind'],
-  'university', '#e2cfae',
-  'dormitory', '#dcb99c',
-  'roof', '#c8cdd0',
-  ['retail', 'commercial'], '#d9c3cf',
-  ['greenhouse'], '#c5dcc4',
-  '#d9d0c3',
+  'university', '#fbf5e6',
+  'dormitory', '#f8e9dc',
+  'roof', '#e4e8ea',
+  ['retail', 'commercial'], '#f3e8ef',
+  ['greenhouse'], '#e1efde',
+  '#f7f3ea',
 ];
 
 const COLOR_BY_ACCESS: ExpressionSpecification = [
@@ -39,7 +39,7 @@ const paintFor = (color: ExpressionSpecification, roofs: boolean): FillExtrusion
   'fill-extrusion-color': ['case', ['boolean', ['feature-state', 'selected'], false], SELECTED_COLOR, color],
   'fill-extrusion-height': roofs ? HEIGHT_UNDER_ROOF : ['get', 'h'],
   'fill-extrusion-base': ['get', 'mh'],
-  'fill-extrusion-opacity': 0.92,
+  'fill-extrusion-opacity': 1,
   'fill-extrusion-vertical-gradient': true,
 });
 
