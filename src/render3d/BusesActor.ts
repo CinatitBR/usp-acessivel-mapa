@@ -4,19 +4,33 @@ import { busTracker, MAX_BUSES } from '../features/transit/busTracker';
 import { createBusGeometry } from './busGeometry';
 import type { FrameContext, SceneActor } from './CampusScene';
 
-/** Every live bus as one instanced mesh: one draw call however many buses there are. */
+/** Every live bus as two instanced meshes: two draw calls however many buses there are. */
 export class BusesActor implements SceneActor {
-  readonly object: THREE.InstancedMesh;
+  readonly object = new THREE.Group();
+  /** The hull, tinted per bus with its line colour. */
+  private readonly paint: THREE.InstancedMesh;
+  /** Glass, lights and wheels, which keep their own colours. */
+  private readonly details: THREE.InstancedMesh;
   private readonly placement = new THREE.Object3D();
   private readonly color = new THREE.Color();
 
   constructor() {
-    const material = new THREE.MeshLambertMaterial({ vertexColors: true });
-    this.object = new THREE.InstancedMesh(createBusGeometry(), material, MAX_BUSES);
-    this.object.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    // MapLibre's projection matrix is not a camera Three.js can cull against.
-    this.object.frustumCulled = false;
-    this.object.count = 0;
+    const geometry = createBusGeometry();
+    this.paint = new THREE.InstancedMesh(geometry.paint, new THREE.MeshLambertMaterial(), MAX_BUSES);
+    this.details = new THREE.InstancedMesh(
+      geometry.details,
+      new THREE.MeshLambertMaterial({ vertexColors: true }),
+      MAX_BUSES,
+    );
+    this.paint.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    // Both meshes are placed identically, so they share one matrix buffer.
+    this.details.instanceMatrix = this.paint.instanceMatrix;
+    for (const mesh of [this.paint, this.details]) {
+      // MapLibre's projection matrix is not a camera Three.js can cull against.
+      mesh.frustumCulled = false;
+      mesh.count = 0;
+      this.object.add(mesh);
+    }
   }
 
   update({ now, zoom, toLocal }: FrameContext): boolean {
@@ -30,19 +44,22 @@ export class BusesActor implements SceneActor {
       this.placement.rotation.set(0, pose.heading, 0);
       this.placement.scale.setScalar(scale);
       this.placement.updateMatrix();
-      this.object.setMatrixAt(index, this.placement.matrix);
-      this.object.setColorAt(index, this.color.set(pose.color));
+      this.paint.setMatrixAt(index, this.placement.matrix);
+      this.paint.setColorAt(index, this.color.set(pose.color));
     });
 
-    this.object.count = poses.length;
-    this.object.instanceMatrix.needsUpdate = true;
-    if (this.object.instanceColor) this.object.instanceColor.needsUpdate = true;
+    this.paint.count = poses.length;
+    this.details.count = poses.length;
+    this.paint.instanceMatrix.needsUpdate = true;
+    if (this.paint.instanceColor) this.paint.instanceColor.needsUpdate = true;
     return poses.length > 0;
   }
 
   dispose() {
-    this.object.geometry.dispose();
-    (this.object.material as THREE.Material).dispose();
-    this.object.dispose();
+    for (const mesh of [this.paint, this.details]) {
+      mesh.geometry.dispose();
+      (mesh.material as THREE.Material).dispose();
+      mesh.dispose();
+    }
   }
 }
