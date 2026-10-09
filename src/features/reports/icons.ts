@@ -1,18 +1,7 @@
 import type { Map as MaplibreMap } from 'maplibre-gl';
-import { ACCESS_COLORS } from '../../domain/access';
-import { isTemporary, REPORT_ANSWERS, REPORT_TYPES, type Report, reportStatus, type ReportType } from '../../domain/reports';
-import { addBadgeImages, type Glyph } from '../../map/badgeIcon';
-import { ACCESS_GLYPHS } from '../accessibility/icons';
-
-const GLYPHS: Record<ReportType, Glyph> = {
-  // A barrier on two legs.
-  blocked: { path: 'M3 8h18v5.5H3z M6 13.5h2.2V19H6z M15.8 13.5H18V19h-2.2z' },
-  step: ACCESS_GLYPHS.steps,
-  // Two arrows pressing on a line.
-  narrow: { path: 'M9.5 12L3 6.5v11z M14.5 12L21 6.5v11z M11 4h2v16h-2z' },
-  elevator: ACCESS_GLYPHS.elevator,
-  toilet: ACCESS_GLYPHS.toilet,
-};
+import { REPORT_ANSWERS, REPORT_TYPES, type Report, reportStatus } from '../../domain/reports';
+import { addBadgeImages } from '../../map/badgeIcon';
+import { REPORT_SCENES } from './scenes';
 
 export const REPORT_ICON_PREFIX = 'report-';
 
@@ -22,21 +11,25 @@ export const reportIconId = ({ type, answer }: Pick<Report, 'type' | 'answer'>) 
 export const PENDING_SUFFIX = '-pending';
 
 /**
- * Registers the symbol of every kind of report, plus its selected form. A temporary report is
- * a triangle, the one shape the accessibility symbols do not use; a permanent one looks like
- * those symbols: a rounded square when one can get through, a diamond when not. Amber and red
- * mean the same as everywhere else. Safe to call more than once.
+ * Brighter than the accessibility colours, with the same meaning: red when one cannot get
+ * through or use it, amber when one can with help.
+ */
+const REPORT_COLORS: Record<ReturnType<typeof reportStatus>, string> = { partial: '#f59f00', no: '#d32f2f' };
+
+/**
+ * Registers the symbol of every kind of report, plus its selected form. A report is a pin, the
+ * one shape nothing else on the map uses, and larger than every other symbol; its head shows a
+ * small drawing of what was reported (see `REPORT_SCENES`). Safe to call more than once.
  */
 export function addReportIcons(map: Pick<MaplibreMap, 'hasImage' | 'addImage'>) {
   for (const type of REPORT_TYPES) {
     for (const answer of REPORT_ANSWERS[type]) {
-      const status = reportStatus({ answer });
-      const color = ACCESS_COLORS[status];
-      const shape = isTemporary({ type, answer }) ? 'triangle' : status === 'no' ? 'diamond' : 'square';
+      const fill = REPORT_COLORS[reportStatus({ answer })];
+      const glyph = { scene: REPORT_SCENES[type] };
       const id = reportIconId({ type, answer });
-      addBadgeImages(map, id, { shape, fill: color, outline: '#ffffff', outlineWidth: 1.5, ink: '#ffffff', glyph: GLYPHS[type] }, color);
-      // Hollow already means "no confirmed information" among the accessibility symbols.
-      addBadgeImages(map, `${id}${PENDING_SUFFIX}`, { shape, fill: '#ffffff', outline: color, outlineWidth: 2, ink: color, glyph: GLYPHS[type], dashed: true }, color);
+      addBadgeImages(map, id, { shape: 'pin', fill, outline: '#ffffff', outlineWidth: 2.5, glyph }, fill);
+      // Hollow already means "no confirmed information" among the accessibility symbols; the drawing fades with it.
+      addBadgeImages(map, `${id}${PENDING_SUFFIX}`, { shape: 'pin', fill: '#ffffff', outline: fill, outlineWidth: 2.5, glyph, glyphOpacity: 0.45, dashed: true }, fill);
     }
   }
 }

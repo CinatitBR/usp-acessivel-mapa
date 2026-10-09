@@ -19,7 +19,7 @@ const MIN_ZOOM = 14;
 
 type ReportProperties = { id: string; icon: string; temporary: boolean; rank: number };
 
-/** Where two reports share a spot the worse one is drawn: lower ranks are placed first. */
+/** Where two reports share a spot the worse one is drawn on top: it has the lower rank. */
 const RANK: Record<Report['answer'], number> = { no: 0, broken: 0, closed: 0, missing: 0, help: 1, yes: 2 };
 
 export const reportFeatures = (reports: readonly Report[]): FeatureCollection<Point, ReportProperties> => ({
@@ -36,8 +36,12 @@ const ON_ROUTE_SCALE = 1.35;
 
 const baseLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['get', 'icon'],
-  'symbol-sort-key': ['get', 'rank'],
-  // Reports give way to one another, but never to other symbols, and never hide them.
+  // The tip of the pin is on the spot.
+  'icon-anchor': 'bottom',
+  // The worse of two reports on one spot is drawn on top.
+  'symbol-sort-key': ['-', ['get', 'rank']],
+  // Reports are never hidden, by one another or by other symbols, and never hide those.
+  'icon-allow-overlap': true,
   'icon-ignore-placement': true,
 };
 
@@ -46,19 +50,21 @@ const sized = (layout: SymbolLayerSpecification['layout'], larger: readonly stri
   ...layout,
   'icon-size': [
     'interpolate', ['linear'], ['zoom'],
-    MIN_ZOOM, ['case', ['in', ['get', 'id'], ['literal', larger]], 0.6 * ON_ROUTE_SCALE, 0.6],
+    MIN_ZOOM, ['case', ['in', ['get', 'id'], ['literal', larger]], 0.75 * ON_ROUTE_SCALE, 0.75],
     18, ['case', ['in', ['get', 'id'], ['literal', larger]], ON_ROUTE_SCALE, 1],
   ],
 });
 
 const selectedLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['concat', ['get', 'icon'], SELECTED_SUFFIX],
+  'icon-anchor': 'bottom',
   'icon-allow-overlap': true,
   'icon-ignore-placement': true,
 };
 
 const mineLayout: SymbolLayerSpecification['layout'] = {
   'icon-image': ['concat', ['get', 'icon'], PENDING_SUFFIX],
+  'icon-anchor': 'bottom',
   'icon-allow-overlap': true,
   'icon-ignore-placement': true,
 };
@@ -69,9 +75,9 @@ const mineSelectedLayout: SymbolLayerSpecification['layout'] = {
 };
 
 /**
- * Published reports. Temporary ones (triangles) are always drawn, unless switched off in the
- * layer menu; permanent ones are part of the accessibility view. The person's own reports,
- * not reviewed yet, are always drawn, hollow. The selected one is drawn larger, with a ring.
+ * Published reports, as pins above every other symbol. Temporary ones are always drawn, unless
+ * switched off in the layer menu; permanent ones are part of the accessibility view. The person's
+ * own reports, not reviewed yet, are always drawn, hollow. The selected one is drawn larger, with a rim.
  */
 export function ReportLayers() {
   const { current: map } = useMap();
