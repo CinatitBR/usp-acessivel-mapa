@@ -5,7 +5,7 @@ import type { LngLat } from '../domain/types';
 import { ACCESS_LAYER, ACCESS_SELECTED_LAYER } from '../features/accessibility/layers';
 import { BUILDINGS_LAYER, BUILDINGS_SOURCE } from '../features/buildings/layers';
 import { INDOOR_ROOMS_LAYER, INDOOR_SLAB_LAYER, PASSAGE_CATEGORIES } from '../features/indoor/layers';
-import { POIS_LAYER, POIS_SELECTED_LAYER } from '../features/pois/layers';
+import { GROUP_MAX_ZOOM, POIS_GROUPS_LAYER, POIS_LAYER, POIS_SELECTED_LAYER } from '../features/pois/layers';
 import { MY_REPORTS_LAYER, MY_REPORTS_SELECTED_LAYER, REPORTS_LAYER, REPORTS_SELECTED_LAYER } from '../features/reports/layers';
 import { onCampus, placeAt } from '../features/reports/place';
 import { STOPS_LAYER, STOPS_SELECTED_LAYER } from '../features/transit/layers';
@@ -57,10 +57,15 @@ export function MapSelection() {
         return;
       }
       // Small symbols win over the building underneath them.
-      const layers = [BUSES_LAYER, ...Object.keys(POINT_KINDS), INDOOR_ROOMS_LAYER, INDOOR_SLAB_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
+      const layers = [BUSES_LAYER, ...Object.keys(POINT_KINDS), POIS_GROUPS_LAYER, INDOOR_ROOMS_LAYER, INDOOR_SLAB_LAYER, BUILDINGS_LAYER].filter((layer) => map.getLayer(layer));
       const feature = layers.length > 0 ? map.queryRenderedFeatures(event.point, { layers })[0] : undefined;
       // A tap on the bare floor of an open plan, or on a corridor, keeps whatever is selected.
       if (feature?.layer.id === INDOOR_SLAB_LAYER) return;
+      if (feature?.layer.id === POIS_GROUPS_LAYER && feature.geometry.type === 'Point') {
+        // A count opens up: close enough, its places are drawn one by one.
+        map.easeTo({ center: feature.geometry.coordinates as LngLat, zoom: GROUP_MAX_ZOOM, duration: CENTER_MS });
+        return;
+      }
       const id: unknown = feature?.properties.id;
       if (feature?.layer.id === INDOOR_ROOMS_LAYER) {
         const { indoor } = useAppStore.getState();

@@ -13,8 +13,8 @@ export const STOPS_LAYER = 'bus-stops';
 export const STOPS_SELECTED_LAYER = 'bus-stops-selected';
 
 const STOPS_URL = dataUrl('stops.geojson');
-const STOPS_MIN_ZOOM = 14;
-const LABEL_MIN_ZOOM = 17;
+const STOPS_MIN_ZOOM = 16;
+const LABEL_MIN_ZOOM = 16;
 
 const label: SymbolLayerSpecification['layout'] = {
   'text-font': ['Noto Sans Regular'],
@@ -27,7 +27,7 @@ const label: SymbolLayerSpecification['layout'] = {
 const layout: SymbolLayerSpecification['layout'] = {
   ...label,
   'icon-image': STOP_ICON,
-  'icon-size': ['interpolate', ['linear'], ['zoom'], STOPS_MIN_ZOOM, 0.45, 18, 1],
+  'icon-size': ['interpolate', ['linear'], ['zoom'], STOPS_MIN_ZOOM, 0.55, 18, 1],
   // A stop never gives way to another symbol.
   'icon-allow-overlap': true,
   'text-field': ['step', ['zoom'], '', LABEL_MIN_ZOOM, ['coalesce', ['get', 'name'], '']],
