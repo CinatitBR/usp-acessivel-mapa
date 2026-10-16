@@ -133,6 +133,8 @@ export const strings = {
     minutes: 'min',
     today: 'hoje',
     tomorrow: 'amanhã',
+    laterShow: (day: string, count: number) => `Horários de ${day} (${count})`,
+    laterHide: (day: string) => `Ocultar horários de ${day}`,
     accessibleBus: 'acessível',
     bus: 'Ônibus',
     vehicles: { bus: 'Ônibus', rail: 'Trem ou metrô' },

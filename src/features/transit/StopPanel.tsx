@@ -1,4 +1,4 @@
-import { use, useMemo } from 'react';
+import { use, useMemo, useState } from 'react';
 import { Icon } from '../../ui/Icon';
 import type { Arrival, BusStop } from '../../domain/types';
 import { useOnline } from '../../lib/useOnline';
@@ -8,8 +8,8 @@ import { strings } from '../../strings/pt-BR';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { busTracker } from './busTracker';
 import { type LineColor, lineStyle, useLineColors } from './LineBadge';
-import { arrivalLabels } from './time';
-import { estimateTrackedArrivals, mergeArrivals } from './trackedArrivals';
+import { arrivalLabels, dayLabel } from './time';
+import { estimateTrackedArrivals, mergeArrivals, splitByDay } from './trackedArrivals';
 import { useArrivals } from './useArrivals';
 import { useNow } from './useNow';
 
@@ -58,10 +58,14 @@ function Arrivals({ stop }: { stop: BusStop }) {
   const stops = use(loadStops());
   const lineColors = useLineColors();
   const positions = useMemo(() => new Map(stops.map((candidate) => [candidate.id, candidate.position])), [stops]);
+  const [showLater, setShowLater] = useState(false);
 
   // Offline, the request is paused rather than failed, and old predictions would mislead.
   if (!online) return <p className="muted">{strings.offline.arrivals}</p>;
   if (isPending) return <p className="muted">{strings.loading}</p>;
+
+  // The timetable runs on into the next day; those departures wait behind a toggle, apart from today's.
+  const { today, later } = splitByDay(data?.arrivals ?? [], now);
 
   // SPTrans leaves campus buses out at some stops, so the buses on the map fill the list in.
   // Their positions are a separate request: they can be there when the predictions are not.
@@ -73,31 +77,48 @@ function Arrivals({ stop }: { stop: BusStop }) {
     now,
   );
   const arrivals = mergeArrivals(
-    data?.arrivals ?? [],
+    today,
     estimated,
     (lineId) => busTracker.route(lineId, 0) !== undefined || busTracker.route(lineId, 1) !== undefined,
   );
-  if (arrivals.length === 0) {
-    if (isError) return <p className="muted">{strings.transit.unavailable}</p>;
-    return <p className="muted">{data.liveReachable ? strings.transit.none : strings.transit.noneNoLive}</p>;
-  }
+  const rows = (list: Arrival[]) => (
+    <ul className="arrivals">
+      {list.map((arrival, index) => (
+        <ArrivalRow key={`${arrival.lineId}-${arrival.time}-${index}`} arrival={arrival} now={now} stopId={stop.id} colors={lineColors.get(arrival.lineId)} />
+      ))}
+    </ul>
+  );
 
   const scheduled = arrivals.every((arrival) => arrival.source === 'scheduled');
+  const laterDay = later[0] && dayLabel(later[0].time, now);
   return (
     <>
-      <p className={scheduled ? 'arrivals-source scheduled' : 'arrivals-source'}>
-        {!scheduled
-          ? strings.transit.live
-          : data?.liveReachable
-            ? strings.transit.scheduledNoBuses
-            : strings.transit.scheduledNoLive}
-      </p>
-      <ul className="arrivals">
-        {arrivals.map((arrival, index) => (
-          <ArrivalRow key={`${arrival.lineId}-${arrival.time}-${index}`} arrival={arrival} now={now} stopId={stop.id} colors={lineColors.get(arrival.lineId)} />
-        ))}
-      </ul>
-      {arrivals.some((arrival) => arrival.source === 'estimated') && <p className="muted">{strings.transit.estimatedNote}</p>}
+      {arrivals.length === 0 ? (
+        <p className="muted">
+          {isError ? strings.transit.unavailable : data.liveReachable ? strings.transit.none : strings.transit.noneNoLive}
+        </p>
+      ) : (
+        <>
+          <p className={scheduled ? 'arrivals-source scheduled' : 'arrivals-source'}>
+            {!scheduled
+              ? strings.transit.live
+              : data?.liveReachable
+                ? strings.transit.scheduledNoBuses
+                : strings.transit.scheduledNoLive}
+          </p>
+          {rows(arrivals)}
+          {arrivals.some((arrival) => arrival.source === 'estimated') && <p className="muted">{strings.transit.estimatedNote}</p>}
+        </>
+      )}
+      {laterDay && (
+        <div className="arrivals-later">
+          <button type="button" className="timeline-toggle" aria-expanded={showLater} onClick={() => setShowLater(!showLater)}>
+            {showLater ? strings.transit.laterHide(laterDay) : strings.transit.laterShow(laterDay, later.length)}
+            <Icon name="chevronDown" />
+          </button>
+          {showLater && rows(later)}
+        </div>
+      )}
     </>
   );
 }
@@ -118,7 +139,7 @@ export function StopPanel({ id }: { id: string }) {
       {stop.description && <p className="muted">{stop.description}</p>}
       <div aria-live="polite">
         <h3 className="list-title">{strings.transit.arrivals}</h3>
-        <Arrivals stop={stop} />
+        <Arrivals key={stop.id} stop={stop} />
       </div>
       <p className="muted">
         {strings.transit.lines}: {stop.lineIds.join(', ')}

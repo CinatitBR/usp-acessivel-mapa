@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { arrivalLabels, dayClock, formatClock, fromDateTimeField, toDateTimeField } from './time';
+import { arrivalLabels, dayClock, dayLabel, formatClock, fromDateTimeField, isSameDay, toDateTimeField } from './time';
 
 /** São Paulo is UTC−3. */
 const local = (day: number, hour: number, minute: number) => Date.UTC(2026, 9, day, hour + 3, minute);
@@ -34,6 +34,19 @@ describe('dayClock', () => {
     expect(dayClock(local(5, 16, 0), NOW)).toBe('16:00');
     expect(dayClock(local(6, 0, 8), NOW)).toBe('amanhã, 00:08');
     expect(dayClock(local(14, 7, 0), NOW)).toMatch(/^qua\.?, 14\/10, 07:00$/);
+  });
+});
+
+describe('isSameDay and dayLabel', () => {
+  it('compares days on the São Paulo calendar', () => {
+    // 23:30 local is already the next day in UTC.
+    expect(isSameDay(local(5, 23, 30), NOW)).toBe(true);
+    expect(isSameDay(local(6, 0, 8), NOW)).toBe(false);
+  });
+
+  it('names tomorrow, and gives the date further on', () => {
+    expect(dayLabel(local(6, 0, 8), NOW)).toBe('amanhã');
+    expect(dayLabel(local(14, 7, 0), NOW)).toMatch(/^qua\.?, 14\/10$/);
   });
 });
 

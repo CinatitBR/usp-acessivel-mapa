@@ -14,11 +14,17 @@ const UTC_OFFSET = '-03:00';
 /** `14:05`, on the São Paulo clock. */
 export const formatClock = (time: number): string => clock.format(time);
 
+/** Whether two moments fall on the same day of the São Paulo calendar. */
+export const isSameDay = (a: number, b: number): boolean => dayKey.format(a) === dayKey.format(b);
+
+/** The name of a day that is not today: `amanhã`, or `qua., 14/10` further on. */
+export const dayLabel = (time: number, now: number): string =>
+  isSameDay(time, now + DAY_MS) ? strings.transit.tomorrow : date.format(time);
+
 /** The clock time, with the day before it when that is not today: `14:05`, `amanhã, 14:05`, `qua., 14/10, 14:05`. */
 export function dayClock(time: number, now: number): string {
-  const day = dayKey.format(time);
-  if (day === dayKey.format(now)) return clock.format(time);
-  return `${day === dayKey.format(now + DAY_MS) ? strings.transit.tomorrow : date.format(time)}, ${clock.format(time)}`;
+  if (isSameDay(time, now)) return clock.format(time);
+  return `${dayLabel(time, now)}, ${clock.format(time)}`;
 }
 
 /** The value of a `datetime-local` field for a moment, read on the São Paulo clock: `2026-10-08T14:05`. */

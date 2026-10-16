@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Arrival, BusStop, LineDirection, LngLat } from '../../domain/types';
 import type { BusPose, BusRoute } from './busTracker';
 import { buildShape } from './interpolate';
-import { CAMPUS_BUS_SPEED, estimateTrackedArrivals, mergeArrivals } from './trackedArrivals';
+import { CAMPUS_BUS_SPEED, estimateTrackedArrivals, mergeArrivals, splitByDay } from './trackedArrivals';
 
 const NOW = Date.parse('2026-10-06T21:20:00-03:00');
 
@@ -123,5 +123,30 @@ describe('mergeArrivals', () => {
 
   it('returns nothing when there is nothing', () => {
     expect(mergeArrivals([], [], tracked)).toEqual([]);
+  });
+});
+
+describe('splitByDay', () => {
+  // NOW is 21:20, so midnight is 160 minutes away.
+  const row = (minutes: number, source: Arrival['source']): Arrival => ({ lineId: '701U-10', headsign: '', time: NOW + minutes * 60_000, source });
+  const minutes = (arrivals: Arrival[]) => arrivals.map((arrival) => (arrival.time - NOW) / 60_000);
+
+  it('sets apart the timetable departures after midnight, soonest first', () => {
+    const { today, later } = splitByDay([row(400, 'scheduled'), row(30, 'scheduled'), row(170, 'scheduled'), row(5, 'live')], NOW);
+    expect(minutes(today)).toEqual([30, 5]);
+    expect(minutes(later)).toEqual([170, 400]);
+  });
+
+  it('keeps a predicted or estimated bus with today, even after midnight', () => {
+    const { today, later } = splitByDay([row(165, 'live'), row(170, 'estimated')], NOW);
+    expect(minutes(today)).toEqual([165, 170]);
+    expect(later).toEqual([]);
+  });
+
+  it('keeps one day only, the first with departures, and no more rows than a panel shows', () => {
+    const dayAfter = 160 + 24 * 60;
+    const many = Array.from({ length: 20 }, (_, index) => row(dayAfter + 10 + index, 'scheduled'));
+    expect(minutes(splitByDay([row(dayAfter + 5, 'scheduled'), row(200, 'scheduled')], NOW).later)).toEqual([200]);
+    expect(splitByDay(many, NOW).later).toHaveLength(12);
   });
 });

@@ -2,6 +2,7 @@ import type { Arrival, BusStop, LngLat } from '../../domain/types';
 import type { BusPose, BusRoute } from './busTracker';
 import { type LocatedStop, locateStops, passedCount } from './lineStops';
 import { MAX_ARRIVALS } from './providers/types';
+import { isSameDay } from './time';
 
 /**
  * Average speed of a campus bus, stops included, in metres per second (27 km/h).
@@ -112,4 +113,20 @@ export function mergeArrivals(provided: Arrival[], estimated: Arrival[], isTrack
 
   const others = provided.filter((arrival) => !isTracked(arrival.lineId)).sort(byTime);
   return [...tracked.sort(byTime), ...others.slice(0, Math.max(MIN_OTHER_ARRIVALS, MAX_ARRIVALS - tracked.length))];
+}
+
+/**
+ * Sets apart the timetable departures that are not today's, which a stop panel
+ * keeps folded away: those of the first day that has any, soonest first.
+ * Predictions and estimates are buses on the road, so they stay with today
+ * even just after midnight.
+ */
+export function splitByDay(arrivals: Arrival[], now: number): { today: Arrival[]; later: Arrival[] } {
+  const isLater = (arrival: Arrival) => arrival.source === 'scheduled' && !isSameDay(arrival.time, now);
+  const later = arrivals.filter(isLater).sort((a, b) => a.time - b.time);
+  const first = later[0];
+  return {
+    today: arrivals.filter((arrival) => !isLater(arrival)),
+    later: first ? later.filter((arrival) => isSameDay(arrival.time, first.time)).slice(0, MAX_ARRIVALS) : [],
+  };
 }

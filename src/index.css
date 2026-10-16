@@ -1062,6 +1062,22 @@ input {
   color: var(--warning-strong);
 }
 
+/* Timetable departures of another day, folded away under today's */
+.arrivals-later {
+  margin-top: 12px;
+  border-top: 2px solid var(--border);
+}
+
+.arrivals-later .timeline-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.arrivals-later .timeline-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
 /* A live arrival that can be followed on the map */
 .arrival-follow {
   grid-template-columns: auto 1fr auto auto;
