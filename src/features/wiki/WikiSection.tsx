@@ -21,6 +21,8 @@ type Props = {
   wiki: WikiRef | undefined;
   /** Set when the article is about something larger than what is selected, e.g. the building's institute. */
   about?: string;
+  /** Photos and a link to the article, without its text. */
+  brief?: boolean;
 };
 
 /**
@@ -28,7 +30,7 @@ type Props = {
  * back: nothing is rendered when there is no article, the request fails or the
  * device is offline with nothing cached.
  */
-export function WikiSection({ wiki, about }: Props) {
+export function WikiSection({ wiki, about, brief }: Props) {
   const { data, isPending } = useWikiArticle(wiki);
   if (!wiki) return null;
   if (isPending) return <div className="wiki wiki-loading" aria-busy="true" aria-label={strings.loading} />;
@@ -46,12 +48,13 @@ export function WikiSection({ wiki, about }: Props) {
           caption: credit(photo),
         }))}
       />
-      <p className="wiki-extract">{summary.extract}</p>
+      {!brief && <p className="wiki-extract">{summary.extract}</p>}
       <p className="wiki-source">
         <a href={summary.url} target="_blank" rel="noopener noreferrer">
           {strings.wiki.readMore}
         </a>
-        {` · ${strings.wiki.license}`}
+        {/* The licence is the text's; the photos credit themselves. */}
+        {!brief && ` · ${strings.wiki.license}`}
       </p>
     </section>
   );

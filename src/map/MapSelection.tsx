@@ -13,6 +13,7 @@ import { BUSES_LAYER } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
 import { strings } from '../strings/pt-BR';
 import { MAP_ACCENT } from '../styles/palette';
+import { loadBuildings } from './staticData';
 
 const FLY_MIN_ZOOM = 17;
 /** How long the camera takes to centre on a tapped symbol. */
@@ -82,7 +83,15 @@ export function MapSelection() {
         const position = geometry.type === 'Point' ? (geometry.coordinates as LngLat) : event.lngLat.toArray();
         select({ kind, id, position }, position, true);
       }
-      else select({ kind: 'building', id });
+      else {
+        select({ kind: 'building', id });
+        // The camera then centres on the building, not on where the finger landed; it is already loaded, since it was drawn.
+        void loadBuildings().then((buildings) => {
+          const center = buildings.find((building) => building.id === id)?.center;
+          const { selection } = useAppStore.getState();
+          if (center && selection?.kind === 'building' && selection.id === id) useAppStore.setState({ flyTarget: { position: center, keepZoom: true } });
+        });
+      }
     };
     map.on('click', onClick);
     return () => {

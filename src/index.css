@@ -385,7 +385,8 @@ input {
 .maplibregl-ctrl-bottom-left,
 .map-status,
 .toast,
-.level-switcher {
+.level-switcher,
+.report-open {
   transition: bottom var(--sheet-motion);
 }
 
@@ -393,7 +394,8 @@ input {
 .sheet-dragging .maplibregl-ctrl-bottom-left,
 .sheet-dragging .map-status,
 .sheet-dragging .toast,
-.sheet-dragging .level-switcher {
+.sheet-dragging .level-switcher,
+.sheet-dragging .report-open {
   transition: none;
 }
 
@@ -403,7 +405,8 @@ input {
   .maplibregl-ctrl-bottom-left,
   .map-status,
   .toast,
-  .level-switcher {
+  .level-switcher,
+  .report-open {
     transition: none;
   }
 }
@@ -2044,12 +2047,38 @@ input {
   margin: 0;
 }
 
-/* Reporting */
+/* Reporting: on phones a larger button at the bottom right, in reach of the thumb, riding on the sheet */
 .report-open {
   display: grid;
   place-items: center;
-  top: calc(env(safe-area-inset-top) + 258px);
+  /* Clear of the attribution, which opens over two lines on a phone. */
+  bottom: calc(var(--sheet-cover) + 64px);
+  width: 56px;
+  height: 56px;
   padding: 0;
+  background: transparent;
+}
+
+/* The icon is its own blue circle. */
+.report-open img {
+  width: 100%;
+  height: 100%;
+}
+
+/* While a report is being written: a ring, so the icon stays as it is. */
+.report-open[aria-pressed="true"] {
+  background: transparent;
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--accent);
+}
+
+/* On wide screens it stays in the column of map buttons at the top right. */
+@media (min-width: 760px) {
+  .report-open {
+    top: calc(env(safe-area-inset-top) + 258px);
+    bottom: auto;
+    width: 44px;
+    height: 44px;
+  }
 }
 
 /* The types to choose from: tall rows, easy to hit */

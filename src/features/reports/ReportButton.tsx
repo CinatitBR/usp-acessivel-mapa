@@ -1,8 +1,9 @@
 import { useAppStore } from '../../state/store';
 import { strings } from '../../strings/pt-BR';
 import { Icon } from '../../ui/Icon';
+import reportIcon from '../../assets/icons/community-report.svg';
 
-/** Round map button that starts a report; the place is then chosen by tapping the map. */
+/** Round map button that starts a report; the place is then chosen by tapping the map. On phones it sits in reach of the thumb. */
 export function ReportButton() {
   const active = useAppStore((state) => state.reportDraft !== null);
   const startReport = useAppStore((state) => state.startReport);
@@ -16,7 +17,7 @@ export function ReportButton() {
       title={strings.reports.open}
       onClick={() => (active ? closeReport() : startReport())}
     >
-      <Icon name="flag" />
+      <img src={reportIcon} alt="" />
     </button>
   );
 }

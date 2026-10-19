@@ -82,9 +82,9 @@ export function BuildingPanel({ id }: { id: string }) {
       )}
       {/* A building without an article of its own shows its institute's. */}
       {building.wiki ? (
-        <WikiSection wiki={building.wiki} />
+        <WikiSection wiki={building.wiki} brief />
       ) : (
-        institute?.wiki && <WikiSection wiki={institute.wiki} about={institute.sigla ?? institute.name} />
+        institute?.wiki && <WikiSection wiki={institute.wiki} about={institute.sigla ?? institute.name} brief />
       )}
       <AccessSummary access={building.access} />
       <VisualRoutesSection unit={unitOf(building)} from={{ kind: 'building', id: building.id }} />
