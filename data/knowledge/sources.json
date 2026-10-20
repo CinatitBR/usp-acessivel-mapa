@@ -1,0 +1,23 @@
+{
+  "pages": [
+    {
+      "id": "fousp",
+      "topic": "saude-odontologica",
+      "urls": ["https://site.fo.usp.br/paciente/"],
+      "place": "institute way/34381227"
+    },
+    {
+      "id": "fundecto",
+      "topic": "saude-odontologica",
+      "urls": ["https://fundecto-dev.netwish.com.br/atendimento-clinico/"],
+      "place": "institute way/34381227"
+    }
+  ],
+  "indexes": [
+    {
+      "topic": "extensao",
+      "url": "https://sites.usp.br/cosmos/grupos-residentes/",
+      "about": "Grupos residentes do Cosmos, o espaço de empreendedorismo da USP"
+    }
+  ]
+}

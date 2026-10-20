@@ -10,3 +10,4 @@ worker/worker-configuration.d.ts
 test-results/
 CLAUDE.local.md
 .claude/worktrees/
+data/knowledge/raw/

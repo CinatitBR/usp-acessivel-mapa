@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "id": "fousp",
+      "title": "FOUSP — Faculdade de Odontologia da USP",
+      "topic": "saude-odontologica",
+      "sources": [
+        "https://site.fo.usp.br/paciente/"
+      ],
+      "checked": "2026-10-20",
+      "body": "Oferece tratamentos odontológicos conforme a disponibilidade de vagas. É necessário apresentar carta de encaminhamento de um dentista, especificando o tratamento necessário. A faculdade também tem um setor de emergência odontológica.\n\n- Endereço: Av. Prof. Lineu Prestes, 2227 — Butantã, São Paulo\n- Telefone: (11) 3091-7418, opção 4\n- Site: https://site.fo.usp.br/paciente/\n\nAs vagas abrem em seleções: acompanhe o site e o Instagram da faculdade."
+    },
+    {
+      "id": "fundecto",
+      "title": "FUNDECTO — atendimento clínico odontológico",
+      "topic": "saude-odontologica",
+      "sources": [
+        "https://fundecto-dev.netwish.com.br/atendimento-clinico/"
+      ],
+      "checked": "2026-10-20",
+      "body": "Oferece tratamentos odontológicos por meio de seleções e cursos clínicos. Para a maioria dos procedimentos é necessária carta de encaminhamento de um dentista, indicando o tratamento necessário.\n\n- Extração de sisos: não exige encaminhamento; entre em contato para informações.\n- Implantes dentários: não exigem encaminhamento, mas há critérios específicos de elegibilidade.\n\n- Endereço: Av. Lineu Prestes, 2227 — Butantã, São Paulo\n- Telefone: (11) 91147-0450\n- WhatsApp: (11) 3030-0920\n- Site: https://fundecto-dev.netwish.com.br/atendimento-clinico/\n\nAs vagas abrem em seleções: acompanhe o site e o Instagram da FUNDECTO."
+    }
+  ]
+}
