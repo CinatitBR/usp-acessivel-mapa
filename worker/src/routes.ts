@@ -18,6 +18,8 @@ export type Route =
   | { kind: 'review-keep'; id: string }
   /** What someone says about a published report, in the body: it is still so, or it changed. */
   | { kind: 'feedback'; id: string }
+  /** A question for the campus chat, with the conversation so far, in the body. */
+  | { kind: 'chat' }
   | { kind: 'bad-request'; message: string }
   | { kind: 'not-found' };
 
@@ -48,6 +50,7 @@ function parseCode(value: string | null): number | undefined {
 
 export function matchRoute(method: string, url: URL): Route {
   if (method === 'POST' && url.pathname === '/reports') return { kind: 'submit-report' };
+  if (method === 'POST' && url.pathname === '/chat') return { kind: 'chat' };
   const decided = method === 'POST' ? /^\/review\/reports\/([\w-]{1,40})$/.exec(url.pathname) : null;
   if (decided) return { kind: 'review-decide', id: decided[1]! };
   const kept = method === 'POST' ? /^\/review\/reports\/([\w-]{1,40})\/keep$/.exec(url.pathname) : null;

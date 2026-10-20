@@ -113,4 +113,9 @@ describe('checkOrigin', () => {
     expect(matchRoute('POST', new URL('https://w/health'))).toEqual({ kind: 'not-found' });
     expect(matchRoute('PUT', new URL('https://w/reports'))).toEqual({ kind: 'not-found' });
   });
+
+  it('takes a chat question only as a POST to /chat', () => {
+    expect(matchRoute('POST', new URL('https://w/chat'))).toEqual({ kind: 'chat' });
+    expect(matchRoute('GET', new URL('https://w/chat'))).toEqual({ kind: 'not-found' });
+  });
 });

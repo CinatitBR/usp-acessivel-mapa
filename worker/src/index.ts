@@ -3,8 +3,11 @@
  * key, signs in to Olho Vivo, forwards a fixed set of read-only calls, adds
  * CORS headers and caches briefly. Responses are the upstream payloads, untouched: all parsing
  * happens in the app's adapters. Reports are the exception: they are this Worker's own data,
- * kept in a D1 database (see reports.ts and reportsDb.ts).
+ * kept in a D1 database (see reports.ts and reportsDb.ts). The chat is the other: its answers come from
+ * a model (Workers AI or Gemini), streamed through (see chat.ts and llm.ts).
  */
+import { MAX_CHAT_BODY_BYTES, parseChatRequest } from './chat';
+import { ChatUpstreamError, streamAnswer } from './llm';
 import { DATA_TTL_SECONDS, olhoVivo, positionsBody, UpstreamError } from './olhovivo';
 import { ORS_ROUTE_TTL_SECONDS, orsRoute } from './ors';
 import { MAX_BODY_BYTES, newReportId, parseFeedback, parseSubmission, todayInSaoPaulo } from './reports';
@@ -37,9 +40,9 @@ async function acceptReport(request: Request, env: Env, cors: Record<string, str
 }
 
 /** A JSON body of bounded size, or the answer that refuses it. */
-async function readBody(request: Request, cors: Record<string, string>): Promise<{ body: unknown } | { refused: Response }> {
+async function readBody(request: Request, cors: Record<string, string>, maxBytes = MAX_BODY_BYTES): Promise<{ body: unknown } | { refused: Response }> {
   const text = await request.text();
-  if (text.length > MAX_BODY_BYTES) return { refused: failure('bad_request', 413, cors, 'the body is too large') };
+  if (text.length > maxBytes) return { refused: failure('bad_request', 413, cors, 'the body is too large') };
   try {
     return { body: JSON.parse(text) as unknown };
   } catch {
@@ -74,6 +77,25 @@ async function acceptFeedback(id: string, request: Request, env: Env, cors: Reco
   return found ? json({ ok: true }, 201, { 'Cache-Control': 'no-store', ...cors }) : failure('not_found', 404, cors);
 }
 
+/** Streams the chat's answer as server-sent events. Only token counts are logged, never what was asked. */
+async function chat(request: Request, env: Env, cors: Record<string, string>): Promise<Response> {
+  const read = await readBody(request, cors, MAX_CHAT_BODY_BYTES);
+  if ('refused' in read) return read.refused;
+  const parsed = parseChatRequest(read.body);
+  if ('error' in parsed) return failure('bad_request', 400, cors, parsed.error);
+  let stream: ReadableStream<Uint8Array>;
+  try {
+    stream = await streamAnswer(parsed.messages, env, (usage, end) => console.log(JSON.stringify({ route: 'chat-usage', end, ...usage })));
+  } catch (error) {
+    if (error instanceof ChatUpstreamError && error.status === 429) return failure('rate_limited', 429, { 'Retry-After': '60', ...cors });
+    return failure(error instanceof DOMException && error.name === 'TimeoutError' ? 'timeout' : 'upstream', 502, cors);
+  }
+  return new Response(stream, {
+    status: 200,
+    headers: { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-store', ...cors },
+  });
+}
+
 async function respond(route: Route, request: Request, env: Env, ctx: ExecutionContext, cors: Record<string, string>): Promise<Response> {
   const cached = { 'Cache-Control': `public, max-age=${DATA_TTL_SECONDS}`, ...cors };
   switch (route.kind) {
@@ -105,6 +127,8 @@ async function respond(route: Route, request: Request, env: Env, ctx: ExecutionC
       return acceptReport(request, env, cors);
     case 'feedback':
       return acceptFeedback(route.id, request, env, cors);
+    case 'chat':
+      return chat(request, env, cors);
     case 'review-list':
     case 'review-decide':
     case 'review-keep':
@@ -126,12 +150,12 @@ export default {
     let response: Response;
     if (!origin.ok) {
       response = failure('forbidden', 403, {});
-    } else if ((route.kind === 'submit-report' || route.kind === 'feedback') && !request.headers.get('Origin')) {
-      // Reports and answers come from the app in a browser, which always says where it is.
+    } else if ((route.kind === 'submit-report' || route.kind === 'feedback' || route.kind === 'chat') && !request.headers.get('Origin')) {
+      // Reports, answers and questions come from the app in a browser, which always says where it is.
       response = failure('forbidden', 403, {});
     } else if (request.method === 'OPTIONS') {
       response = new Response(null, { status: 204, headers: origin.headers });
-    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors' || route.kind === 'reports' || route.kind === 'submit-report' || route.kind === 'review-list' || route.kind === 'review-decide' || route.kind === 'review-keep' || route.kind === 'feedback') {
+    } else if (route.kind === 'olhovivo' || route.kind === 'positions' || route.kind === 'ors' || route.kind === 'reports' || route.kind === 'submit-report' || route.kind === 'review-list' || route.kind === 'review-decide' || route.kind === 'review-keep' || route.kind === 'feedback' || route.kind === 'chat') {
       const client = request.headers.get('CF-Connecting-IP') ?? 'unknown';
       // Reading reports shares the general limit; routing and sending a report have stricter ones.
       const limiter =
@@ -139,6 +163,8 @@ export default {
         : route.kind === 'submit-report' ? env.REPORT_LIMITER
         // Slow enough that the reviewers' password cannot be found by trying.
         : route.kind === 'feedback' ? env.FEEDBACK_LIMITER
+        // Every question costs a model call.
+        : route.kind === 'chat' ? env.CHAT_LIMITER
         : route.kind === 'review-list' || route.kind === 'review-decide' || route.kind === 'review-keep' ? env.REVIEW_LIMITER
         : env.OLHOVIVO_LIMITER;
       const { success } = await limiter.limit({ key: client });

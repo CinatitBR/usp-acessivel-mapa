@@ -7,13 +7,24 @@
 
   // Set with `wrangler secret put <NAME>`; for local dev put them in worker/.dev.vars (gitignored).
   // REVIEW_TOKEN is the password reviewers type on the review page; choose a long random one.
+  // GEMINI_API_KEY (https://aistudio.google.com/apikey) is optional: the chat needs it only when CHAT_PROVIDER is "gemini".
   "secrets": { "required": ["OLHOVIVO_TOKEN", "ORS_API_KEY", "REVIEW_TOKEN"] },
 
   "vars": {
     // Comma-separated origins allowed to call this Worker from a browser.
     // Local dev and preview, plus the production site.
     "ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:4173,https://usp-campus-map.pages.dev",
+    // Who answers the campus chat: "workers-ai" (the AI binding below, free up to 10,000 neurons a day) or "gemini".
+    "CHAT_PROVIDER": "workers-ai",
+    // https://developers.cloudflare.com/workers-ai/models/ — about 30 neurons a question with the current sources.
+    "WORKERS_AI_MODEL": "@cf/google/gemma-4-26b-a4b-it",
+    // https://ai.google.dev/gemini-api/docs/models
+    "GEMINI_MODEL": "gemini-3.8-flash",
   },
+
+  // Workers AI, for the campus chat. `wrangler dev` runs it on Cloudflare (it needs `wrangler login`) and it counts
+  // towards the account's daily allowance.
+  "ai": { "binding": "AI" },
 
   // Reports people make on the map. The id is not a secret. `wrangler dev` keeps a local copy,
   // set up with `npm run db:migrate:local`.
@@ -50,6 +61,12 @@
       "name": "FEEDBACK_LIMITER",
       "namespace_id": "1005",
       "simple": { "limit": 10, "period": 60 },
+    },
+    // A question to the campus chat: 6 per minute per client; each one is a paid model call.
+    {
+      "name": "CHAT_LIMITER",
+      "namespace_id": "1006",
+      "simple": { "limit": 6, "period": 60 },
     },
     // The review page: 30 per minute per client, which also keeps its password from being guessed.
     {

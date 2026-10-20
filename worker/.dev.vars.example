@@ -2,3 +2,7 @@
 OLHOVIVO_TOKEN=
 # openrouteservice API key, for step-free routes (https://openrouteservice.org/dev/#/signup).
 ORS_API_KEY=
+# Password reviewers type on the review page.
+REVIEW_TOKEN=
+# Optional: a Gemini API key, for the campus chat when CHAT_PROVIDER is "gemini" (https://aistudio.google.com/apikey).
+GEMINI_API_KEY=
