@@ -380,3 +380,26 @@ test('s30 modo leve', async ({ page }) => {
   await settle(page);
   await shot(page, 's30-modo-leve');
 });
+
+// J. Pergunte sobre o campus
+
+const openChat = async (page: Page) => {
+  await openApp(page);
+  await page.getByRole('navigation', { name: 'Telas' }).getByRole('button', { name: 'Pergunte' }).click();
+  await expect(page.getByRole('heading', { name: 'Pergunte sobre o campus' })).toBeVisible();
+};
+
+test('s31 chat', async ({ page }) => {
+  await openChat(page);
+  await shot(page, 's31-chat');
+});
+
+test('s32 resposta com fontes', async ({ page }) => {
+  await openChat(page);
+  await page.getByRole('button', { name: 'Onde faço tratamento odontológico no campus?' }).click();
+  // The answer comes from Workers AI through the Worker: `wrangler dev` must be signed in to Cloudflare.
+  await expect(page.getByRole('region', { name: 'Fontes' })).toBeVisible({ timeout: 45_000 });
+  await expect(page.getByRole('button', { name: 'Ver no mapa' }).first()).toBeVisible();
+  await shot(page, 's32-chat-resposta');
+});
+

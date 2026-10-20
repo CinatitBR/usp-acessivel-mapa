@@ -4,7 +4,7 @@ Especificação para a apresentação interativa: um slide para cada tela + aç�
 
 ## Visão geral
 
-**O que é.** Um mapa do campus Butantã da USP, pensado primeiro para o celular. Mostra prédios, unidades e locais, os ônibus com previsão ao vivo e a acessibilidade do campus: rampas, elevadores, entradas, banheiros e vagas. Para algumas unidades há também rotas visuais: o caminho para entrar ou circular no prédio, mostrado foto a foto. Quem passa pelo campus pode relatar um problema de acessibilidade; depois de revisado, o relato aparece no mapa de todos e as rotas sem degraus desviam dele.
+**O que é.** Um mapa do campus Butantã da USP, pensado primeiro para o celular, com um chat que responde perguntas sobre serviços do campus a partir de fontes selecionadas. Mostra prédios, unidades e locais, os ônibus com previsão ao vivo e a acessibilidade do campus: rampas, elevadores, entradas, banheiros e vagas. Para algumas unidades há também rotas visuais: o caminho para entrar ou circular no prédio, mostrado foto a foto. Quem passa pelo campus pode relatar um problema de acessibilidade; depois de revisado, o relato aparece no mapa de todos e as rotas sem degraus desviam dele.
 
 **Quem usa.**
 - **Pessoa em cadeira de rodas ou com mobilidade reduzida**: quer saber se um prédio é acessível, por onde entrar e que caminho não tem degraus nem bloqueios.
@@ -14,7 +14,8 @@ Especificação para a apresentação interativa: um slide para cada tela + aç�
 **O layout que todas as telas compartilham.**
 - **Mapa** ocupando a tela inteira, em 3D (prédios, árvores e ônibus).
 - **Controles flutuantes** sobre o mapa: campo de busca, botão "Acessibilidade", "Camadas do mapa", "Traçar rota" e "Relatar um problema".
-- **Painel inferior**: abre quando algo é selecionado. No celular fica sobre a parte de baixo do mapa e para em três alturas (só o cabeçalho, metade, tela cheia); arrasta-se pela alça ou toca-se nela ("Expandir painel" / "Recolher painel"). O "Fechar" (×) volta ao mapa. Em telas largas (a partir de 760 px) o painel fica ao lado do mapa.
+- **Barra de navegação** embaixo, com "Mapa" e "Pergunte" (o chat). Em telas largas ela vira uma coluna à esquerda.
+- **Painel inferior**: abre quando algo é selecionado, logo acima da barra de navegação. No celular fica sobre a parte de baixo do mapa e para em três alturas (só o cabeçalho, metade, tela cheia); arrasta-se pela alça ou toca-se nela ("Expandir painel" / "Recolher painel"). O "Fechar" (×) volta ao mapa. Em telas largas (a partir de 760 px) o painel fica ao lado do mapa.
 
 As capturas usam o layout de celular.
 
@@ -30,6 +31,7 @@ As capturas usam o layout de celular.
 - **G. Relatos**: S01, S03 ou S08 → S19 → S20 → S21 → S22; qualquer relato no mapa → S23 → S24.
 - **H. Revisão**: `?revisar` → S25 → S26 → S27; S26 → S28. O que é publicado aqui é o que aparece em S23 e S18.
 - **I. Quando algo dá errado**: S29 (sem conexão) e S30 (aparelho lento) podem acontecer em qualquer ponto.
+- **J. Pergunte**: "Pergunte" na barra de navegação → S31 → S32 → "Ver no mapa" → S04 (ou S03 / S05, conforme a fonte).
 
 ---
 
@@ -43,6 +45,7 @@ As capturas usam o layout de celular.
   - "Camadas do mapa" (botão redondo) → S06
   - "Traçar rota" (botão redondo) → S15
   - "Relatar um problema" (botão redondo, bandeira) → S19
+  - "Pergunte" (aba da barra de navegação) → S31
   - Toque em um prédio (mapa) → S03
   - Toque no símbolo de um local (mapa) → S05
   - Toque em um ponto de ônibus (mapa) → S13
@@ -435,3 +438,30 @@ Dois slides curtos, fáceis de cortar se a apresentação precisar ser menor.
   - Outra mensagem do mesmo tipo: "Há uma nova versão do mapa." com "Atualizar" (botão) → recarrega o aplicativo
 - **Estado a capturar:** o mapa sem árvores e com ônibus planos, com a mensagem "Modo leve ativado…" e o botão "Desfazer".
 - **Captura:** `screenshots/s30-modo-leve.png`
+
+## J. Pergunte sobre o campus
+
+### S31 · Chat
+- **Etapa/Objetivo:** tirar uma dúvida sobre um serviço do campus (por exemplo, onde fazer tratamento odontológico) sem procurar em vários sites.
+- **Ações e pontos de interação:**
+  - Aviso sob o título (só leitura): "Respostas geradas por IA a partir de fontes selecionadas. Confirme sempre no site oficial."
+  - Sugestões (chips): "Onde faço tratamento odontológico no campus?", "Preciso de encaminhamento para extrair o siso?", "Tem atendimento de emergência odontológica?" → S32
+  - Campo "Escreva sua pergunta" (campo de texto) e "Enviar pergunta" (botão) → S32
+  - "Mapa" (aba da barra de navegação) → volta ao mapa como estava
+  - Sem conexão: "Sem conexão. O chat precisa de internet." e o envio fica desligado
+- **Estado a capturar:** o chat vazio, com o aviso e as três sugestões.
+- **Captura:** `screenshots/s31-chat.png`
+
+### S32 · Resposta com fontes
+- **Etapa/Objetivo:** ler a resposta e saber de onde veio cada informação.
+- **Ações e pontos de interação:**
+  - A resposta aparece enquanto é escrita; números pequenos depois de uma frase indicam a fonte
+  - "Parar resposta" (botão, enquanto escreve) → a resposta para, com "Resposta interrompida."
+  - "Fontes" (lista numerada): o título de cada fonte (link) abre o site oficial
+  - "Ver no mapa" (chip ao lado da fonte) → abre o mapa com o lugar selecionado (S04 para uma unidade)
+  - "Nova conversa" (botão) → S31
+  - Pergunta fora das fontes → "Não encontrei essa informação nas fontes do mapa."
+  - Muitas perguntas seguidas → "Muitas perguntas seguidas. Espere um minuto e tente de novo."
+- **Estado a capturar:** a resposta à primeira sugestão, com as fontes FOUSP e FUNDECTO e os chips "Ver no mapa".
+- **Captura:** `screenshots/s32-chat-resposta.png`
+

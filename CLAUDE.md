@@ -12,11 +12,12 @@ npm test                     # Vitest
 npm run build
 npm run check:data           # public/data must stay ≤ 1 MB
 npm run data:osm && npm run data:build   # regenerate campus data (data:addresses, data:transit too)
+npm run knowledge:build      # chat sources → Worker corpus + public/data/knowledge.json (knowledge:fetch, knowledge:draft too)
 npm run db:generate          # D1 migration from worker/src/schema.ts
 npm run db:migrate:local     # apply locally (db:migrate for remote)
 ```
 
-Before calling a change done: `npm run typecheck && npm test`, plus `npm run build` and `npm run check:data` when the build or data changed.
+Before calling a change done: `npm run typecheck && npm test`, plus `npm run build` and `npm run check:data` when the build or data changed, and `npm run knowledge:build` when `data/knowledge/` changed.
 
 ## Where to read first
 
@@ -27,6 +28,7 @@ Before calling a change done: `npm run typecheck && npm test`, plus `npm run bui
 | `src/features/transit/`, Olho Vivo | `docs/transit.md` |
 | `src/features/routing/` | `docs/routing.md` |
 | `src/features/reports/`, `src/features/review/`, D1 | `docs/reports.md` |
+| `src/features/chat/`, `data/knowledge/`, `/chat`, bottom navigation | `docs/chat.md` |
 | `src/features/indoor/`, `data/indoor/` | `docs/indoor.md` |
 | CSS, tokens, `src/ui/`, the bottom sheet, PWA | `docs/ui.md` |
 | `public/styles/campus.json` | `docs/basemap.md` |
