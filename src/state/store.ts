@@ -51,7 +51,13 @@ export type RoutePlan = {
 /** When to travel: leaving now, leaving at a moment or arriving by it (`at`, epoch milliseconds). */
 export type RouteTime = { kind: 'now' } | { kind: 'depart' | 'arrive'; at: number };
 
+/** The screen the bottom navigation shows. */
+export type Screen = 'map' | 'chat';
+
 type AppState = {
+  screen: Screen;
+  setScreen: (screen: Screen) => void;
+
   mapStatus: MapStatus;
   setMapStatus: (status: MapStatus) => void;
 
@@ -168,6 +174,9 @@ const saved = (mine: MyReport[]) => {
 };
 
 export const useAppStore = create<AppState>((set) => ({
+  screen: 'map',
+  setScreen: (screen) => set({ screen }),
+
   mapStatus: 'loading',
   setMapStatus: (mapStatus) => set({ mapStatus }),
 

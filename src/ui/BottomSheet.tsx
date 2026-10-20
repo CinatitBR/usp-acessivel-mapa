@@ -74,7 +74,9 @@ export function BottomSheet({ title, subtitle, icon, onClose, routeTo, back, act
   useLayoutEffect(() => {
     if (wide) return;
     const measure = () => {
-      const next = { viewport: window.innerHeight, grip: gripRef.current?.offsetHeight ?? 0, content: (gripRef.current?.offsetHeight ?? 0) + (bodyRef.current?.offsetHeight ?? 0) };
+      // The sheet rests on the navigation bar, so the screen it measures against ends there.
+      const viewport = window.innerHeight - (document.querySelector<HTMLElement>('.bottom-nav')?.offsetHeight ?? 0);
+      const next = { viewport, grip: gripRef.current?.offsetHeight ?? 0, content: (gripRef.current?.offsetHeight ?? 0) + (bodyRef.current?.offsetHeight ?? 0) };
       setSizes((current) => (current && current.viewport === next.viewport && current.grip === next.grip && current.content === next.content ? current : next));
     };
     measure();

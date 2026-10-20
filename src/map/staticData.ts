@@ -1,7 +1,9 @@
 import type { FeatureCollection } from 'geojson';
 import type { IndoorPlan } from '../domain/indoor';
 import type { AccessibilityFeature, Building, BusStop, Institute, LineDirection, Poi } from '../domain/types';
+import type { KnowledgeSource } from '../domain/knowledge';
 import { parseAccessFeature } from '../features/accessibility/parse';
+import { parseKnowledgeSource } from '../features/chat/parse';
 import { parseBuilding } from '../features/buildings/parse';
 import { parsePoi } from '../features/pois/parse';
 import type { LineColor } from '../features/transit/LineBadge';
@@ -74,3 +76,9 @@ export const loadInstitutes = () => loadOnce('institutes.json', (json) => json a
 
 /** The floor plans of one building; already in domain shape. Fetched when its indoor map is opened. */
 export const loadIndoorPlan = (plan: string) => loadOnce(`indoor/${plan}.json`, (json) => json as IndoorPlan);
+
+/** The sources the campus chat can cite: titles, links and places on the map. */
+export const loadKnowledge = () =>
+  loadOnce('knowledge.json', (json) => (Array.isArray(json) ? json.map(parseKnowledgeSource).filter(defined) : [])) satisfies Promise<
+    KnowledgeSource[]
+  >;
