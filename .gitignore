@@ -8,3 +8,5 @@ worker/.dev.vars
 *.log
 worker/worker-configuration.d.ts
 test-results/
+CLAUDE.local.md
+.claude/worktrees/

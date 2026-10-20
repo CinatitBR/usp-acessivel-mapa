@@ -13,7 +13,7 @@ const routeKey = (profile: OrsProfile, from: string, to: string, avoided: readon
 
 /**
  * How far around a report the route keeps away, in metres. Chosen by the user after a trial
- * (REPORTS_PLAN.md): tight enough to leave a parallel sidewalk open, so a pin placed further
+ * (docs/reports.md): tight enough to leave a parallel sidewalk open, so a pin placed further
  * than this from its path is warned about but not gone around.
  */
 export const AVOID_RADIUS_METERS = 8;

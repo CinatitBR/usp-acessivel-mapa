@@ -1,5 +1,5 @@
 /*
- * Design tokens: the app's visual identity in one place (see UI_PLAN.md).
+ * Design tokens: the app's visual identity in one place (see docs/ui.md).
  * Colour and type literals live only in this file; everything else uses the
  * role names below, never a step of a scale directly.
  */
