@@ -12,8 +12,8 @@
 
   "vars": {
     // Comma-separated origins allowed to call this Worker from a browser.
-    // Local dev and preview, plus the production site.
-    "ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:4173,https://usp-campus-map.pages.dev",
+    // Local dev and preview on any port ("host:*"), plus the production site.
+    "ALLOWED_ORIGINS": "http://localhost:*,http://127.0.0.1:*,https://usp-campus-map.pages.dev",
     // Who answers the campus chat: "workers-ai" (the AI binding below, free up to 10,000 neurons a day) or "gemini".
     "CHAT_PROVIDER": "workers-ai",
     // https://developers.cloudflare.com/workers-ai/models/ — about 30 neurons a question with the current sources.

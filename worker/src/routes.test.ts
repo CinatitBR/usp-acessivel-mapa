@@ -80,6 +80,16 @@ describe('checkOrigin', () => {
     expect(checkOrigin('https://usp-map.pages.dev.evil.example', allowed).ok).toBe(false);
   });
 
+  it('allows any port where an entry ends in :*', () => {
+    const local = 'https://usp-map.pages.dev, http://localhost:*, http://127.0.0.1:*';
+    for (const origin of ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:4173']) {
+      expect(checkOrigin(origin, local).headers['Access-Control-Allow-Origin'], origin).toBe(origin);
+    }
+    for (const origin of ['http://localhost', 'http://localhost:', 'https://localhost:5173', 'http://localhost.evil.example:80', 'http://localhost:5173.evil.example', 'http://localhost:5173/x', 'http://192.168.0.10:5173']) {
+      expect(checkOrigin(origin, local).ok, origin).toBe(false);
+    }
+  });
+
   it('lets requests without an Origin through, with no CORS headers', () => {
     expect(checkOrigin(null, allowed)).toEqual({ ok: true, headers: {} });
   });

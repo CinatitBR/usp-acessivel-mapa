@@ -74,7 +74,7 @@ Built on `src/lib/http.ts` (`fetchJson(url, { signal, timeoutMs })`, throws `Pro
 
 ## Worker
 
-`worker/src/index.ts`, routes parsed in `worker/src/routes.ts`. Anything not listed is 404. A browser `Origin` not in `ALLOWED_ORIGINS` (`worker/wrangler.jsonc`) gets 403.
+`worker/src/index.ts`, routes parsed in `worker/src/routes.ts`. Anything not listed is 404. A browser `Origin` not in `ALLOWED_ORIGINS` (`worker/wrangler.jsonc`) gets 403. An entry ending in `:*` matches any port: the list has `http://localhost:*` and `http://127.0.0.1:*`, so the app works locally whatever port Vite picks. A LAN address (a phone testing `npm run dev -- --host`) is not on the list.
 
 | Route | What it does | Limit per client |
 |---|---|---|

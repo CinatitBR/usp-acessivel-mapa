@@ -114,13 +114,16 @@ export function matchRoute(method: string, url: URL): Route {
 
 /**
  * CORS decision for a request. `allowed` is the comma-separated ALLOWED_ORIGINS
- * variable. Requests without an Origin (curl, server-side scripts) are let
- * through: CORS only governs browsers, and the rate limit still applies.
+ * variable. An entry ending in `:*` (`http://localhost:*`) allows that scheme and host on any port.
+ * Requests without an Origin (curl, server-side scripts) are let through: CORS only governs browsers,
+ * and the rate limit still applies.
  */
 export function checkOrigin(origin: string | null, allowed: string): { ok: boolean; headers: Record<string, string> } {
   if (!origin) return { ok: true, headers: {} };
   const list = allowed.split(',').map((entry) => entry.trim()).filter(Boolean);
-  if (!list.includes(origin)) return { ok: false, headers: {} };
+  const matches = (entry: string) =>
+    entry.endsWith(':*') ? origin.startsWith(entry.slice(0, -1)) && /^\d{1,5}$/.test(origin.slice(entry.length - 1)) : entry === origin;
+  if (!list.some(matches)) return { ok: false, headers: {} };
   return {
     ok: true,
     headers: {
