@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { Institute } from '../src/domain/types';
 import { generateJson } from './lib/gemini';
-import { type EntryPlaceRef, formatEntry, parseEntry } from './lib/knowledge';
+import { type EntryPlaceRef, formatEntry, parseEntry, TAGS } from './lib/knowledge';
 import { addProposals, parseSources, rawIndexPath, rawPagePath, type SourcePage } from './lib/knowledgeSources';
 
 const SOURCES = 'data/knowledge/sources.json';
@@ -36,15 +36,21 @@ const entrySchema = {
     title: { type: 'STRING', description: 'nome do serviço ou grupo, com a sigla, por exemplo "Turing USP — grupo de inteligência artificial"' },
     body: { type: 'STRING' },
     institute: { type: 'STRING', description: 'id da unidade da lista, ou "" se a página não diz' },
+    tags: { type: 'ARRAY', items: { type: 'STRING', enum: [...TAGS] }, description: 'os temas que o texto deixa claros; pode ser vazio' },
+    meetingPlace: { type: 'STRING', description: 'onde se encontra ou atende (prédio, sala, espaço do campus), ou "" se o texto não diz' },
   },
-  required: ['relevant', 'title', 'body', 'institute'],
+  required: ['relevant', 'title', 'body', 'institute', 'tags', 'meetingPlace'],
 };
 
 const pagePrompt = (page: SourcePage, text: string) => `Você prepara fontes para o chat de um mapa do campus Butantã da USP.
 Escreva, a partir do TEXTO de uma página (tema: ${page.topic}), uma ficha curta em português do Brasil:
 - um parágrafo: o que é e o que oferece;
 - quem pode participar ou ser atendido, e como (processo seletivo, encaminhamento, inscrição), se o texto diz;
-- uma lista "- " com endereço, telefone, e-mail, site e redes sociais que o texto traga.
+- quando e onde se encontra, se o texto diz;
+- uma lista "- " com endereço, telefone, e-mail, site e redes sociais que o texto traga. Redes sociais só como link.
+Nunca copie números de celular ou WhatsApp: costumam ser de alunos. Telefones fixos de instituições podem ficar.${
+  page.topic === 'extensao' ? '\nÉ um grupo de extensão: diga em uma frase a que unidade pertence, se pertence, e mantenha o texto antes da lista em até 90 palavras.' : ''
+}
 Use só o que está no texto. Não invente nada nem complete com o que você sabe. Datas de processos seletivos mudam: não as copie, diga apenas que há seleção e onde acompanhar.
 Em "institute", escolha o id da unidade da USP a que pertence, entre estas, só se o texto deixar claro:
 ${institutes.map((institute) => `${institute.id}: ${institute.name}${institute.sigla ? ` (${institute.sigla})` : ''}`).join('\n')}
@@ -60,7 +66,14 @@ async function draftPage(page: SourcePage) {
     const current = parseEntry(page.id, page.topic, readFileSync(path, 'utf8'));
     if ('ok' in current && current.ok.reviewed) return;
   }
-  const answer = (await generateJson(pagePrompt(page, readFileSync(raw, 'utf8')), entrySchema)) as { relevant: boolean; title: string; body: string; institute: string };
+  const answer = (await generateJson(pagePrompt(page, readFileSync(raw, 'utf8')), entrySchema)) as {
+    relevant: boolean;
+    title: string;
+    body: string;
+    institute: string;
+    tags: string[];
+    meetingPlace: string;
+  };
   if (!answer.relevant) {
     console.log(`not about it  ${page.topic}/${page.id}`);
     return;
@@ -71,8 +84,8 @@ async function draftPage(page: SourcePage) {
     : institutes.some((institute) => institute.id === answer.institute) ? { kind: 'institute', id: answer.institute }
     : undefined;
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, formatEntry({ title: answer.title.trim(), topic: page.topic, ...(place && { place }), sources: page.urls, checked: today, reviewed: false, body: answer.body }));
-  console.log(`draft  ${path}`);
+  writeFileSync(path, formatEntry({ title: answer.title.trim(), topic: page.topic, ...(place && { place }), ...(answer.tags.length > 0 && { tags: answer.tags }), sources: page.urls, checked: today, reviewed: false, body: answer.body }));
+  console.log(`draft  ${path}${answer.meetingPlace ? `  (meets: ${answer.meetingPlace})` : ''}`);
 }
 
 const indexSchema = {

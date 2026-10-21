@@ -11,6 +11,8 @@ export type Entry = {
   title: string;
   topic: string;
   place?: EntryPlaceRef;
+  /** Themes from `TAGS`, so the chat can answer "which groups are about …?" questions. */
+  tags?: string[];
   sources: string[];
   /** The day someone last checked the entry against its sources, `YYYY-MM-DD`. */
   checked: string;
@@ -20,6 +22,34 @@ export type Entry = {
 };
 
 export type Parsed<T> = { ok: T } | { error: string };
+
+/** The themes an entry may carry: a fixed list, so a question about a theme finds every entry that has it. */
+export const TAGS = [
+  'computação',
+  'dados e IA',
+  'robótica',
+  'engenharia',
+  'aeroespacial',
+  'matemática',
+  'finanças',
+  'negócios',
+  'empreendedorismo',
+  'impacto social',
+  'pesquisa',
+  'competição',
+  'jogos',
+  'esportes',
+  'artes marciais',
+  'dança',
+  'música',
+  'cultura',
+  'idiomas',
+  'religião',
+  'cristianismo',
+  'espiritismo',
+  'budismo',
+] as const;
+const TAG_SET = new Set<string>(TAGS);
 
 const PLACE_KINDS = new Set<string>(['building', 'institute', 'poi']);
 const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -73,6 +103,9 @@ export function parseEntry(id: string, topicDir: string, source: string): Parsed
   if (sources.length === 0) return { error: 'at least one source URL is required' };
   for (const url of sources) if (!/^https?:\/\/\S+$/.test(url)) return { error: `not a URL: ${url}` };
   if (!body) return { error: 'the entry has no text' };
+  if (fields.tags !== undefined && !Array.isArray(fields.tags)) return { error: 'tags must be a list' };
+  const tags = Array.isArray(fields.tags) ? fields.tags : [];
+  for (const tag of tags) if (!TAG_SET.has(tag)) return { error: `unknown tag: ${tag} (see TAGS in scripts/lib/knowledge.ts)` };
 
   let place: EntryPlaceRef | undefined;
   const placeText = text(fields.place);
@@ -82,25 +115,26 @@ export function parseEntry(id: string, topicDir: string, source: string): Parsed
       return { error: 'place must be "<building|institute|poi> <node|way|relation>/<id>"' };
     place = { kind: kind as EntryPlaceRef['kind'], id: osmId };
   }
-  return { ok: { id, title, topic, ...(place && { place }), sources, checked, reviewed: reviewed === 'true', body } };
+  return { ok: { id, title, topic, ...(place && { place }), ...(tags.length > 0 && { tags }), sources, checked, reviewed: reviewed === 'true', body } };
 }
 
 /** Writes an entry back in the same format, for the drafting script. */
 export function formatEntry(entry: Omit<Entry, 'id'>): string {
   const lines = ['---', `title: ${entry.title}`, `topic: ${entry.topic}`];
   if (entry.place) lines.push(`place: ${entry.place.kind} ${entry.place.id}`);
+  if (entry.tags?.length) lines.push('tags:', ...entry.tags.map((tag) => `  - ${tag}`));
   lines.push('sources:', ...entry.sources.map((url) => `  - ${url}`), `checked: ${entry.checked}`, `reviewed: ${entry.reviewed}`, '---');
   return `${lines.join('\n')}\n${entry.body.trim()}\n`;
 }
 
 /** What the Worker bundles: the text the model reads, in a fixed order so the prompt prefix stays cacheable. */
-export type KnowledgeCorpus = { entries: { id: string; title: string; topic: string; sources: string[]; checked: string; body: string }[] };
+export type KnowledgeCorpus = { entries: { id: string; title: string; topic: string; tags?: string[]; sources: string[]; checked: string; body: string }[] };
 
 export function corpusOf(entries: Entry[]): KnowledgeCorpus {
   return {
     entries: entries
       .filter((entry) => entry.reviewed)
       .sort((a, b) => a.id.localeCompare(b.id))
-      .map(({ id, title, topic, sources, checked, body }) => ({ id, title, topic, sources, checked, body })),
+      .map(({ id, title, topic, tags, sources, checked, body }) => ({ id, title, topic, ...(tags && { tags }), sources, checked, body })),
   };
 }

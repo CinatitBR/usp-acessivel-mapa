@@ -54,12 +54,19 @@ describe('parseEntry', () => {
     expect(parseEntry('a', 'saude', source.replace(/sources:\n(  - .*\n)+/, ''))).toHaveProperty('error');
   });
 
+  it('reads tags from the fixed list and refuses others', () => {
+    const tagged = source.replace('sources:', 'tags:\n  - computação\n  - pesquisa\nsources:');
+    expect(parseEntry('a', 'saude', tagged)).toHaveProperty('ok.tags', ['computação', 'pesquisa']);
+    expect(parseEntry('a', 'saude', tagged.replace('pesquisa', 'xadrez'))).toEqual({ error: 'unknown tag: xadrez (see TAGS in scripts/lib/knowledge.ts)' });
+    expect(parseEntry('a', 'saude', source)).not.toHaveProperty('ok.tags');
+  });
+
   it('refuses a file name that is not an id', () => {
     expect(parseEntry('Fo USP', 'saude', source)).toHaveProperty('error');
   });
 
   it('reads back what formatEntry writes', () => {
-    const parsed = parseEntry('fousp', 'saude', source);
+    const parsed = parseEntry('fousp', 'saude', source.replace('sources:', 'tags:\n  - religião\nsources:'));
     if (!('ok' in parsed)) throw new Error('fixture');
     const { id, ...rest } = parsed.ok;
     expect(parseEntry(id, 'saude', formatEntry(rest))).toEqual(parsed);

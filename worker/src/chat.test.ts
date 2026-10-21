@@ -45,6 +45,11 @@ describe('the prompt', () => {
     expect(system.indexOf('Regras:')).toBeLessThan(system.indexOf('FONTES:'));
   });
 
+  it('lists the themes of a tagged entry', () => {
+    const tagged = { entries: [{ ...corpus.entries[0]!, id: 'flusp', tags: ['computação', 'pesquisa'] }] };
+    expect(systemInstruction(tagged)).toContain('<fonte id="flusp" tema="saude" temas="computação, pesquisa" verificada="2026-10-20">');
+  });
+
   it('is the same bytes every time, so the provider can reuse its cache', () => {
     expect(systemInstruction(corpus)).toBe(systemInstruction(structuredClone(corpus)));
   });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractLinks, htmlToText } from './htmlText';
+import { decodeEntities, extractLinks, htmlToText } from './htmlText';
 import { robotsAllows } from './robots';
 
 const page = `<html><head><style>p{}</style><script>var a=1</script></head><body>
@@ -7,6 +7,14 @@ const page = `<html><head><style>p{}</style><script>var a=1</script></head><body
 <main><h1>Atendimento &amp; clínicas</h1><p>Vagas conforme&nbsp;disponibilidade.<br>Ligue (11) 3091-7418.</p>
 <ul><li>Extração de siso</li><li><a href="/implantes#topo">Implantes</a></li></ul></main>
 <footer>© FO</footer></body></html>`;
+
+describe('decodeEntities', () => {
+  it('reads Portuguese accents written as named entities', () => {
+    expect(decodeEntities('Polit&eacute;cnica, rob&ocirc;s, Jo&atilde;o, &Uacute;ltimas, fun&ccedil;&otilde;es, &ldquo;ok&rdquo; &amp; &#233; &bogus;')).toBe(
+      'Politécnica, robôs, João, Últimas, funções, “ok” & é &bogus;',
+    );
+  });
+});
 
 describe('htmlToText', () => {
   it('keeps the main text, line by line, and drops the rest', () => {
