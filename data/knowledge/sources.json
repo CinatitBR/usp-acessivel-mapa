@@ -3,14 +3,275 @@
     {
       "id": "fousp",
       "topic": "saude-odontologica",
-      "urls": ["https://site.fo.usp.br/paciente/"],
+      "urls": [
+        "https://site.fo.usp.br/paciente/"
+      ],
       "place": "poi way/394937312"
     },
     {
       "id": "fundecto",
       "topic": "saude-odontologica",
-      "urls": ["https://ww1.fundecto.com.br/atendimento-clinico/", "https://ww1.fundecto.com.br/institucional/unidades/"],
+      "urls": [
+        "https://ww1.fundecto.com.br/atendimento-clinico/",
+        "https://ww1.fundecto.com.br/institucional/unidades/"
+      ],
       "place": "institute way/34381227"
+    },
+    {
+      "id": "beedata",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/beedata/",
+        "https://grusp.site/grupo/26"
+      ]
+    },
+    {
+      "id": "flusp",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/flusp/",
+        "https://flusp.ime.usp.br/about/",
+        "https://grusp.site/grupo/14"
+      ]
+    },
+    {
+      "id": "hardware-livre",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/hardware-livre/",
+        "https://grusp.site/grupo/17"
+      ]
+    },
+    {
+      "id": "ime-finance",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/ime-finance/",
+        "https://grusp.site/grupo/1"
+      ]
+    },
+    {
+      "id": "ime-jr",
+      "topic": "extensao",
+      "urls": [
+        "https://imejr.com/"
+      ]
+    },
+    {
+      "id": "imesec",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/imesec/",
+        "https://grusp.site/grupo/6"
+      ]
+    },
+    {
+      "id": "maratonusp",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/maratonusp/",
+        "https://grusp.site/grupo/15"
+      ]
+    },
+    {
+      "id": "tecs",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/tecs/",
+        "https://grusp.site/grupo/40"
+      ]
+    },
+    {
+      "id": "uspcodelab",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/uspcodelab/",
+        "https://grusp.site/grupo/35"
+      ]
+    },
+    {
+      "id": "uspgamedev",
+      "topic": "extensao",
+      "urls": [
+        "https://bcc.ime.usp.br/uspgamedev/",
+        "https://grusp.site/grupo/3"
+      ]
+    },
+    {
+      "id": "thunderatz",
+      "topic": "extensao",
+      "urls": [
+        "https://thunderatz.org/"
+      ]
+    },
+    {
+      "id": "poli-finance",
+      "topic": "extensao",
+      "urls": [
+        "https://www.polifinance.com.br/",
+        "https://grusp.site/grupo/41"
+      ]
+    },
+    {
+      "id": "carp",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/28"
+      ]
+    },
+    {
+      "id": "judo-eefe",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/2"
+      ]
+    },
+    {
+      "id": "calistenia-poli",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/4"
+      ]
+    },
+    {
+      "id": "xadrez-farmacia",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/5"
+      ]
+    },
+    {
+      "id": "linux-e-terminal",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/7"
+      ]
+    },
+    {
+      "id": "bjj-poli",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/8"
+      ]
+    },
+    {
+      "id": "remo-poli",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/10"
+      ]
+    },
+    {
+      "id": "polichain",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/11"
+      ]
+    },
+    {
+      "id": "jiu-jitsu-eefe",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/13"
+      ]
+    },
+    {
+      "id": "seguranca-de-dados-e-criptografia",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/16"
+      ]
+    },
+    {
+      "id": "natacao-ime-icbio",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/18"
+      ]
+    },
+    {
+      "id": "dojo-fisica-iag-ipen",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/19"
+      ]
+    },
+    {
+      "id": "aguias-de-jesus",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/20"
+      ]
+    },
+    {
+      "id": "boxe-poli",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/24"
+      ]
+    },
+    {
+      "id": "judo-usp",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/25"
+      ]
+    },
+    {
+      "id": "atletismo-fau",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/27"
+      ]
+    },
+    {
+      "id": "sao-jose-de-anchieta",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/29"
+      ]
+    },
+    {
+      "id": "boxe-eefe",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/30"
+      ]
+    },
+    {
+      "id": "polisat",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/31"
+      ]
+    },
+    {
+      "id": "boxe-fflch",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/39"
+      ]
+    },
+    {
+      "id": "gnpoli",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/43"
+      ]
+    },
+    {
+      "id": "necis",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/45"
+      ]
+    },
+    {
+      "id": "liga-fea",
+      "topic": "extensao",
+      "urls": [
+        "https://grusp.site/grupo/46"
+      ]
     }
   ],
   "indexes": [
@@ -18,6 +279,11 @@
       "topic": "extensao",
       "url": "https://sites.usp.br/cosmos/grupos-residentes/",
       "about": "Grupos residentes do Cosmos, o espaço de empreendedorismo da USP"
+    },
+    {
+      "topic": "extensao",
+      "url": "https://bcc.ime.usp.br/grupos-de-extensao/",
+      "about": "Grupos de extensão ligados ao IME (Instituto de Matemática e Estatística), cada um com uma página no site do BCC"
     }
   ]
 }

@@ -1,6 +1,161 @@
 {
   "entries": [
     {
+      "id": "aguias-de-jesus",
+      "title": "Águias de Jesus — grupo evangélico",
+      "topic": "extensao",
+      "tags": [
+        "religião",
+        "cristianismo"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/20"
+      ],
+      "checked": "2026-10-20",
+      "body": "Organização estudantil evangélica de estudantes da USP, ligada a estudantes de outras universidades da América Latina, para viver e compartilhar o evangelho na universidade. É para quem quer conhecer Jesus ou torná-lo conhecido. Encontra-se às terças, às 18h, no bandejão da Química, e às quintas, às 18h, na Praça do Relógio Solar.\n\n- Instagram: https://www.instagram.com/aguiasdejesus.brasil/"
+    },
+    {
+      "id": "atletismo-fau",
+      "title": "Atletismo FAU (FAUtletismo)",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "competição"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/27"
+      ],
+      "checked": "2026-10-20",
+      "body": "Equipe de atletismo da FAU, aberta a todos e sem precisar de experiência, com treinadores. Treina corrida (curta e longa distância), saltos (altura, distância e triplo) e lançamentos e arremessos (dardo, disco e peso). Pista (corrida e saltos): segunda 12h e quarta 17h30. Campo (lançamentos e arremessos): terça e quinta 12h. Há um repasse mensal (R$ 50 na época do cadastro).\n\n- Instagram: https://www.instagram.com/atletismo.fauusp/"
+    },
+    {
+      "id": "beedata",
+      "title": "BeeData — Liga Competitiva de Ciência de Dados da USP",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "dados e IA",
+        "competição"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/beedata/",
+        "https://grusp.site/grupo/26"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de extensão ligado ao IME, focado em ciência de dados competitiva: competições e desafios com tempo limitado, como os do Kaggle. Reúne estudantes, profissionais e entusiastas que querem desenvolver as habilidades técnicas de um cientista de dados. É gratuito. As reuniões internas costumam ser aos sábados, das 14h às 15h30, online.\n\n- E-mail: beedata@ime.usp.br\n- Telegram: https://t.me/beedata\n- Instagram: https://www.instagram.com/beedata.usp/\n- LinkedIn: https://br.linkedin.com/company/beedata-usp"
+    },
+    {
+      "id": "bjj-poli",
+      "title": "BJJ PoliUSP — jiu-jítsu da Poli",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "artes marciais"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/8"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de jiu-jítsu da Poli, aberto à comunidade USP. Treina no andar de baixo do restaurante universitário (bandejão) do Instituto de Química, em vários horários: de segunda a quinta das 18h às 19h30 (com kimono), segunda e quarta das 11h às 12h (com kimono), terça, quinta e sexta das 11h às 12h (sem kimono) e sexta às 17h (com kimono). A mensalidade era de R$ 120.\n\n- Instagram: https://www.instagram.com/bjj.poliusp/"
+    },
+    {
+      "id": "boxe-eefe",
+      "title": "Boxe EEFE",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "artes marciais"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/30"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de treino de boxe organizado por alunos de educação física e esporte da USP, para iniciantes e para quem já tem experiência, num ambiente seguro. Treina às segundas e sextas, às 11h30, no salão D da EEFE. Não há mensalidade.\n\n- Página no GRUSP: https://grusp.site/grupo/30"
+    },
+    {
+      "id": "boxe-fflch",
+      "title": "Boxe FFLCH",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "artes marciais"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/39"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de boxe da atlética da FFLCH, aberto a alunos e funcionários de todos os cursos e departamentos da USP. Treina às terças e quintas, das 17h30 às 19h, debaixo do velódromo, no CEPE. A mensalidade era de R$ 60 (R$ 10 o treino avulso), e a primeira aula é grátis.\n\n- Instagram: https://www.instagram.com/boxefflch/"
+    },
+    {
+      "id": "boxe-poli",
+      "title": "Boxe Poli",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "artes marciais"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/24"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de treino de boxe da Poli, aberto a toda a comunidade USP. Não precisa de experiência e não tem mensalidade. Treina às quartas, das 17h30 às 19h (o dia pode mudar a cada semestre), no CEPE, ao lado da parede de escalada e em frente ao velódromo.\n\n- Página no GRUSP: https://grusp.site/grupo/24"
+    },
+    {
+      "id": "calistenia-poli",
+      "title": "Calistenia Poli",
+      "topic": "extensao",
+      "tags": [
+        "esportes"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/4"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de calistenia da Poli, aberto a estudantes da USP de qualquer instituto. Treina às terças e sextas, às 17h15, no conjunto de barras do CEPE, perto da pista de atletismo. É gratuito.\n\n- Grupo no WhatsApp: https://chat.whatsapp.com/GXNSZurcSXgL3MGnpMlnOb"
+    },
+    {
+      "id": "carp",
+      "title": "CARP USP — Colegiado Acadêmico para Reflexão de Princípios",
+      "topic": "extensao",
+      "tags": [
+        "religião"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/28"
+      ],
+      "checked": "2026-10-20",
+      "body": "Associação universitária que propõe estudar e aplicar princípios e valores, com rodas de compartilhamento (Home Groups), workshops, palestras sobre caráter e ações sociais na comunidade local. É para jovens e universitários em geral e não tem mensalidade. Os Home Groups são aos sábados, às 15h30, no Centro do CARP USP, na Rua João D'Elias, 81, Vila Universitária (fora do campus).\n\n- Instagram: https://www.instagram.com/carp_usp/"
+    },
+    {
+      "id": "dojo-fisica-iag-ipen",
+      "title": "Dojô Física/IAG/IPEN — lutas",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "artes marciais"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/19"
+      ],
+      "checked": "2026-10-20",
+      "body": "Time de lutas da atlética Gleb Wataghin (Física, IAG, IEE e IPEN), aberto a essas unidades e a toda a comunidade USP. Tem jiu-jítsu (sexta, 17h às 18h30, módulo 5), karatê (sexta, 16h às 17h, módulo 5) e kung fu (segunda, 10h às 12h, e sexta, 14h às 16h, Bloco F, sala 51).\n\n- Página no GRUSP: https://grusp.site/grupo/19"
+    },
+    {
+      "id": "flusp",
+      "title": "FLUSP — FLOSS at USP (software livre)",
+      "topic": "extensao",
+      "tags": [
+        "computação"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/flusp/",
+        "https://flusp.ime.usp.br/about/",
+        "https://grusp.site/grupo/14"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de extensão do IME que estuda e contribui com projetos de software livre, como o kernel Linux e o compilador GCC. Os membros ajudam uns aos outros a entrar nessas comunidades, e quem já contribui é bem-vindo. A participação pode render créditos em disciplinas do MAC (MAC0214, MAC0215) e virar TCC ou iniciação científica. Para participar, fale com o grupo pelos canais abaixo. As reuniões são às sextas-feiras, das 14h às 16h, no saguão do Centro de Competência em Software Livre (CCSL), no IME.\n\n- Site: https://flusp.ime.usp.br/\n- E-mail: flusp@googlegroups.com\n- Telegram: https://t.me/FLUSP2"
+    },
+    {
       "id": "fousp",
       "title": "FOUSP — Faculdade de Odontologia da USP",
       "topic": "saude-odontologica",
@@ -22,6 +177,351 @@
       ],
       "checked": "2026-10-20",
       "body": "A FUNDECTO é a Fundação da Odontologia USP. Nos cursos de atualização e especialização, cirurgiões-dentistas já formados atendem a população, com acompanhamento dos professores. A fundação atende cerca de 30 mil pacientes por ano.\n\n## Como conseguir atendimento\n\n- É preciso levar uma carta de encaminhamento de um cirurgião-dentista ou de um médico para pedir o agendamento.\n- O tratamento só é confirmado depois de uma triagem e da lista de espera.\n- Os atendimentos são com hora marcada. A FUNDECTO não tem pronto atendimento: para dor, inchaço, sangramento ou trauma, procure o Setor de Urgência da FOUSP.\n- A FOUSP encaminha para a FUNDECTO casos mais complexos, como implantes e extração de sisos.\n\n## Custos\n\n- O atendimento é, na maior parte, gratuito.\n- São cobrados apenas itens específicos, como aparelhos ortodônticos, trabalhos de laboratório e peças de implantes. O valor é informado ao paciente antes, depois da triagem.\n\n## Contato\n\n- Central de atendimento ao paciente: (11) 3030-0910, das 9h às 17h\n- WhatsApp: (11) 91147-0450\n- E-mail: contato@fundecto.com.br. O formulário do site tem a opção \"Atendimento de pacientes\".\n- Unidade Cidade Universitária: Av. Prof. Lineu Prestes, 2227 — Butantã, São Paulo\n- Unidade Butantã: Av. Valdemar Ferreira, 475 — Butantã, São Paulo (fora do campus)\n- Site: https://ww1.fundecto.com.br/atendimento-clinico/"
+    },
+    {
+      "id": "gnpoli",
+      "title": "GnPoli — Grupo de Negócios da Poli",
+      "topic": "extensao",
+      "tags": [
+        "negócios",
+        "finanças",
+        "empreendedorismo"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/43"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de negócios da Escola Politécnica para quem quer seguir carreira em mercado financeiro, consultoria ou empreendedorismo. Capacita os membros com habilidades e conhecimentos para o mundo dos negócios.\n\n- E-mail: grupodenegociospoli@gmail.com\n- LinkedIn: https://www.linkedin.com/company/grupodenegociospoli\n- Facebook: https://www.facebook.com/gnpoliusp/\n- Instagram: https://www.instagram.com/gnpoliusp/"
+    },
+    {
+      "id": "hardware-livre",
+      "title": "Hardware Livre USP",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "engenharia"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/hardware-livre/",
+        "https://grusp.site/grupo/17"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de extensão do IME que se encontra toda semana, desde 2013, para discutir e montar projetos de hardware livre: Arduino, Raspberry Pi, eletrônica, sistemas embarcados e impressão 3D. É parceiro do Laboratório de Impressão 3D do IME. No primeiro semestre faz oficinas para quem nunca programou nem mexeu com hardware. Não é preciso ser do BCC: já participaram pessoas da ECA, da Poli, da Física e da Biologia. É gratuito; o principal canal é o Telegram.\n\n- Site: http://hardwarelivreusp.org/\n- E-mail: hwlivre@ime.usp.br\n- Telegram: https://t.me/joinchat/Ct7oFUSrX622T4itxM2UpA\n- GitHub: https://github.com/HardwareLivreUSP"
+    },
+    {
+      "id": "ime-finance",
+      "title": "IME Finance — Liga de Mercado Financeiro do IME",
+      "topic": "extensao",
+      "tags": [
+        "finanças"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/ime-finance/",
+        "https://grusp.site/grupo/1"
+      ],
+      "checked": "2026-10-20",
+      "body": "Liga de mercado financeiro do IME, criada em 2020. Tem grupos de estudo, projetos internos e parcerias com empresas, com uma frente de finanças tradicionais (equity research) e outra de finanças quantitativas, além de um curso introdutório para quem tem pouca experiência. É gratuita e aberta a estudantes de qualquer instituto da USP; o principal requisito é vontade de aprender. A entrada é por processo seletivo, divulgado nas redes do grupo.\n\n- Instagram: https://www.instagram.com/imefinanceusp/\n- Facebook: https://www.facebook.com/IMEFinanceUSP"
+    },
+    {
+      "id": "ime-jr",
+      "title": "IME Jr — Empresa Júnior do IME",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "dados e IA",
+        "empreendedorismo"
+      ],
+      "sources": [
+        "https://imejr.com/",
+        "https://bcc.ime.usp.br/grupos-de-extensao/"
+      ],
+      "checked": "2026-10-20",
+      "body": "Empresa júnior do IME, desde 1991, formada por estudantes de graduação da USP com orientação de professores. Faz projetos reais para pessoas e empresas em três áreas: computação (software, aplicativos, automações, produtos com IA), análise de dados e educação (materiais didáticos e o cursinho pré-vestibular IMEnsina). Tem mais de 50 membros, que entram por processo seletivo.\n\n- Site: https://imejr.com/\n- E-mail: contato@imejr.com\n- Telefone: (11) 3091-6241\n- Endereço: R. do Matão, 1010, Cidade Universitária"
+    },
+    {
+      "id": "imesec",
+      "title": "IMESec — segurança da informação",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "competição"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/imesec/",
+        "https://grusp.site/grupo/6"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de extensão do IME, desde 2017, para estudar segurança da informação. Resolve desafios on-line, participa de competições de capture the flag (CTF) e desenvolve projetos que beneficiem o público. Qualquer pessoa interessada é bem-vinda. As reuniões são semanais, no LabX, Bloco C do IME; datas e novidades saem no Telegram e no Facebook.\n\n- Site: https://imesec.ime.usp.br/\n- E-mail: imesec@ime.usp.br\n- Telegram: https://t.me/joinchat/B9vLqUkNHrsd5cDUfiYIpQ\n- Facebook: https://facebook.com/imesec"
+    },
+    {
+      "id": "jiu-jitsu-eefe",
+      "title": "Jiu-jítsu EEFE",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "artes marciais"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/13"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de jiu-jítsu da EEFE, para a comunidade EEFE/USP. Ensina técnicas básicas e avançadas, regras oficiais e a filosofia da arte marcial, e prepara para competições. Treina às segundas e quartas, das 11h30 às 13h, no tatame do Bloco D da EEFE. É gratuito.\n\n- Telefone: (11) 3091-3117"
+    },
+    {
+      "id": "judo-eefe",
+      "title": "Judô EEFE",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "artes marciais"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/2"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de treino e estudo do judô na EEFE, aberto a toda a comunidade USP, sem precisar de experiência. Treina às terças e quintas, das 11h45 às 13h, e às sextas, das 12h às 13h, no tatame do salão D da EEFE, perto da entrada pelo CEPE. É gratuito.\n\n- Instagram: https://www.instagram.com/judoeefeusp/\n- Grupo no WhatsApp: https://chat.whatsapp.com/DVsrGNI85BBGaPZ804uU4M"
+    },
+    {
+      "id": "judo-usp",
+      "title": "Judô USP",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "artes marciais"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/25"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de judô com pessoas de todos os institutos, que compartilha treinos de vários institutos, principalmente Poli e FEA. Aberto a todos da USP. Para detalhes, fale com os diretores de modalidade do seu instituto, que estão no grupo.\n\n- Grupo no WhatsApp: https://chat.whatsapp.com/I4ssAEUkTTnJmzEwwQyH0h"
+    },
+    {
+      "id": "liga-fea",
+      "title": "Liga de Mercado Financeiro FEA USP",
+      "topic": "extensao",
+      "tags": [
+        "finanças"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/46"
+      ],
+      "checked": "2026-10-20",
+      "body": "Liga de mercado financeiro da FEA, para membros da FEA. Com palestras, grupos de estudos e networking, aproxima os alunos do mercado financeiro e os prepara para ele.\n\n- E-mail: contato@ligafeausp.com\n- LinkedIn: https://www.linkedin.com/company/ligafeausp\n- Instagram: https://www.instagram.com/ligafeausp/"
+    },
+    {
+      "id": "linux-e-terminal",
+      "title": "Linux e Terminal (IME)",
+      "topic": "extensao",
+      "tags": [
+        "computação"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/7"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo do IME para discutir Linux, terminal e linha de comando, tirar dúvidas e compartilhar coisas interessantes. Aberto a qualquer pessoa interessada; funciona num grupo do Telegram.\n\n- Telegram: https://t.me/+A5ewW2H_UzU3OGEx"
+    },
+    {
+      "id": "maratonusp",
+      "title": "MaratonUSP — programação competitiva",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "competição",
+        "matemática"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/maratonusp/",
+        "https://grusp.site/grupo/15"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de estudos de programação competitiva do IME, com aulas, treinos e material para competições como a OBI (Olimpíada Brasileira de Informática, indicada para calouros) e a Maratona SBC de Programação, de que o IME participa desde 1996 e que pode levar às finais mundiais do ICPC. É para quem gosta de resolver problemas de matemática, lógica e computação. Não há mensalidade nem horários fixos; para participar, fale com o grupo por e-mail ou Telegram.\n\n- Site: https://www.ime.usp.br/~maratona/\n- E-mail: maratona@ime.usp.br\n- Telegram: https://t.me/maratonusp2020\n- YouTube: https://www.youtube.com/c/MaratonUSP/"
+    },
+    {
+      "id": "natacao-ime-icbio",
+      "title": "Natação IME ICBIÓ",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "competição"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/18"
+      ],
+      "checked": "2026-10-20",
+      "body": "Time de natação do IME e do ICBIÓ, para pessoas desses institutos que sabem o básico e querem nadar e competir; o treinador ensina as técnicas. Treina nas piscinas do complexo aquático do CEPE, em geral de terça a sexta no almoço, com horários divulgados no Instagram a cada semestre. Para entrar no complexo é preciso ter exame dermatológico registrado no site do CEPE. O valor muda a cada semestre: confirme com os diretores de modalidade.\n\n- Instagram (IME): https://instagram.com/natacao.ime\n- Instagram (ICBIÓ): https://instagram.com/natacaoicbio"
+    },
+    {
+      "id": "necis",
+      "title": "NECIS — cidades inteligentes e sustentáveis (FEA)",
+      "topic": "extensao",
+      "tags": [
+        "pesquisa"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/45"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de pesquisa e extensão da FEA sobre cidades inteligentes e sustentáveis, com professores, alunos de graduação, mestrado e doutorado e pesquisadores parceiros. Fica na sala G175 da FEA.\n\n- E-mail: necis@usp.br\n- LinkedIn: https://www.linkedin.com/in/necisfea/"
+    },
+    {
+      "id": "poli-finance",
+      "title": "Poli Finance — Liga de Mercado Financeiro da Poli",
+      "topic": "extensao",
+      "tags": [
+        "finanças",
+        "competição"
+      ],
+      "sources": [
+        "https://www.polifinance.com.br/",
+        "https://grusp.site/grupo/41"
+      ],
+      "checked": "2026-10-20",
+      "body": "Liga de mercado financeiro da Escola Politécnica, fundada em 2012. Organiza eventos e projetos com bancos e empresas, cursos, palestras e cases de análise de investimento, e disputa competições de equity research, como o CFA Institute Research Challenge. O objetivo é aproximar os alunos da Poli e da USP do mercado financeiro.\n\n- Site: https://www.polifinance.com.br/\n- E-mail: polifinance@polifinance.com.br\n- LinkedIn: https://www.linkedin.com/company/poli-finance"
+    },
+    {
+      "id": "polichain",
+      "title": "Polichain — estudos de blockchain da Poli",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "pesquisa"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/11"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de estudos de blockchain da Escola Politécnica, fundado no fim de 2021 por alunos de graduação (antes se chamava Nabla). Nasceu para dar clareza aos termos usados pela mídia e pelo mercado. Tem apoio da UBRI (University Blockchain Research Initiative), por meio de professores da Poli.\n\n- Site: https://polichain.xyz/"
+    },
+    {
+      "id": "polisat",
+      "title": "PoliSAT — nanossatélites da Poli",
+      "topic": "extensao",
+      "tags": [
+        "aeroespacial",
+        "engenharia",
+        "pesquisa"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/31"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de estudo e desenvolvimento de nanossatélites da Escola Politécnica. É para estudantes da USP interessados em nanossatélites e não tem mensalidade. Encontra-se no CITI (Centro Interdisciplinar de Tecnologia Integrativa).\n\n- E-mail: polisat.usp@gmail.com\n- Instagram: https://www.instagram.com/polisat.usp/"
+    },
+    {
+      "id": "remo-poli",
+      "title": "Remo Poli",
+      "topic": "extensao",
+      "tags": [
+        "esportes",
+        "competição"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/10"
+      ],
+      "checked": "2026-10-20",
+      "body": "Equipe de remo da Escola Politécnica, com seletiva para universitários da USP todo semestre. Treina de terça a sexta, das 17h às 19h, na Raia Olímpica do CEPEUSP. A mensalidade é definida pelo Clube Bandeirante, a que a equipe é associada, e muda a cada semestre.\n\n- Instagram: https://www.instagram.com/remopoliusp/"
+    },
+    {
+      "id": "sao-jose-de-anchieta",
+      "title": "São José de Anchieta (SJA) — grupo católico",
+      "topic": "extensao",
+      "tags": [
+        "religião",
+        "cristianismo"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/29"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de jovens católicos, ou em processo de conversão, com formação católica em encontros semanais e confraternizações. Encontra-se às quartas, ao meio-dia, no CJE da ECA.\n\n- Instagram: https://www.instagram.com/sjanchietausp"
+    },
+    {
+      "id": "seguranca-de-dados-e-criptografia",
+      "title": "Segurança de Dados e Criptografia (IME)",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "matemática",
+        "pesquisa"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/16"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de estudos e pesquisa acadêmica em criptografia do IME, conduzido pelo professor Routo Terada, do Departamento de Ciência da Computação. Tem projetos de pesquisa e reuniões semanais, e se relaciona com as disciplinas MAC0336 (Criptografia para Segurança de Dados, graduação) e MAC5723 (Introdução à Criptologia, pós-graduação). Para participar, fale com o professor por e-mail.\n\n- E-mail: rt@ime.usp.br"
+    },
+    {
+      "id": "tecs",
+      "title": "Tecs — impacto social da computação",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "impacto social"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/tecs/",
+        "https://grusp.site/grupo/40"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de extensão do IME, desde 2017, focado no impacto social da computação e da tecnologia. Dá cursos e oficinas de educação em computação, faz aplicativos, sites e sistemas com iniciativas sociais, serviços públicos e organizações sem fins lucrativos, e discute ética e tecnologia. Pode oferecer horas de extensão por meio de uma AEX. Para participar, fale com o grupo pelos canais abaixo.\n\n- Site: https://tecs.ime.usp.br/\n- E-mail: tecs@ime.usp.br\n- Telegram: https://t.me/tecsusp\n- Facebook: https://facebook.com/tecs.usp"
+    },
+    {
+      "id": "thunderatz",
+      "title": "ThundeRatz — equipe de robótica da Poli",
+      "topic": "extensao",
+      "tags": [
+        "robótica",
+        "engenharia",
+        "competição"
+      ],
+      "sources": [
+        "https://thunderatz.org/"
+      ],
+      "checked": "2026-10-20",
+      "body": "Equipe de robótica da Escola Politécnica, fundada em 2001 e reformulada em 2005, orientada por professores da Poli. Projeta e constrói robôs para competições nacionais e internacionais, e os membros também cuidam da gestão da equipe. A oficina, apelidada de \"A Gaiola\", fica no Departamento de Engenharia Mecatrônica e de Sistemas Mecânicos da Poli. A entrada é por processo seletivo, divulgado no site.\n\n- Site: https://thunderatz.org/"
+    },
+    {
+      "id": "uspcodelab",
+      "title": "USPCodeLab — desenvolvimento de software",
+      "topic": "extensao",
+      "tags": [
+        "computação"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/uspcodelab/",
+        "https://grusp.site/grupo/35"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de extensão que estimula a inovação tecnológica na USP, criado em 2015, com núcleos no IME, no ICMC e na EACH. O tema principal é o desenvolvimento de sistemas, em geral aplicações web e mobile, com trabalho em equipe e práticas ágeis; o programa de formação se chama dev.journey(). O foco são estudantes de computação, sistemas de informação e engenharia de computação, mas qualquer pessoa interessada em desenvolvimento é aceita. É gratuito. Para participar, entre no grupo do Telegram.\n\n- Site: https://codelab.ime.usp.br/\n- E-mail: codelab@ime.usp.br\n- Telegram (geral): https://t.me/uspcodelab\n- Telegram (núcleo Butantã): https://t.me/codelabbutanta\n- Instagram: https://uclab.xyz/instagram"
+    },
+    {
+      "id": "uspgamedev",
+      "title": "USPGameDev — desenvolvimento de jogos",
+      "topic": "extensao",
+      "tags": [
+        "computação",
+        "jogos"
+      ],
+      "sources": [
+        "https://bcc.ime.usp.br/uspgamedev/",
+        "https://grusp.site/grupo/3"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de desenvolvimento de jogos digitais e analógicos da USP, criado em 2009, com mais de vinte jogos lançados, todos open source. Reúne pessoas de várias áreas (computação, matemática, design, música, letras) e não exige experiência: os membros aprendem e ensinam uns aos outros. Oferece cursos e oficinas e participa de game jams. É gratuito e aceita pessoas de todos os cursos e de fora da USP. A maior parte das atividades acontece no Discord, onde os horários de reunião são divulgados a cada semestre.\n\n- Site: https://usp.game.dev.br/\n- Discord: https://discord.gg/agZv7zu\n- Jogos: https://uspgamedev.itch.io/"
+    },
+    {
+      "id": "xadrez-farmacia",
+      "title": "Xadrez Farmácia",
+      "topic": "extensao",
+      "tags": [
+        "jogos"
+      ],
+      "sources": [
+        "https://grusp.site/grupo/5"
+      ],
+      "checked": "2026-10-20",
+      "body": "Grupo de xadrez da Farmácia e da Química, aberto a qualquer interessado e sem mensalidade. Encontra-se às quartas, às 16h, na vivência da Farmácia/Química.\n\n- Página no GRUSP: https://grusp.site/grupo/5"
     }
   ]
 }
