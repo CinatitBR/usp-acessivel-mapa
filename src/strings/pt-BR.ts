@@ -32,9 +32,8 @@ export const strings = {
     intro: 'Pergunte sobre serviços do campus. As respostas vêm de fontes que reunimos e dizem de onde veio cada informação.',
     suggestionsLabel: 'Sugestões de perguntas',
     suggestions: [
-      'Onde faço tratamento odontológico no campus?',
-      'Preciso de encaminhamento para extrair o siso?',
-      'Tem atendimento de emergência odontológica?',
+      { title: 'Saúde odontológica', questions: ['Existe tratamento odontológico gratuito?'] },
+      { title: 'Grupos de extensão', questions: ['Quais grupos de extensão existem?'] },
     ],
     input: 'Sua pergunta',
     placeholder: 'Escreva sua pergunta',

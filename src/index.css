@@ -2636,6 +2636,20 @@ html:has(.review) #root {
   margin: 0 0 16px;
 }
 
+.chat-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chat-topic h2 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: var(--size-body-small);
+  line-height: var(--line-body-small);
+  font-weight: var(--weight-semibold);
+}
+
 .chat-suggestions {
   display: flex;
   flex-direction: column;

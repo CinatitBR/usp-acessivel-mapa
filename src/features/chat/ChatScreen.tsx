@@ -77,15 +77,22 @@ export function ChatScreen() {
         {messages.length === 0 ? (
           <div className="chat-empty">
             <p>{strings.chat.intro}</p>
-            <ul className="chat-suggestions" aria-label={strings.chat.suggestionsLabel}>
-              {strings.chat.suggestions.map((question) => (
-                <li key={question}>
-                  <button type="button" className="chip" disabled={!online} onClick={() => send(question)}>
-                    {question}
-                  </button>
-                </li>
+            <div className="chat-topics" role="group" aria-label={strings.chat.suggestionsLabel}>
+              {strings.chat.suggestions.map((topic, index) => (
+                <div key={topic.title} className="chat-topic">
+                  <h2 id={`chat-topic-${index}`}>{topic.title}</h2>
+                  <ul className="chat-suggestions" aria-labelledby={`chat-topic-${index}`}>
+                    {topic.questions.map((question) => (
+                      <li key={question}>
+                        <button type="button" className="chip" disabled={!online} onClick={() => send(question)}>
+                          {question}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         ) : (
           <ol className="chat-log" aria-busy={answering}>

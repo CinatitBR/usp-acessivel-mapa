@@ -396,7 +396,7 @@ test('s31 chat', async ({ page }) => {
 
 test('s32 resposta com fontes', async ({ page }) => {
   await openChat(page);
-  await page.getByRole('button', { name: 'Onde faço tratamento odontológico no campus?' }).click();
+  await page.getByRole('button', { name: 'Existe tratamento odontológico gratuito?' }).click();
   // The answer comes from Workers AI through the Worker: `wrangler dev` must be signed in to Cloudflare.
   await expect(page.getByRole('region', { name: 'Fontes' })).toBeVisible({ timeout: 45_000 });
   await expect(page.getByRole('button', { name: 'Ver no mapa' }).first()).toBeVisible();

@@ -445,11 +445,11 @@ Dois slides curtos, fáceis de cortar se a apresentação precisar ser menor.
 - **Etapa/Objetivo:** tirar uma dúvida sobre um serviço do campus (por exemplo, onde fazer tratamento odontológico) sem procurar em vários sites.
 - **Ações e pontos de interação:**
   - Aviso sob o título (só leitura): "Respostas geradas por IA a partir de fontes selecionadas. Confirme sempre no site oficial."
-  - Sugestões (chips): "Onde faço tratamento odontológico no campus?", "Preciso de encaminhamento para extrair o siso?", "Tem atendimento de emergência odontológica?" → S32
+  - Sugestões (chips), agrupadas por tema: sob "Saúde odontológica", "Existe tratamento odontológico gratuito?"; sob "Grupos de extensão", "Quais grupos de extensão existem?" → S32
   - Campo "Escreva sua pergunta" (campo de texto) e "Enviar pergunta" (botão) → S32
   - "Mapa" (aba da barra de navegação) → volta ao mapa como estava
   - Sem conexão: "Sem conexão. O chat precisa de internet." e o envio fica desligado
-- **Estado a capturar:** o chat vazio, com o aviso e as três sugestões.
+- **Estado a capturar:** o chat vazio, com o aviso e as sugestões sob os temas "Saúde odontológica" e "Grupos de extensão".
 - **Captura:** `screenshots/s31-chat.png`
 
 ### S32 · Resposta com fontes
