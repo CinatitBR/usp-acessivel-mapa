@@ -93,7 +93,7 @@ Olho Vivo sign-in: the session cookie is kept 15 minutes in the Cache API; on 40
 | Concern | How |
 |---|---|
 | Initial JS | No hard budget (MapLibre alone is about 280 KB gz). Three.js and all 3D code are in a lazy `render3d` chunk, loaded after the map's first `idle`; lite mode never downloads it |
-| First screen | The map's chain would otherwise load one step at a time (app script → MapLibre → worker and style → tile index → tiles). `preloadMap()` in `vite.config.ts` puts MapLibre, its worker, `campus.json` and the tile index in `index.html`, so they start with the page. Campus files a panel or route needs are fetched when it is used, not at startup; the service worker is registered after the map's first `idle` (`src/map/settled.ts`). `validateStyle` is off: the style is validated by its test |
+| First screen | The map's chain would otherwise load one step at a time (app script → MapLibre → worker and style → tile index → tiles). `preloadMap()` in `vite.config.ts` puts MapLibre, `campus.json` and the tile index in `index.html`, so they start with the page. Campus files a panel or route needs are fetched when it is used, not at startup; the service worker is registered after the map's first `idle` (`src/map/settled.ts`). `validateStyle` is off: the style is validated by its test |
 | Static data | ≤ 1 MB in `public/data`, enforced by `npm run check:data`: short property keys, 6-decimal coordinates, integer-encoded trees and roofs |
 | Draw calls | Trees one `InstancedMesh` (capacity 4,000; the build ships `MAX_TREES = 1000`), buses one `InstancedMesh` (`MAX_BUSES = 64`), roofs one merged mesh. Repaint only while something animates |
 | Polling | TanStack Query, only while the tab is visible and the relevant layer or panel is open |

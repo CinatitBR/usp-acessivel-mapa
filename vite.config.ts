@@ -8,7 +8,8 @@ const DAY = 24 * 60 * 60;
 /**
  * The map's resources otherwise load one after another: the app's script, then MapLibre (a
  * dynamic import), its worker and the style, then the tile index the style names, then tiles.
- * These links start MapLibre, its worker, the style and the tile index with the page.
+ * These links start MapLibre, the style and the tile index with the page. (A prefetch of the
+ * worker was downloaded a second time when the worker started, so it is left out.)
  */
 function preloadMap(): Plugin {
   const style = JSON.parse(readFileSync('public/styles/campus.json', 'utf8')) as { sources: Record<string, { url?: string }> };
@@ -21,14 +22,11 @@ function preloadMap(): Plugin {
       handler(_html, { bundle }) {
         const files = Object.values(bundle ?? {});
         const maplibre = files.find((file) => file.type === 'chunk' && file.name === 'maplibre-gl');
-        const worker = files.find((file) => file.fileName.includes('maplibre-gl-worker'));
-        if (!maplibre || maplibre.type !== 'chunk' || !worker) throw new Error('preload-map: MapLibre chunks not found');
+        if (!maplibre || maplibre.type !== 'chunk') throw new Error('preload-map: MapLibre chunk not found');
         const link = (attrs: Record<string, string | boolean>): HtmlTagDescriptor => ({ tag: 'link', attrs, injectTo: 'head' });
         return [
           // Its imports are shared with the entry, which Vite already preloads.
           link({ rel: 'modulepreload', href: `/${maplibre.fileName}`, crossorigin: true }),
-          // The worker is compiled in its own thread; prefetching only puts it in the HTTP cache.
-          link({ rel: 'prefetch', href: `/${worker.fileName}` }),
           // `crossorigin` makes these match MapLibre's own fetch() requests, so they are not downloaded twice.
           link({ rel: 'preload', href: '/styles/campus.json', as: 'fetch', crossorigin: 'anonymous' }),
           ...tileIndexes.map((url) => link({ rel: 'preload', href: url, as: 'fetch', crossorigin: 'anonymous' })),
