@@ -62,5 +62,6 @@ Below its highest rest the sheet follows any vertical drag on its content, and t
 - The font is not preloaded: its file name is hashed by the build, so `index.html` cannot name it.
 - The bus panel and its stop timeline have not been reviewed in the new style.
 - A real flick and the feel of the sheet under a finger have not been tried on a phone (only unit tests and synthetic drags).
+- The S01 screenshot (`docs/journey/screenshots/s01-mapa.png`) still shows the old tilted opening; `npm run journey:screenshots -- -g s01` (needs the live services) brings it up to date.
 - At 200% text size the legend and the floor switcher overlap when both are open on a phone.
 - Links inside running text (attribution, photo credits, "Ler na Wikipédia") and MapLibre's attribution button are under 44 px.

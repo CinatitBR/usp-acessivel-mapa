@@ -35,4 +35,5 @@ App layers are always inserted before one of the anchors (see `src/map/anchors.t
 
 ## Known gaps
 
+- Minor streets are drawn from z10.5: the z12 tile over the campus holds 2,218 of them (250 KB), the heaviest tile around. Hiding them below z13 would lighten views framed across the city, not the campus, and changes how the city looks, so it is left as is.
 - Within one road layer, features are drawn in tile order, so at a junction a minor road's fill can lie over a major one's. All fills share one colour from zoom 15.5, so this only shows as slightly different tints between 13 and 15.5.
