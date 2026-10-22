@@ -35,6 +35,11 @@ export const INITIAL_PITCH = 0;
  */
 export const MIN_ZOOM = 9;
 export const MAX_PITCH = 70;
+/**
+ * The map is drawn at the screen's pixel ratio up to this. Many phones are 3×, which is 2.25 times
+ * the pixels of 2× for every frame of the map and the 3D layer, for a sharpness hard to see at arm's length.
+ */
+export const MAX_PIXEL_RATIO = 2;
 
 /**
  * Base URL of the campus backend, which holds the visual routes people sent in, and of the

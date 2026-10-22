@@ -6,6 +6,7 @@ import {
   INITIAL_PITCH,
   INITIAL_ZOOM,
   MAX_PITCH,
+  MAX_PIXEL_RATIO,
   MIN_ZOOM,
   STYLE_URL,
 } from '../config';
@@ -54,6 +55,7 @@ export function CampusMap() {
       validateStyle={false}
       minZoom={MIN_ZOOM}
       maxPitch={MAX_PITCH}
+      pixelRatio={Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO)}
       attributionControl={false}
       // Keeps the camera in the URL, so a view can be reloaded or shared.
       hash

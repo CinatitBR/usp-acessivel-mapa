@@ -32,7 +32,7 @@ Temporary working plan; delete it when every step is done (the lasting facts go 
   - [x] `validateStyle: false` (the style is validated by its test);
   - [x] `INITIAL_PITCH` 50 → 0 (decided by the user): 2 tiles instead of 5, ~0.5–0.8 s sooner on 4G; `MAX_PITCH` stays 70;
   - [ ] regenerate `docs/journey/screenshots/s01-mapa.png` (`npm run journey:screenshots -- -g s01`, needs the live services).
-- [ ] **4. Fill cost**: cap `pixelRatio` at 2; reconsider lite mode (also simplify the basemap, watchdog with 3D off) — this reopens a decision in `docs/architecture.md`, so ask first.
+- [x] **4. Fill cost**: `pixelRatio` capped at `MAX_PIXEL_RATIO` (2) in `src/config.ts`. Lite mode stays as it is (decided by the user). Not measurable here (software WebGL); check on a 3× phone.
 - [ ] **5. Lock in**: performance numbers from step 0 in `docs/architecture.md`.
 
 ## Progress notes
