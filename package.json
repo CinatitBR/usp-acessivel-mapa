@@ -15,6 +15,7 @@
     "data:transit": "tsx scripts/build-transit.ts",
     "indoor:extract": "tsx scripts/extract-indoor.ts",
     "check:data": "tsx scripts/check-data.ts",
+    "style:slim": "tsx scripts/slim-style.ts",
     "knowledge:fetch": "tsx scripts/fetch-knowledge.ts",
     "knowledge:draft": "tsx scripts/draft-knowledge.ts",
     "knowledge:build": "tsx scripts/build-knowledge.ts",

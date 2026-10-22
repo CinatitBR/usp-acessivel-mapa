@@ -40,6 +40,13 @@ A live arrival of a tracked line is a button: it opens the bus's panel, followin
 - `FollowCamera` keeps the bus centred and pauses when the person drags the map; the button resumes it.
 - Positions: each fix is projected onto the line shape and animated from the previous distance along it over the poll interval, never past the latest fix; a jump over 600 m or a fix more than 60 m off the shape snaps instead.
 - Scheduled arrivals and lines not in `FULL_LINES` cannot be followed: there is no vehicle or shape behind them.
+- Drawing: the 3D models move every frame; the flat markers (and the invisible tap targets) are moved once a second, every 500 ms while a bus is open so its ring keeps up with the camera. They wait while a finger moves the map, and a refresh in which no bus moved a metre is skipped: each one re-tiles the GeoJSON source on the workers that also parse basemap tiles (`src/features/transit/LiveBuses.tsx`, `busFeatures.ts`).
+
+## Decisions
+
+| Decision | Reason |
+|---|---|
+| Flat bus markers refresh at most once a second (500 ms with a bus open), never during a gesture | A refresh every 500 ms kept the map's workers busy and slowed tile loading while panning on phones |
 
 ## Known gaps
 
