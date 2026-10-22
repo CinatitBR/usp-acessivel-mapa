@@ -3,9 +3,11 @@
  * OpenFreeMap, the browser, its network and CPU throttling, and its trace. Every request
  * reaches the page over real localhost HTTP, so Chrome's network emulation applies to all.
  */
-import { createServer } from 'node:http';
+import { createHash } from 'node:crypto';
+import { createServer, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { extname } from 'node:path';
+import { gzipSync } from 'node:zlib';
 import { chromium, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { cpuByThread } from './trace';
 
@@ -39,6 +41,29 @@ export type Server = {
   close(): void;
 };
 
+/** Already compressed, or not worth it. */
+const BINARY = new Set(['image/png', 'font/woff2']);
+const gzipped = new Map<string, Buffer>();
+
+/**
+ * Answers like the real hosts: gzip when asked (Pages sends brotli, a little smaller), and their
+ * caching: OpenFreeMap for years, Pages' /assets/ immutable, the rest revalidated by ETag.
+ */
+function reply(request: { headers: Record<string, string | string[] | undefined> }, response: ServerResponse, path: string, type: string, body: Buffer | string) {
+  const buffer = Buffer.isBuffer(body) ? body : Buffer.from(body);
+  const etag = `"${createHash('sha1').update(buffer).digest('hex').slice(0, 16)}"`;
+  const cache = path.startsWith(MIRROR) ? 'public, max-age=315360000' : path.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'public, max-age=0, must-revalidate';
+  const headers: Record<string, string> = { 'Content-Type': type, 'Access-Control-Allow-Origin': '*', 'Cache-Control': cache, ETag: etag };
+  if (request.headers['if-none-match'] === etag) return response.writeHead(304, headers).end();
+  let payload = buffer;
+  if (!BINARY.has(type) && String(request.headers['accept-encoding'] ?? '').includes('gzip')) {
+    payload = gzipped.get(etag) ?? gzipSync(buffer);
+    gzipped.set(etag, payload);
+    headers['Content-Encoding'] = 'gzip';
+  }
+  response.writeHead(200, headers).end(payload);
+}
+
 /** Serves `read(path)` (undefined: 404) and mirrors OpenFreeMap under /ofm/. */
 export async function serve(read: (path: string, server: Server) => Buffer | string | undefined): Promise<Server> {
   const self = { tileTimes: [] as number[] } as Server;
@@ -58,7 +83,7 @@ export async function serve(read: (path: string, server: Server) => Buffer | str
   const server = createServer((request, response) => {
     const path = new URL(request.url ?? '/', 'http://localhost').pathname;
     const send = (type: string, body: Buffer | string | undefined) =>
-      body === undefined ? response.writeHead(404).end() : response.writeHead(200, { 'Content-Type': type, 'Access-Control-Allow-Origin': '*' }).end(body);
+      body === undefined ? response.writeHead(404).end() : reply(request, response, path, type, body);
     if (path.startsWith(`${MIRROR}/`)) {
       const upstream = path.slice(MIRROR.length);
       if (upstream.endsWith('.pbf') && !upstream.startsWith('/fonts/')) self.tileTimes.push(Date.now());

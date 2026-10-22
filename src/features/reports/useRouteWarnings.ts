@@ -20,10 +20,13 @@ export function useRouteWarnings(): RouteWarning[] {
   const published = useReports();
   const route = useRoute(plan).data?.route;
   // Buildings and accessibility points tell which building a report belongs to; warnings on the way work without them.
+  // Loaded with the first route, not at startup, where parsing them would compete with the map's first tiles.
   const [places, setPlaces] = useState<{ buildings: Building[]; features: AccessibilityFeature[] }>();
+  const hasRoute = route !== undefined;
   useEffect(() => {
+    if (!hasRoute || places) return;
     Promise.all([loadBuildings(), loadAccessFeatures()]).then(([buildings, features]) => setPlaces({ buildings, features }), () => undefined);
-  }, []);
+  }, [hasRoute, places]);
 
   const to = plan?.to?.position;
   return useMemo(() => {

@@ -1,12 +1,47 @@
+import { readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const DAY = 24 * 60 * 60;
 
+/**
+ * The map's resources otherwise load one after another: the app's script, then MapLibre (a
+ * dynamic import), its worker and the style, then the tile index the style names, then tiles.
+ * These links start MapLibre, its worker, the style and the tile index with the page.
+ */
+function preloadMap(): Plugin {
+  const style = JSON.parse(readFileSync('public/styles/campus.json', 'utf8')) as { sources: Record<string, { url?: string }> };
+  const tileIndexes = Object.values(style.sources).flatMap((source) => (source.url ? [source.url] : []));
+  return {
+    name: 'preload-map',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, { bundle }) {
+        const files = Object.values(bundle ?? {});
+        const maplibre = files.find((file) => file.type === 'chunk' && file.name === 'maplibre-gl');
+        const worker = files.find((file) => file.fileName.includes('maplibre-gl-worker'));
+        if (!maplibre || maplibre.type !== 'chunk' || !worker) throw new Error('preload-map: MapLibre chunks not found');
+        const link = (attrs: Record<string, string | boolean>): HtmlTagDescriptor => ({ tag: 'link', attrs, injectTo: 'head' });
+        return [
+          // Its imports are shared with the entry, which Vite already preloads.
+          link({ rel: 'modulepreload', href: `/${maplibre.fileName}`, crossorigin: true }),
+          // The worker is compiled in its own thread; prefetching only puts it in the HTTP cache.
+          link({ rel: 'prefetch', href: `/${worker.fileName}` }),
+          // `crossorigin` makes these match MapLibre's own fetch() requests, so they are not downloaded twice.
+          link({ rel: 'preload', href: '/styles/campus.json', as: 'fetch', crossorigin: 'anonymous' }),
+          ...tileIndexes.map((url) => link({ rel: 'preload', href: url, as: 'fetch', crossorigin: 'anonymous' })),
+        ];
+      },
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     react(),
+    preloadMap(),
     VitePWA({
       // The app asks before switching to a new version (src/main.tsx).
       registerType: 'prompt',

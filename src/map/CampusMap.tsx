@@ -23,6 +23,7 @@ import { LiveBuses } from '../features/transit/LiveBuses';
 import { useAppStore } from '../state/store';
 import { missingAnchors } from './anchors';
 import { mapLib } from './maplibre';
+import { markMapSettled } from './settled';
 import { SheetPadding } from './SheetPadding';
 import { MapSelection } from './MapSelection';
 import { Scene3D } from './Scene3D';
@@ -36,7 +37,7 @@ export function CampusMap() {
   const handleLoad = (event: MapLibreEvent) => {
     // Read by `npm run perf:app`, and by DevTools when profiling on a phone.
     performance.mark('map-load');
-    event.target.once('idle', () => performance.mark('map-first-idle'));
+    event.target.once('idle', markMapSettled);
     const missing = missingAnchors(event.target);
     if (missing.length > 0) {
       console.error(`campus.json is missing anchor layers: ${missing.join(', ')}`);
@@ -49,6 +50,8 @@ export function CampusMap() {
       mapLib={mapLib}
       initialViewState={{ ...CAMPUS_CENTER, zoom: INITIAL_ZOOM, pitch: INITIAL_PITCH }}
       mapStyle={STYLE_URL}
+      // campus.json is validated by its test (scripts/lib/slimStyle.test.ts); checking it again on the phone's main thread only delays the map.
+      validateStyle={false}
       minZoom={MIN_ZOOM}
       maxPitch={MAX_PITCH}
       attributionControl={false}

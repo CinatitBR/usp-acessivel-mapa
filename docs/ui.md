@@ -26,7 +26,7 @@ The layer menu (the round button under the zoom controls) chooses which categori
 
 ## Offline and installing
 
-The app is a PWA (`vite-plugin-pwa`, configured in `vite.config.ts`). On the first visit the service worker stores the app, the basemap style and all campus data, so the map, buildings, search and the accessibility view work without a connection. Basemap tiles, fonts and icons are stored as they are viewed. Live buses and arrivals always need the network; offline, the app says so. The 3D code is stored only once it has been used, so lite mode still never downloads it.
+The app is a PWA (`vite-plugin-pwa`, configured in `vite.config.ts`). On the first visit, once the map's first screen is drawn (so the download does not compete with the first tiles), the service worker stores the app, the basemap style and all campus data, so the map, buildings, search and the accessibility view work without a connection. Basemap tiles, fonts and icons are stored as they are viewed. Live buses and arrivals always need the network; offline, the app says so. The 3D code is stored only once it has been used, so lite mode still never downloads it.
 
 A new version is not applied behind the user's back: the app shows "Há uma nova versão do mapa" with an **Atualizar** button.
 

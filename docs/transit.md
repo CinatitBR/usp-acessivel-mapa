@@ -36,7 +36,7 @@ Olho Vivo does not predict the tracked lines everywhere: some campus stops get n
 A live arrival of a tracked line is a button: it opens the bus's panel, following it, with "Todas as chegadas" as the way back. The panel shows the line's stops as a timeline down to the stop the person came from: "Passou" behind the bus, "Ônibus aqui", "≈ N min" ahead and "Seu ponto". The time at the person's stop is the live prediction already polled for the stop; the stops between get that time shared out by distance, marked with ≈. Opened by tapping a bus on the map, the timeline shows the whole line with no times.
 
 - `lines.geojson` gives each direction its ordered `stops`; `locateStops` (`src/features/transit/lineStops.ts`) places them along the shape without going backwards, which matters on the 8085 loop that passes the same street twice.
-- Only the selected bus's direction is drawn as a coloured line; with no bus selected no line shape is on the map.
+- Only the selected bus's direction is drawn as a coloured line; with no bus selected no line shape is on the map, and the map holds no line source (the tracker still reads `lines.geojson` to place buses).
 - `FollowCamera` keeps the bus centred and pauses when the person drags the map; the button resumes it.
 - Positions: each fix is projected onto the line shape and animated from the previous distance along it over the poll interval, never past the latest fix; a jump over 600 m or a fix more than 60 m off the shape snaps instead.
 - Scheduled arrivals and lines not in `FULL_LINES` cannot be followed: there is no vehicle or shape behind them.

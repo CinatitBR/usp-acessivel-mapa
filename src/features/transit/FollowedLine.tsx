@@ -39,7 +39,7 @@ const checkpointPaint: CircleLayerSpecification['paint'] = {
 
 /**
  * The route of the selected bus and its stops as checkpoints. No bus line is
- * drawn on the map otherwise.
+ * drawn on the map otherwise, and the lines file is only fetched once a bus is open.
  */
 export function FollowedLine() {
   const selection = useAppStore((state) => state.selection);
@@ -71,10 +71,12 @@ export function FollowedLine() {
 
   return (
     <>
-      <Source id="bus-lines" type="geojson" data={LINES_URL}>
-        <Layer id="bus-lines-casing" type="line" beforeId={ANCHORS.features} filter={filter} layout={lineLayout} paint={casingPaint} />
-        <Layer id="bus-lines" type="line" beforeId={ANCHORS.features} filter={filter} layout={lineLayout} paint={linePaint} />
-      </Source>
+      {bus && (
+        <Source id="bus-lines" type="geojson" data={LINES_URL}>
+          <Layer id="bus-lines-casing" type="line" beforeId={ANCHORS.features} filter={filter} layout={lineLayout} paint={casingPaint} />
+          <Layer id="bus-lines" type="line" beforeId={ANCHORS.features} filter={filter} layout={lineLayout} paint={linePaint} />
+        </Source>
+      )}
       <Source id="bus-checkpoints" type="geojson" data={checkpoints}>
         <Layer id="bus-checkpoints" type="circle" beforeId={ANCHORS.labels} paint={checkpointPaint} />
       </Source>
