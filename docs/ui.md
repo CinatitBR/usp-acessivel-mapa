@@ -49,6 +49,7 @@ Below its highest rest the sheet follows any vertical drag on its content, and t
 | A real draggable bottom sheet on phones | The Figma handle implies the behaviour; a long panel under the map squeezed it |
 | Bottom navigation with the map kept mounted under the chat (`visibility: hidden`, `inert`) | Coming back to the map must not reload it or lose the camera and selection |
 | Plain CSS with tokens; no Tailwind | One stylesheet, roles in one file |
+| The map opens looking straight down (`INITIAL_PITCH` 0); tilting shows the buildings in 3D | A tilted opening loads more tiles and reached the first screen 0.5–0.8 s later on 4G (`npm run perf:app`) |
 | Filled green chips use `success-700` `#15803D`; `#22C55E` only for dots and icons | White on the Figma green is 2.3:1 |
 | White text never on warning or information fills; no text lighter than neutral 500 | Contrast under 4.5:1 |
 | Nothing smaller than Label 12/16; Figma's 10 px "Descrição" is not used | Readability in an accessibility map |

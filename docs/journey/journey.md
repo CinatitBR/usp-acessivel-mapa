@@ -12,7 +12,7 @@ Especificação para a apresentação interativa: um slide para cada tela + aç�
 - **Revisor**: confere os relatos enviados e decide o que vai para o mapa.
 
 **O layout que todas as telas compartilham.**
-- **Mapa** ocupando a tela inteira, em 3D (prédios, árvores e ônibus).
+- **Mapa** ocupando a tela inteira, em 3D (prédios, árvores e ônibus) quando inclinado; abre visto de cima.
 - **Controles flutuantes** sobre o mapa: campo de busca, botão "Acessibilidade", "Camadas do mapa", "Traçar rota" e "Relatar um problema".
 - **Barra de navegação** embaixo, com "Mapa" e "Pergunte" (o chat). Em telas largas ela vira uma coluna à esquerda.
 - **Painel inferior**: abre quando algo é selecionado, logo acima da barra de navegação. No celular fica sobre a parte de baixo do mapa e para em três alturas (só o cabeçalho, metade, tela cheia); arrasta-se pela alça ou toca-se nela ("Expandir painel" / "Recolher painel"). O "Fechar" (×) volta ao mapa. Em telas largas (a partir de 760 px) o painel fica ao lado do mapa.
@@ -51,8 +51,8 @@ As capturas usam o layout de celular.
   - Toque em um ponto de ônibus (mapa) → S13
   - Toque em um ônibus em movimento (mapa) → S14
   - Toque em um aviso de relato (mapa) → S23
-  - Arrastar, pinçar e girar (mapa): move a câmera; não muda de tela
-- **Estado a capturar:** o aplicativo recém-aberto, com o campus inteiro à vista, nada selecionado e os ônibus ao vivo no mapa.
+  - Arrastar, pinçar, girar e inclinar (mapa): move a câmera; não muda de tela
+- **Estado a capturar:** o aplicativo recém-aberto, visto de cima, com o campus inteiro à vista, nada selecionado e os ônibus ao vivo no mapa.
 - **Captura:** `screenshots/s01-mapa.png`
 
 ### S02 · Busca

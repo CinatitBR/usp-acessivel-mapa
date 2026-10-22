@@ -30,7 +30,8 @@ Temporary working plan; delete it when every step is done (the lasting facts go 
   - [x] service worker registered after the map's first idle (`src/map/settled.ts`);
   - [x] `useRouteWarnings` loads buildings and accessibility points with the first route; the bus lines source only while a bus is open;
   - [x] `validateStyle: false` (the style is validated by its test);
-  - [ ] lower `INITIAL_PITCH` (50) and `MAX_PITCH` (70): pitch 0 loads 2 tiles instead of 5 and opens ~0.5–0.8 s sooner on 4G. A product decision (the tilt shows the 3D buildings): ask first, and measure intermediate pitches.
+  - [x] `INITIAL_PITCH` 50 → 0 (decided by the user): 2 tiles instead of 5, ~0.5–0.8 s sooner on 4G; `MAX_PITCH` stays 70;
+  - [ ] regenerate `docs/journey/screenshots/s01-mapa.png` (`npm run journey:screenshots -- -g s01`, needs the live services).
 - [ ] **4. Fill cost**: cap `pixelRatio` at 2; reconsider lite mode (also simplify the basemap, watchdog with 3D off) — this reopens a decision in `docs/architecture.md`, so ask first.
 - [ ] **5. Lock in**: performance numbers from step 0 in `docs/architecture.md`.
 

@@ -24,8 +24,11 @@ export const BUS_3D_MIN_ZOOM = 15.5;
 export const TREE_MIN_ZOOM = 15;
 
 export const INITIAL_ZOOM = 15.5;
-/** Tilted by default so building extrusions read as 3D. */
-export const INITIAL_PITCH = 50;
+/**
+ * Straight down: a tilted camera loads more tiles (5 instead of 2 at the opening view) and
+ * reached its first screen 0.5–0.8 s later on a 4G phone. Tilting shows the buildings in 3D.
+ */
+export const INITIAL_PITCH = 0;
 /**
  * The camera is not kept to the campus: a route or a journey by public transport may end anywhere
  * in the city, and the map frames all of it. This is far enough out for the whole metropolitan area.
