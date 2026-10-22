@@ -26,7 +26,7 @@ The layer menu (the round button under the zoom controls) chooses which categori
 
 ## Offline and installing
 
-The app is a PWA (`vite-plugin-pwa`, configured in `vite.config.ts`). On the first visit the service worker stores the app, the basemap style and all campus data, so the map, buildings, search and the accessibility view work without a connection. Basemap tiles, fonts and icons are stored as they are viewed. Live buses and arrivals always need the network; offline, the app says so. The 3D code is stored only once it has been used, so lite mode still never downloads it.
+The app is a PWA (`vite-plugin-pwa`, configured in `vite.config.ts`). On the first visit, once the map's first screen is drawn (so the download does not compete with the first tiles), the service worker stores the app, the basemap style and all campus data, so the map, buildings, search and the accessibility view work without a connection. Basemap tiles, fonts and icons are stored as they are viewed. Live buses and arrivals always need the network; offline, the app says so. The 3D code is stored only once it has been used, so lite mode still never downloads it.
 
 A new version is not applied behind the user's back: the app shows "Há uma nova versão do mapa" with an **Atualizar** button.
 
@@ -49,6 +49,7 @@ Below its highest rest the sheet follows any vertical drag on its content, and t
 | A real draggable bottom sheet on phones | The Figma handle implies the behaviour; a long panel under the map squeezed it |
 | Bottom navigation with the map kept mounted under the chat (`visibility: hidden`, `inert`) | Coming back to the map must not reload it or lose the camera and selection |
 | Plain CSS with tokens; no Tailwind | One stylesheet, roles in one file |
+| The map opens looking straight down (`INITIAL_PITCH` 0); tilting shows the buildings in 3D | A tilted opening loads more tiles and reached the first screen 0.5–0.8 s later on 4G (`npm run perf:app`) |
 | Filled green chips use `success-700` `#15803D`; `#22C55E` only for dots and icons | White on the Figma green is 2.3:1 |
 | White text never on warning or information fills; no text lighter than neutral 500 | Contrast under 4.5:1 |
 | Nothing smaller than Label 12/16; Figma's 10 px "Descrição" is not used | Readability in an accessibility map |
@@ -61,5 +62,6 @@ Below its highest rest the sheet follows any vertical drag on its content, and t
 - The font is not preloaded: its file name is hashed by the build, so `index.html` cannot name it.
 - The bus panel and its stop timeline have not been reviewed in the new style.
 - A real flick and the feel of the sheet under a finger have not been tried on a phone (only unit tests and synthetic drags).
+- The S01 screenshot (`docs/journey/screenshots/s01-mapa.png`) still shows the old tilted opening; `npm run journey:screenshots -- -g s01` (needs the live services) brings it up to date.
 - At 200% text size the legend and the floor switcher overlap when both are open on a phone.
 - Links inside running text (attribution, photo credits, "Ler na Wikipédia") and MapLibre's attribution button are under 44 px.

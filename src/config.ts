@@ -24,14 +24,22 @@ export const BUS_3D_MIN_ZOOM = 15.5;
 export const TREE_MIN_ZOOM = 15;
 
 export const INITIAL_ZOOM = 15.5;
-/** Tilted by default so building extrusions read as 3D. */
-export const INITIAL_PITCH = 50;
+/**
+ * Straight down: a tilted camera loads more tiles (5 instead of 2 at the opening view) and
+ * reached its first screen 0.5–0.8 s later on a 4G phone. Tilting shows the buildings in 3D.
+ */
+export const INITIAL_PITCH = 0;
 /**
  * The camera is not kept to the campus: a route or a journey by public transport may end anywhere
  * in the city, and the map frames all of it. This is far enough out for the whole metropolitan area.
  */
 export const MIN_ZOOM = 9;
 export const MAX_PITCH = 70;
+/**
+ * The map is drawn at the screen's pixel ratio up to this. Many phones are 3×, which is 2.25 times
+ * the pixels of 2× for every frame of the map and the 3D layer, for a sharpness hard to see at arm's length.
+ */
+export const MAX_PIXEL_RATIO = 2;
 
 /**
  * Base URL of the campus backend, which holds the visual routes people sent in, and of the

@@ -11,6 +11,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { build } from 'esbuild';
+import { slimStyle } from './lib/slimStyle';
 
 const katu = resolve(process.argv[2] ?? '../Katu-Maps');
 const entry = `${katu}/apps/map-app/src/map/GlobalMapStyle.ts`;
@@ -137,8 +138,10 @@ const style = {
   sources: { [SOURCE]: raw.sources[SOURCE] },
   layers: kept,
 };
-writeFileSync(STYLE_OUT, `${JSON.stringify(style, null, 2)}\n`);
+// Merges the per-class road layers and drops per-feature work the map does not need (see slimStyle.ts).
+const slim = slimStyle(style);
+writeFileSync(STYLE_OUT, `${JSON.stringify(slim, null, 2)}\n`);
 
 console.log(`${RAW_OUT}: ${raw.layers.length} layers, sources ${Object.keys(raw.sources).join(', ')}`);
 for (const [reason, count] of dropped) console.log(`  dropped ${String(count).padStart(2)}: ${reason}`);
-console.log(`${STYLE_OUT}: ${kept.length} layers (4 anchors)`);
+console.log(`${STYLE_OUT}: ${slim.layers.length} layers (4 anchors), ${kept.length} before slimming`);
