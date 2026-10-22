@@ -5,8 +5,10 @@
  * - each group of six per-class road layers (casing, fill, bridge shadow,
  *   bridge casing, bridge fill) becomes one layer whose width is chosen per
  *   feature, since the six differed only in width;
- * - `line-sort-key` is dropped (the fills already lie above every casing);
- * - the flat building colour is a lookup instead of a per-feature colour mix.
+ * - `line-sort-key` is dropped (the fills already lie above every casing).
+ *
+ * The flat building colour is left as Katu-Maps wrote it: its costly branch only runs for the
+ * few buildings with an OSM `colour` tag, and a lookup in its place lost their tint.
  *
  * Pure and idempotent: a style that is already slim comes back unchanged.
  */
@@ -130,31 +132,9 @@ function withoutLineSortKey(layer: StyleLayer): StyleLayer {
   return { ...layer, layout };
 }
 
-export const FLAT_BUILDINGS = 'global-building-footprints-2d';
-/**
- * Katu-Maps' building colour, without its tint from OSM `colour` tags: #fffef9 shifted by a
- * fixed offset chosen from the feature id, so neighbouring footprints read apart.
- */
-const BUILDING_COLOR = [
-  'match',
-  ['%', ['floor', ['/', ['abs', ['to-number', ['id'], 0]], 10]], 8],
-  2, '#f5f0e7',
-  3, '#f1f4f5',
-  4, '#f8f3e9',
-  5, '#eff7ef',
-  6, '#f3eff3',
-  7, '#f6f1f0',
-  '#fffef9',
-];
-
-function flatBuildingColor(layer: StyleLayer): StyleLayer {
-  if (layer.id !== FLAT_BUILDINGS) return layer;
-  return { ...layer, paint: { ...layer.paint, 'fill-color': BUILDING_COLOR } };
-}
-
 export function slimStyle<S extends { layers: StyleLayer[] }>(style: S): S {
   let layers = style.layers;
   for (const group of ROAD_GROUPS) layers = mergeRoadGroup(layers, group);
-  layers = layers.map(withoutLineSortKey).map(flatBuildingColor);
+  layers = layers.map(withoutLineSortKey);
   return { ...style, layers };
 }

@@ -14,16 +14,16 @@ Temporary working plan; delete it when every step is done (the lasting facts go 
 
 ## Steps
 
-- [ ] **0. Measure.** `npm run perf:basemap` (style alone, opening + fixed pan) and `npm run perf:app` (the built app until the map's first idle), in `scripts/perf/`: phone viewport, CPU ×4 slower, CPU time per thread from a Chrome trace, OpenFreeMap served from a local mirror so `--net` (none, 4g, slow4g) throttles tiles and app alike. Frame times are left out (software WebGL in headless Chrome). Live buses cannot be measured here (no Olho Vivo token).
+- [x] **0. Measure.** `npm run perf:basemap` (style alone, opening + fixed pan) and `npm run perf:app` (the built app until the map's first idle), in `scripts/perf/`: phone viewport, CPU ×4 slower, CPU time per thread from a Chrome trace, OpenFreeMap served from a local mirror so `--net` (none, 4g, slow4g) throttles tiles and app alike. Frame times are left out (software WebGL in headless Chrome). Live buses cannot be measured here (no Olho Vivo token).
   - [x] harness and scripts; `--dist a,b` runs builds alternately (numbers from separate sessions drift by ~0.5 s, so compare only within one run);
   - [x] numbers with network throttling (below).
-- [x] **1. Slim the basemap** — `scripts/lib/slimStyle.ts`, run by `export-katu-style.ts` and by `npm run style:slim`. 91 → 66 layers, 211 → 120 KB:
+- [x] **1. Slim the basemap** — `scripts/lib/slimStyle.ts`, run by `export-katu-style.ts` and by `npm run style:slim`. 91 → 66 layers, 211 → 140 KB:
   - [x] each six-layer road group (casing, fill, bridge shadow, bridge casing, bridge fill) merged into one layer with a per-feature width; filters and widths checked equal to the old layers with the style-spec evaluator (11,340 feature × zoom cases);
   - [x] `line-sort-key` dropped everywhere;
-  - [x] flat building colour is a lookup by id (same colours for untagged buildings);
+  - [x] ~~flat building colour as a lookup~~ reverted: it lost the tint of buildings with an OSM `colour` tag (visible on real tiles), and Katu's costly branch only runs for those few buildings;
   - [ ] raise minor roads, paths and footprints to z13+: deferred to step 0, which shows what the z11–12 tiles actually carry (OpenMapTiles generalises low zooms already);
   - [x] test: valid style, ≤ 70 layers, no `line-sort-key`, already slim (`scripts/lib/slimStyle.test.ts`); `docs/basemap.md` updated;
-  - [ ] look at the result on real tiles (blocked here: `tiles.openfreemap.org` is not reachable from the cloud session).
+  - [x] looked at on real tiles: old and new styles render the same at a junction (z16.5), the campus (z15), the city (z13) and a bridge (z16): at most 99 pixels of 500 × 500 differ, by at most 3/255.
 - [x] **2. Calm the live buses** — `LiveBuses.tsx` + `busFeatures.ts`: flat markers refresh every 1 s (500 ms with a bus open, to keep pace with `FollowCamera`), not during a gesture, and not when no bus moved ~1 m; `docs/transit.md` updated.
 - [ ] **3. Faster first screen**:
   - [x] `preloadMap()` in `vite.config.ts`: modulepreload for the MapLibre chunk, preload for `campus.json` and the tile index (a worker prefetch was downloaded twice, so it was dropped);
