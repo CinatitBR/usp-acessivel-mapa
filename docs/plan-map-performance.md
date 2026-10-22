@@ -14,7 +14,9 @@ Temporary working plan; delete it when every step is done (the lasting facts go 
 
 ## Steps
 
-- [ ] **0. Measure.** Playwright with 4× CPU throttling: time to first `idle`, frame times and tile-load time over a scripted pan; compare campus.json, OpenFreeMap Liberty, no app layers, buses off. Needs `tiles.openfreemap.org` allowed in the environment (blocked in the cloud session), or run locally.
+- [ ] **0. Measure.** `npm run perf:basemap` (style alone, opening + fixed pan) and `npm run perf:app` (the built app until the map's first idle), in `scripts/perf/`: phone viewport, CPU ×4 slower, CPU time per thread from a Chrome trace, OpenFreeMap served from a local mirror so `--net` (none, 4g, slow4g) throttles tiles and app alike. Frame times are left out (software WebGL in headless Chrome). Live buses cannot be measured here (no Olho Vivo token).
+  - [x] harness and scripts;
+  - [ ] numbers with network throttling; record them below.
 - [x] **1. Slim the basemap** — `scripts/lib/slimStyle.ts`, run by `export-katu-style.ts` and by `npm run style:slim`. 91 → 66 layers, 211 → 120 KB:
   - [x] each six-layer road group (casing, fill, bridge shadow, bridge casing, bridge fill) merged into one layer with a per-feature width; filters and widths checked equal to the old layers with the style-spec evaluator (11,340 feature × zoom cases);
   - [x] `line-sort-key` dropped everywhere;
@@ -30,3 +32,19 @@ Temporary working plan; delete it when every step is done (the lasting facts go 
 ## Progress notes
 
 - Katu-Maps is not checked out here, so `export-katu-style.ts` cannot run; the slim pass is applied to the committed `campus.json` (it is idempotent) and the export script calls it too.
+- `tiles.openfreemap.org` is now allowed in the cloud environment.
+
+## Measurements
+
+CPU ×4 slower, phone viewport at 1× pixels, one run each unless noted (noise is a few hundred ms).
+
+Basemap alone (`perf:basemap`, pitch 50, network not throttled):
+
+| style | layers | first idle | main CPU to idle | worker CPU to idle |
+|---|---|---|---|---|
+| OpenFreeMap Liberty | 111 | 2.5 s | 2.0 s | 0.53 s |
+| campus before step 1 | 91 | 3.3 s | 2.5 s | 0.54 s |
+| campus after step 1 | 66 | 2.9 s | 2.2 s | 0.48 s |
+
+App (`perf:app`, network not throttled): first idle 4.3 s with 3D, main thread 3.7 s, workers 0.6 s. Pitch 0 and blocking the campus GeoJSON each change it by a few hundred ms. Main-thread profile (4.3 s run): MapLibre drawing ~1.0 s (shader compiling ~0.25 s), React and app code ~0.5 s, style load ~0.25 s (validation ~0.13 s), label placement ~0.25 s, native (script compile, GC, GL) ~1.9 s.
+

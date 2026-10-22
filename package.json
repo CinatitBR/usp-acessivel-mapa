@@ -16,6 +16,8 @@
     "indoor:extract": "tsx scripts/extract-indoor.ts",
     "check:data": "tsx scripts/check-data.ts",
     "style:slim": "tsx scripts/slim-style.ts",
+    "perf:basemap": "tsx scripts/perf/basemap.ts",
+    "perf:app": "tsx scripts/perf/app.ts",
     "knowledge:fetch": "tsx scripts/fetch-knowledge.ts",
     "knowledge:draft": "tsx scripts/draft-knowledge.ts",
     "knowledge:build": "tsx scripts/build-knowledge.ts",

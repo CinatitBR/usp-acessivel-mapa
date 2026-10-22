@@ -34,6 +34,9 @@ export function CampusMap() {
   const setMapStatus = useAppStore((state) => state.setMapStatus);
 
   const handleLoad = (event: MapLibreEvent) => {
+    // Read by `npm run perf:app`, and by DevTools when profiling on a phone.
+    performance.mark('map-load');
+    event.target.once('idle', () => performance.mark('map-first-idle'));
     const missing = missingAnchors(event.target);
     if (missing.length > 0) {
       console.error(`campus.json is missing anchor layers: ${missing.join(', ')}`);

@@ -96,6 +96,7 @@ Olho Vivo sign-in: the session cookie is kept 15 minutes in the Cache API; on 40
 | Static data | ≤ 1 MB in `public/data`, enforced by `npm run check:data`: short property keys, 6-decimal coordinates, integer-encoded trees and roofs |
 | Draw calls | Trees one `InstancedMesh` (capacity 4,000; the build ships `MAX_TREES = 1000`), buses one `InstancedMesh` (`MAX_BUSES = 64`), roofs one merged mesh. Repaint only while something animates |
 | Polling | TanStack Query, only while the tab is visible and the relevant layer or panel is open |
+| Measuring | `npm run perf:basemap` (the style alone, against OpenFreeMap Liberty or an earlier revision with `--before`) and `npm run build && npm run perf:app` (the app until the map's first idle, marked `map-load` and `map-first-idle` by `CampusMap.tsx`). Phone viewport, CPU ×4 slower, `--net 4g` or `slow4g`, CPU time per thread from a Chrome trace, OpenFreeMap from a local mirror. Behind the cloud session's proxy: `NODE_USE_ENV_PROXY=1 PERF_CHROMIUM=/opt/pw-browsers/chromium` |
 | Lite mode | `src/features/litemode/detect.ts`: reduced motion, no WebGL 2, ≤ 2 GB memory, or a phone with ≤ 4 cores. `fpsWatchdog.ts`: below about 25 fps for 3 s switches to lite with "Desfazer". The manual "Visualização 3D" switch always wins and is remembered |
 
 ## Verified facts about the external APIs

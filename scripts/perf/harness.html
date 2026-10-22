@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Basemap benchmark</title>
+    <link rel="stylesheet" href="/maplibre/maplibre-gl.css" />
+    <style>
+      html, body, #map { margin: 0; width: 100%; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <!-- Driven by scripts/perf/basemap.ts, which reads window.result. -->
+    <script type="module">
+      import * as maplibregl from '/maplibre/maplibre-gl.mjs';
+      maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
+
+      const params = new URLSearchParams(location.search);
+      const pitch = Number(params.get('pitch') ?? 0);
+      const once = (map, event) => new Promise((resolve) => map.once(event, resolve));
+
+      const map = new maplibregl.Map({
+        container: 'map',
+        style: params.get('style'),
+        center: [-46.7283, -23.5611],
+        zoom: 15.5,
+        pitch,
+        maxPitch: 85,
+        attributionControl: false,
+      });
+
+      await once(map, 'idle');
+      const firstIdle = performance.now();
+      // The runner splits its trace of CPU time at this mark.
+      performance.mark('first-idle');
+
+      // A fixed pan across the campus and into the city around it, each leg as a finger would.
+      const panStart = performance.now();
+      for (const [x, y] of [[300, 0], [300, 0], [0, -400], [-300, 0], [-300, 0], [-300, 0], [0, 400], [300, 0]]) {
+        map.panBy([x, y], { duration: 400, easing: (t) => t });
+        await once(map, 'moveend');
+      }
+      const panEnd = performance.now();
+      if (!map.areTilesLoaded()) await once(map, 'idle');
+      const settled = performance.now();
+
+      window.result = {
+        layers: map.getStyle().layers.length,
+        firstIdleMs: Math.round(firstIdle),
+        panMs: Math.round(panEnd - panStart),
+        catchUpMs: Math.round(settled - panEnd),
+      };
+    </script>
+  </body>
+</html>
